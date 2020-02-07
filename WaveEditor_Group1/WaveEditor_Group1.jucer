@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="qjpNyF" name="WaveEditor_Group1" projectType="guiapp" jucerVersion="5.4.5">
+<JUCERPROJECT id="qjpNyF" name="WaveEditor_Group1" projectType="guiapp" jucerVersion="5.4.6">
   <MAINGROUP id="tyDDqv" name="WaveEditor_Group1">
     <GROUP id="{3E47EF1E-4CB9-544D-1C23-A552A31D159C}" name="Source">
       <GROUP id="{BB5CC47A-0D16-07D6-1FBF-C9722E750B60}" name="AudioProcessing">
@@ -18,17 +18,17 @@
         <FILE id="odGRJD" name="WaveVisualizer.h" compile="0" resource="0"
               file="Source/WaveVisualizer.h"/>
       </GROUP>
-      <FILE id="vihLW4" name="AudioProcessingComponent.cpp" compile="1" resource="0"
+      <FILE id="xP2Hny" name="AudioProcessingComponent.cpp" compile="1" resource="0"
             file="Source/AudioProcessingComponent.cpp"/>
-      <FILE id="JhfuC4" name="AudioProcessingComponent.h" compile="0" resource="0"
+      <FILE id="Q3HFvT" name="AudioProcessingComponent.h" compile="0" resource="0"
             file="Source/AudioProcessingComponent.h"/>
-      <FILE id="UfrcR4" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="pvZyEJ" name="GUIComponent.cpp" compile="1" resource="0"
+      <FILE id="kSxnZY" name="GUIComponent.cpp" compile="1" resource="0"
             file="Source/GUIComponent.cpp"/>
-      <FILE id="O78sJb" name="GUIComponent.h" compile="0" resource="0" file="Source/GUIComponent.h"/>
-      <FILE id="Qdh6yK" name="MainComponent.cpp" compile="1" resource="0"
-            file="Source/MainComponent.cpp"/>
+      <FILE id="RPJWRE" name="GUIComponent.h" compile="0" resource="0" file="Source/GUIComponent.h"/>
       <FILE id="qdYXst" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="vbGSMz" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="eF6Rc5" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -109,6 +109,7 @@
   </MODULES>
   <LIVE_SETTINGS>
     <WINDOWS/>
+    <OSX/>
   </LIVE_SETTINGS>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
 </JUCERPROJECT>
