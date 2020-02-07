@@ -67,103 +67,84 @@ private:
     /*
     \ Update audio state
     */
-    void changeState(TransportState newState)
-    {
-        if (state != newState) //if different new state
-        {
-            state = newState; //change state and perform appropriate actions
-            switch (state)
-            {
-                case Stopped:
-                    stopButton.setEnabled(false);
-                    pauseButton.setEnabled(false);
-                    playButton.setEnabled(true);
-                    transportSource.setPosition(0.0);
-                    break;
-                case Starting:
-                    transportSource.start();
-                    break;
-                case Playing:
-                    playButton.setEnabled(false);
-                    pauseButton.setEnabled(true);
-                    stopButton.setEnabled(true);
-                    break;
-                case Pausing:
-                    transportSource.stop();
-                    break;
-                case Paused:
-                    pauseButton.setEnabled(false);
-                    playButton.setEnabled(true);
-                    stopButton.setEnabled(true);
-                    break;
-                case Stopping:
-                    transportSource.stop();
-                    break;
-            }
-        }
-    }
+    void changeState(TransportState newState);
 
     /*
     \ When OPEN button is pressed
     \ open file browser
     */
-    void openButtonClicked()
-    {
-        FileChooser chooser ("Select a .wav file to play...", {}, "*.wav"); //open file browser
-
-        if (chooser.browseForFileToOpen())
-        {
-            auto file = chooser.getResult();
-            auto* reader = formatManager.createReaderFor(file);
-
-            if (reader != nullptr)
-            {
-                std::unique_ptr<AudioFormatReaderSource> newSource(new AudioFormatReaderSource(reader, true));
-                transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-                playButton.setEnabled(true);
-                readerSource.reset(newSource.release());
-            }
-        }
-    }
+    void openButtonClicked();
 
     /*
     \ When PLAY button is pressed
     \ change audio state to STARTING or PAUSING
     \ depending on current state
     */
-    void playButtonClicked()
-    {
-        if ((state == Stopped) || (state == Paused))
-            changeState(Starting);
-    }
+    void playButtonClicked();
 
-    void pauseButtonClicked()
-    {
-        if (state == Playing)
-            changeState(Pausing);
-    }
+    /*
+    \ When PAUSE button is pressed
+    \ change audio state to PAUSING
+    \ if currently playing
+    */
+    void pauseButtonClicked();
 
     /*
     \ When STOP button is pressed
     \ change audio state to STOPPED or STOPPING
     \ depending on current state
     */
-    void stopButtonClicked()
-    {
-        if (state == Paused)
-            changeState(Stopped);
-        else
-            changeState(Stopping);
-    }
+    void stopButtonClicked();
 
     //=============================================================================
     //Additional variables...
     //buttons
     TextButton openButton;
-    TextButton playButton;
-    TextButton pauseButton;
-    TextButton stopButton;
+    ImageButton playButton;
+    ImageButton pauseButton;
+    ImageButton stopButton;
+    
+    //image files
+    //all should be located in ../WaveEditor_Group1/
+    const String sPlayNormal = "../../../../../play_normal.png";
+    const String sPlayOver = "../../../../../play_over.png";
+    const String sPlayDown = "../../../../../play_down.png";
 
+    const String sPauseNormal = "../../../../../pause_normal.png";
+    const String sPauseOver = "../../../../../pause_over.png";
+    const String sPauseDown = "../../../../../pause_down.png";
+
+    const String sStopNormal = "../../../../../stop_normal.png";
+    const String sStopOver = "../../../../../stop_over.png";
+    const String sStopDown = "../../../../../stop_down.png";
+
+    //image objects
+    Image iPlayNormal;
+    Image iPlayOver;
+    Image iPlayDown;
+
+    Image iPauseNormal;
+    Image iPauseOver;
+    Image iPauseDown;
+
+    Image iStopNormal;
+    Image iStopOver;
+    Image iStopDown;
+
+    //image file objects
+    ImageFileFormat* fPlayNormal;
+    ImageFileFormat* fPlayOver;
+    ImageFileFormat* fPlayDown;
+
+    ImageFileFormat* fPauseNormal;
+    ImageFileFormat* fPauseOver;
+    ImageFileFormat* fPauseDown;
+
+    ImageFileFormat* fStopNormal;
+    ImageFileFormat* fStopOver;
+    ImageFileFormat* fStopDown;
+
+    //audio aspects
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
     AudioTransportSource transportSource;
