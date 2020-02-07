@@ -12,40 +12,92 @@
 #include "AudioProcessingComponent.h"
 
 //==============================================================================
-AudioProcessingComponent::AudioProcessingComponent()
+AudioProcessingComponent::AudioProcessingComponent():state(Stopped)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-
+    formatManager.registerBasicFormats();       // [1]
+    transportSource.addChangeListener (this);   // [2]
+    
+    setAudioChannels (0, 2);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()
 {
+    shutdownAudio();
 }
 
-void AudioProcessingComponent::paint (Graphics& g)
+void prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("AudioProcessingComponent", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
+    transportSource.prepareToPlay (samplesPerBlockExpected, sampleRate);
 }
 
-void AudioProcessingComponent::resized()
-{
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
+void releaseResources() {
+    
+}
 
+void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) {
+
+}
+
+
+void changeState (TransportState newState)
+{
+    if (state != newState)
+    {
+        state = newState;
+        
+        switch (state)
+        {
+            case Stopped:                           // [3]
+                stopButton.setEnabled (false);
+                playButton.setEnabled (true);
+                transportSource.setPosition (0.0);
+                break;
+                
+            case Starting:                          // [4]
+                playButton.setEnabled (false);
+                transportSource.start();
+                break;
+                
+            case Playing:                           // [5]
+                stopButton.setEnabled (true);
+                break;
+                
+            case Stopping:                          // [6]
+                transportSource.stop();
+                break;
+        }
+    }
+}
+
+void openButtonClicked()
+{
+    FileChooser chooser ("Select a Wave file to play...",
+                         {},
+                         "*.wav");                                        // [7]
+    
+    if (chooser.browseForFileToOpen())                                    // [8]
+    {
+        auto file = chooser.getResult();                                  // [9]
+        auto* reader = formatManager.createReaderFor (file);              // [10]
+        
+        if (reader != nullptr)
+        {
+            std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); // [11]
+            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     // [12]
+            playButton.setEnabled (true);                                                                    // [13]
+            readerSource.reset (newSource.release());                                                        // [14]
+        }
+    }
+}
+
+void playButtonClicked()
+{
+    changeState (Starting);
+}
+
+void stopButtonClicked()
+{
+    changeState (Stopping);
 }

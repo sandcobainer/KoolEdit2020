@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    WaveVisualizer.h
-    Created: 7 Feb 2020 3:15:20pm
+    Playbar.h
+    Created: 7 Feb 2020 4:59:17pm
     Author:  user
 
   ==============================================================================
@@ -11,21 +11,35 @@
 #pragma once
 
 #include <JuceHeader.h>
-
+#include "AudioProcessingComponent.h"
 //==============================================================================
 /*
 */
-class WaveVisualizer    : public Component
+class Playbar    : public Component
 {
 public:
-    WaveVisualizer()
+    Playbar()
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-
+        addAndMakeVisible (&openButton);
+        openButton.setButtonText ("Open...");
+        openButton.onClick = [this] { AudioProcessingComponent::openButtonClicked(); };
+        
+        addAndMakeVisible (&playButton);
+        playButton.setButtonText ("Play");
+        playButton.onClick = [this] { AudioProcessingComponent::playButtonClicked(); };
+        playButton.setColour (TextButton::buttonColourId, Colours::green);
+        playButton.setEnabled (false);
+        
+        addAndMakeVisible (&stopButton);
+        stopButton.setButtonText ("Stop");
+        stopButton.onClick = [this] { AudioProcessingComponent::stopButtonClicked(); };
+        stopButton.setColour (TextButton::buttonColourId, Colours::red);
+        stopButton.setEnabled (false);
     }
 
-    ~WaveVisualizer()
+    ~Playbar()
     {
     }
 
@@ -40,12 +54,12 @@ public:
 
         g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
 
-        g.setColour (Colours::black);
+        g.setColour (Colours::grey);
         g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
         g.setColour (Colours::white);
         g.setFont (14.0f);
-        g.drawText ("WaveVisualizer", getLocalBounds(),
+        g.drawText ("Playbar", getLocalBounds(),
                     Justification::centred, true);   // draw some placeholder text
     }
 
@@ -57,5 +71,11 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
+    
+    TextButton openButton;
+    TextButton playButton;
+    TextButton stopButton;
+    
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playbar)
 };
