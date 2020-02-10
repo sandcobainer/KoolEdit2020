@@ -5,15 +5,12 @@
 
     It contains the basic startup code for a JUCE application.
 
-    https://docs.juce.com/master/tutorial_playing_sound_files.html
-
   ==============================================================================
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GUIComponent.h"
+#include "MainComponent.h"
 
-//Application class - handles instance start/quit/init of overall app/window
 //==============================================================================
 class WaveEditor_Group1Application  : public JUCEApplication
 {
@@ -29,12 +26,14 @@ public:
     void initialise (const String&) override
     {
         // This method is where you should put your application's initialisation code..
-        mainWindow.reset (new MainWindow (getApplicationName(), new GUIComponent(), *this));
+
+        mainWindow.reset (new MainWindow (getApplicationName(), new MainComponent(), *this));
     }
 
     void shutdown() override
     {
         // Add your application's shutdown code here..
+
         mainWindow = nullptr; // (deletes our window)
     }
 
@@ -52,7 +51,6 @@ public:
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
     }
-
 private:
     //==============================================================================
     /*
@@ -62,10 +60,10 @@ private:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow(const String& name, Component* c, JUCEApplication& a)
-            : DocumentWindow(name, Desktop::getInstance().getDefaultLookAndFeel()
-                .findColour(ResizableWindow::backgroundColourId),
-                DocumentWindow::allButtons),
+        MainWindow (const String& name, Component* c, JUCEApplication& a)  : DocumentWindow (name,
+                                                    Desktop::getInstance().getDefaultLookAndFeel()
+                                                                          .findColour (ResizableWindow::backgroundColourId),
+                                                    DocumentWindow::allButtons),
             app(a)
         {
             setUsingNativeTitleBar (true);

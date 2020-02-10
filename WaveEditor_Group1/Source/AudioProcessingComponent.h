@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    GUIComponent.h
-    Created: 7 Feb 2020 3:04:33pm
+    AudioProcessingComponent.h
+    Created: 7 Feb 2020 3:05:06pm
     Author:  user
 
   ==============================================================================
@@ -11,21 +11,19 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "ToolbarIF.h"
 
 //==============================================================================
 /*
 */
-class GUIComponent    : public Component
+class AudioProcessingComponent    : public Component
 {
 public:
-    GUIComponent();
-    ~GUIComponent();
+    AudioProcessingComponent();
+    ~AudioProcessingComponent();
 
     void paint (Graphics&) override;
     void resized() override;
 
 private:
-    ToolbarIF tlbar;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
