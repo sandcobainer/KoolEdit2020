@@ -11,6 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SpectrogramVisualizer.h"
 
 //==============================================================================
 /*
@@ -25,5 +26,6 @@ public:
     void resized() override;
 
 private:
+    SpectrogramVisualizer specVis;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
 };
