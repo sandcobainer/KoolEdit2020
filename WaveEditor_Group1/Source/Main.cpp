@@ -23,11 +23,11 @@ public:
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialise (const String&) override
     {
         // This method is where you should put your application's initialisation code..
 
-        mainWindow.reset (new MainWindow (getApplicationName()));
+        mainWindow.reset (new MainWindow (getApplicationName(), new MainComponent(), *this));
     }
 
     void shutdown() override
@@ -51,7 +51,7 @@ public:
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
     }
-
+private:
     //==============================================================================
     /*
         This class implements the desktop window that contains an instance of
@@ -60,18 +60,20 @@ public:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow (String name)  : DocumentWindow (name,
+        MainWindow (const String& name, Component* c, JUCEApplication& a)  : DocumentWindow (name,
                                                     Desktop::getInstance().getDefaultLookAndFeel()
                                                                           .findColour (ResizableWindow::backgroundColourId),
-                                                    DocumentWindow::allButtons)
+                                                    DocumentWindow::allButtons),
+            app(a)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (new MainComponent(), true);
+            setContentOwned (c, true);
 
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
            #else
-            setResizable (true, true);
+            setResizable (true, false);
+            setResizeLimits(300, 250, 10000, 10000);
             centreWithSize (getWidth(), getHeight());
            #endif
 
@@ -83,7 +85,7 @@ public:
             // This is called when the user tries to close this window. Here, we'll just
             // ask the app to quit when this happens, but you can change this to do
             // whatever you need.
-            JUCEApplication::getInstance()->systemRequestedQuit();
+            app.systemRequestedQuit();
         }
 
         /* Note: Be careful if you override any DocumentWindow methods - the base
@@ -94,10 +96,11 @@ public:
         */
 
     private:
+        JUCEApplication& app;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
 
-private:
+
     std::unique_ptr<MainWindow> mainWindow;
 };
 

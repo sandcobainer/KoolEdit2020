@@ -16,9 +16,8 @@ GUIComponent::GUIComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    setSize(700, 700);
-    addAndMakeVisible(specVis);
-
+    addAndMakeVisible(&tlbar);
+    setSize(500, 500);
 }
 
 GUIComponent::~GUIComponent()
@@ -35,14 +34,6 @@ void GUIComponent::paint (Graphics& g)
     */
 
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("GUIComponent", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
 }
 
 void GUIComponent::resized()
