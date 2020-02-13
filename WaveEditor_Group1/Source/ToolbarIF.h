@@ -17,22 +17,23 @@ public:
     ToolbarIF()
     {
         setSize(500, 500);
+        const String projRootDir = getProjRootDir();
 
         //-----------------------GUI Images------------------------------------
         //Play
-        iPlayNormal = fPlayNormal->loadFrom(File(sPlayNormal));
-        iPlayOver = fPlayOver->loadFrom(File(sPlayOver));
-        iPlayDown = fPlayDown->loadFrom(File(sPlayDown));
+        iPlayNormal = fPlayNormal->loadFrom(File(projRootDir + sPlayNormal));
+        iPlayOver = fPlayOver->loadFrom(File(projRootDir + sPlayOver));
+        iPlayDown = fPlayDown->loadFrom(File(projRootDir + sPlayDown));
         
         //Pause
-        iPauseNormal = fPauseNormal->loadFrom(File(sPauseNormal));
-        iPauseOver = fPauseOver->loadFrom(File(sPauseOver));
-        iPauseDown = fPauseDown->loadFrom(File(sPauseDown));
+        iPauseNormal = fPauseNormal->loadFrom(File(projRootDir + sPauseNormal));
+        iPauseOver = fPauseOver->loadFrom(File(projRootDir + sPauseOver));
+        iPauseDown = fPauseDown->loadFrom(File(projRootDir + sPauseDown));
 
         //Stop
-        iStopNormal = fStopNormal->loadFrom(File(sStopNormal));
-        iStopOver = fStopOver->loadFrom(File(sStopOver));
-        iStopDown = fStopDown->loadFrom(File(sStopDown));
+        iStopNormal = fStopNormal->loadFrom(File(projRootDir + sStopNormal));
+        iStopOver = fStopOver->loadFrom(File(projRootDir + sStopOver));
+        iStopDown = fStopDown->loadFrom(File(projRootDir + sStopDown));
 
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -108,6 +109,22 @@ private:
 
     }
 
+    /*! Function to search for root project directory
+    \ return root directory as string to be able to
+    \ navigate to Assets folder
+    */
+    const String getProjRootDir()
+    {
+        File projectRootDir = File::getCurrentWorkingDirectory().getParentDirectory();
+        
+        while (projectRootDir.getParentDirectory().getRelativePathFrom(projectRootDir) != "..\\..\\WaveEditor_Group1")
+        {
+            projectRootDir = projectRootDir.getParentDirectory();
+        }
+
+        return(projectRootDir.getParentDirectory().getFullPathName());
+    }
+
     //==========================================================================
     //Additional variables
     //Buttons
@@ -118,17 +135,17 @@ private:
 
     //Image files
     //all should be located in ../Source/Assets/
-    const String sPlayNormal = "../../../../../Source/Assets/play_normal.png";
-    const String sPlayOver = "../../../../../Source/Assets/play_over.png";
-    const String sPlayDown = "../../../../../Source/Assets/play_down.png";
+    const String sPlayNormal = "\\Source\\Assets\\play_normal.png";
+    const String sPlayOver = "\\Source\\Assets\\play_over.png";
+    const String sPlayDown = "\\Source\\Assets\\play_down.png";
 
-    const String sPauseNormal = "../../../../../Source/Assets/pause_normal.png";
-    const String sPauseOver = "../../../../../Source/Assets/pause_over.png";
-    const String sPauseDown = "../../../../../Source/Assets/pause_down.png";
+    const String sPauseNormal = "\\Source\\Assets\\pause_normal.png";
+    const String sPauseOver = "\\Source\\Assets\\pause_over.png";
+    const String sPauseDown = "\\Source\\Assets\\pause_down.png";
 
-    const String sStopNormal = "../../../../../Source/Assets/stop_normal.png";
-    const String sStopOver = "../../../../../Source/Assets/stop_over.png";
-    const String sStopDown = "../../../../../Source/Assets/stop_down.png";
+    const String sStopNormal = "\\Source\\Assets\\stop_normal.png";
+    const String sStopOver = "\\Source\\Assets\\stop_over.png";
+    const String sStopDown = "\\Source\\Assets\\stop_down.png";
 
     //Image objects
     Image iPlayNormal;
@@ -155,6 +172,7 @@ private:
     ImageFileFormat* fStopNormal;
     ImageFileFormat* fStopOver;
     ImageFileFormat* fStopDown;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarIF)
 };

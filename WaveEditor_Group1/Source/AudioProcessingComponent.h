@@ -24,6 +24,22 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    const String getAudioState();
+    void setAudioState();
+
 private:
+
+    enum TransportState //Audio states
+    {
+        Stopped,
+        Starting,
+        Playing,
+        Pausing,
+        Paused,
+        Stopping
+    };
+
+    TransportState state;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

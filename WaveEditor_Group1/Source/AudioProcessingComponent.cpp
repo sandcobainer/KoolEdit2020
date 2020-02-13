@@ -13,6 +13,7 @@
 
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent()
+    : state(Stopped)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -47,5 +48,15 @@ void AudioProcessingComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
+
+}
+
+const String AudioProcessingComponent::getAudioState()
+{
+    return("");
+}
+
+void AudioProcessingComponent::setAudioState()
+{
 
 }
