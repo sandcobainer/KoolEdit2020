@@ -25,25 +25,31 @@ public:
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
     
-    static void openButtonClicked();
-    static void playButtonClicked();
-    static void stopButtonClicked();
+    void openButtonClicked();
+    void playButtonClicked();
+    void stopButtonClicked();
     
 private:
     
     enum TransportState
     {
         Stopped,
-        Starting,
+        Pausing,
         Playing,
+        
+        Starting,
         Stopping
     };
     
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
     AudioTransportSource transportSource;
+    
     TransportState state;
-    void changeState(TransportState state);
+    double currentPosition;
+    
+    void setState(TransportState state);
+    void getState(TransportState state);
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
