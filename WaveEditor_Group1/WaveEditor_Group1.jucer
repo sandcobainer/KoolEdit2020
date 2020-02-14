@@ -13,9 +13,9 @@
         <FILE id="d9LiAJ" name="MeterVisualizer.h" compile="0" resource="0"
               file="Source/MeterVisualizer.h"/>
         <FILE id="HJnmd9" name="Playbar.h" compile="0" resource="0" file="Source/Playbar.h"/>
+        <FILE id="QpYgkw" name="ToolbarIF.h" compile="0" resource="0" file="Source/ToolbarIF.h"/>
         <FILE id="fA3eMh" name="SpectrogramVisualizer.h" compile="0" resource="0"
               file="Source/SpectrogramVisualizer.h"/>
-        <FILE id="QpYgkw" name="Toolbar.h" compile="0" resource="0" file="Source/Toolbar.h"/>
         <FILE id="yu5tyA" name="WaveVisualizer.h" compile="0" resource="0"
               file="Source/WaveVisualizer.h"/>
       </GROUP>

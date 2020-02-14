@@ -16,7 +16,7 @@ GUIComponent::GUIComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    addAndMakeVisible(player);
+    addAndMakeVisible(toolbar);
 }
 
 GUIComponent::~GUIComponent()
@@ -47,6 +47,6 @@ void GUIComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    player.setBounds(0, 0, 50, 300);
+    toolbar.setBounds(0, 0, 50, 300);
 
 }

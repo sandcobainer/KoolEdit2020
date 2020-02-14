@@ -28,15 +28,15 @@ AudioProcessingComponent::~AudioProcessingComponent()  {
     shutdownAudio();
 }
 
-void prepareToPlay (int samplesPerBlockExpected, double sampleRate) {
+void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate) {
     
 }
 
-void releaseResources() {
+void AudioProcessingComponent::releaseResources() {
     
 }
 
-void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) {
+void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) {
 
 }
 

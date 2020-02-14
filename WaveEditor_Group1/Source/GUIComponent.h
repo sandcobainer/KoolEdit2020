@@ -11,7 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Playbar.h"
+#include "ToolbarIF.h"
+
 //==============================================================================
 /*
 */
@@ -26,6 +27,6 @@ public:
 
 private:
     
-    Playbar player;
+    ToolbarIF toolbar;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
 };
