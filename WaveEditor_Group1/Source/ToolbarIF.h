@@ -16,7 +16,7 @@ class ToolbarIF : public Component
 public:
     ToolbarIF()
     {
-        setSize(500, 500);
+        setSize(700, 700);
         const String projRootDir = getProjRootDir();
 
         //-----------------------GUI Images------------------------------------
@@ -116,8 +116,15 @@ private:
     const String getProjRootDir()
     {
         File projectRootDir = File::getCurrentWorkingDirectory().getParentDirectory();
+        String searchFor;
+
+        #if JUCE_WINDOWS
+                searchFor = "..\\..\\WaveEditor_Group1";
+        #else
+                searchFor = "../../WaveEditor_Group1"
+        #endif
         
-        while (projectRootDir.getParentDirectory().getRelativePathFrom(projectRootDir) != "..\\..\\WaveEditor_Group1")
+        while (projectRootDir.getParentDirectory().getRelativePathFrom(projectRootDir) != searchFor)
         {
             projectRootDir = projectRootDir.getParentDirectory();
         }
@@ -135,17 +142,31 @@ private:
 
     //Image files
     //all should be located in ../Source/Assets/
-    const String sPlayNormal = "\\Source\\Assets\\play_normal.png";
-    const String sPlayOver = "\\Source\\Assets\\play_over.png";
-    const String sPlayDown = "\\Source\\Assets\\play_down.png";
+    #if JUCE_WINDOWS
+        const String sPlayNormal = "\\Source\\Assets\\play_normal.png";
+        const String sPlayOver = "\\Source\\Assets\\play_over.png";
+        const String sPlayDown = "\\Source\\Assets\\play_down.png";
 
-    const String sPauseNormal = "\\Source\\Assets\\pause_normal.png";
-    const String sPauseOver = "\\Source\\Assets\\pause_over.png";
-    const String sPauseDown = "\\Source\\Assets\\pause_down.png";
+        const String sPauseNormal = "\\Source\\Assets\\pause_normal.png";
+        const String sPauseOver = "\\Source\\Assets\\pause_over.png";
+        const String sPauseDown = "\\Source\\Assets\\pause_down.png";
 
-    const String sStopNormal = "\\Source\\Assets\\stop_normal.png";
-    const String sStopOver = "\\Source\\Assets\\stop_over.png";
-    const String sStopDown = "\\Source\\Assets\\stop_down.png";
+        const String sStopNormal = "\\Source\\Assets\\stop_normal.png";
+        const String sStopOver = "\\Source\\Assets\\stop_over.png";
+        const String sStopDown = "\\Source\\Assets\\stop_down.png";
+    #else
+        const String sPlayNormal = "/Source/Assets/play_normal.png";
+        const String sPlayOver = "/Source/Assets/play_over.png";
+        const String sPlayDown = "/Source/Assets/play_down.png";
+
+        const String sPauseNormal = "/Source/Assets/pause_normal.png";
+        const String sPauseOver = "/Source/Assets/pause_over.png";
+        const String sPauseDown = "/Source/Assets/pause_down.png";
+
+        const String sStopNormal = "/Source/Assets/stop_normal.png";
+        const String sStopOver = "/Source/Assets/stop_over.png";
+        const String sStopDown = "/Source/Assets/stop_down.png";
+    #endif
 
     //Image objects
     Image iPlayNormal;
