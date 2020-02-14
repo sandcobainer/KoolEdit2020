@@ -119,9 +119,9 @@ private:
         String searchFor;
 
         #if JUCE_WINDOWS
-                searchFor = "..\\..\\WaveEditor_Group1";
+            searchFor = "..\\..\\WaveEditor_Group1";
         #else
-                searchFor = "../../WaveEditor_Group1"
+            searchFor = "../../WaveEditor_Group1";
         #endif
         
         while (projectRootDir.getParentDirectory().getRelativePathFrom(projectRootDir) != searchFor)

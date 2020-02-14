@@ -12,7 +12,6 @@
       <GROUP id="{A7B9535E-4657-AC2C-601D-3D7D2805E8CD}" name="GUI">
         <FILE id="d9LiAJ" name="MeterVisualizer.h" compile="0" resource="0"
               file="Source/MeterVisualizer.h"/>
-        <FILE id="HJnmd9" name="Playbar.h" compile="0" resource="0" file="Source/Playbar.h"/>
         <FILE id="QpYgkw" name="ToolbarIF.h" compile="0" resource="0" file="Source/ToolbarIF.h"/>
         <FILE id="fA3eMh" name="SpectrogramVisualizer.h" compile="0" resource="0"
               file="Source/SpectrogramVisualizer.h"/>
