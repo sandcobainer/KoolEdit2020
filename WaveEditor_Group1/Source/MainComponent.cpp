@@ -16,9 +16,9 @@ MainComponent::MainComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    addAndMakeVisible(&gui);
-    addAndMakeVisible(&cap);
-    setSize(500, 500);
+    addAndMakeVisible(gui);
+    addAndMakeVisible(cap);
+    setSize(700, 700);
 
 }
 
@@ -34,12 +34,22 @@ void MainComponent::paint (Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-    
+
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+
+    g.setColour (Colours::grey);
+    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+
+    g.setColour (Colours::white);
+    g.setFont (14.0f);
+    g.drawText ("MainComponent", getLocalBounds(),
+                Justification::centred, true);   // draw some placeholder text
 }
 
 void MainComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
+    gui.setBounds(getLocalBounds());
+
 }
