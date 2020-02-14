@@ -11,35 +11,48 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "WaveAudio.h"
 
 //==============================================================================
 /*
 */
-class AudioProcessingComponent    : public Component
+class AudioProcessingComponent    : public AudioAppComponent, public ChangeListener
 {
 public:
     AudioProcessingComponent();
     ~AudioProcessingComponent();
 
-    void paint (Graphics&) override;
-    void resized() override;
-
-    const String getAudioState();
-    void setAudioState();
-
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void releaseResources() override;
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
+    
+    void changeListenerCallback (ChangeBroadcaster* source) override;
+    
+    void openButtonClicked();
+    void playButtonClicked();
+    void stopButtonClicked();
+    
 private:
-
-    enum TransportState //Audio states
+    
+    enum TransportState
     {
         Stopped,
-        Starting,
-        Playing,
         Pausing,
-        Paused,
+        Playing,
+        
+        Starting,
         Stopping
     };
-
+    
+    AudioFormatManager formatManager;
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    AudioTransportSource transportSource;
+    
     TransportState state;
-
+    double currentPosition;
+    
+    void setState(TransportState state);
+    void getState(TransportState state);
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

@@ -7,15 +7,15 @@
         <FILE id="Tgs0Vv" name="MeterAudio.h" compile="0" resource="0" file="Source/MeterAudio.h"/>
         <FILE id="hvTkn4" name="SpectrogramAudio.h" compile="0" resource="0"
               file="Source/SpectrogramAudio.h"/>
-        <FILE id="NJmbnt" name="WaveAudio.h" compile="0" resource="0" file="Source/WaveAudio.h"/>
+        <FILE id="TerYr7" name="WaveAudio.h" compile="0" resource="0" file="Source/WaveAudio.h"/>
       </GROUP>
       <GROUP id="{A7B9535E-4657-AC2C-601D-3D7D2805E8CD}" name="GUI">
         <FILE id="d9LiAJ" name="MeterVisualizer.h" compile="0" resource="0"
               file="Source/MeterVisualizer.h"/>
+        <FILE id="QpYgkw" name="ToolbarIF.h" compile="0" resource="0" file="Source/ToolbarIF.h"/>
         <FILE id="fA3eMh" name="SpectrogramVisualizer.h" compile="0" resource="0"
               file="Source/SpectrogramVisualizer.h"/>
-        <FILE id="QpYgkw" name="ToolbarIF.h" compile="0" resource="0" file="Source/ToolbarIF.h"/>
-        <FILE id="odGRJD" name="WaveVisualizer.h" compile="0" resource="0"
+        <FILE id="yu5tyA" name="WaveVisualizer.h" compile="0" resource="0"
               file="Source/WaveVisualizer.h"/>
       </GROUP>
       <FILE id="xP2Hny" name="AudioProcessingComponent.cpp" compile="1" resource="0"
