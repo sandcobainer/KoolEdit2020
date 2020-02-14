@@ -25,6 +25,8 @@ public:
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
     
+    void changeListenerCallback (ChangeBroadcaster* source) override;
+    
     void openButtonClicked();
     void playButtonClicked();
     void stopButtonClicked();

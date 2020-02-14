@@ -40,6 +40,10 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 
 }
 
+void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source) {
+
+}
+
 void AudioProcessingComponent::getState (TransportState newState) {
     
 }
