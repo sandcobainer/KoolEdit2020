@@ -10,6 +10,9 @@
 
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
+//#include "AudioProcessingComponent.h"
+//#include "MainComponent.h"
+
 
 class ToolbarIF : public Component
 {
@@ -89,6 +92,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to open file and set up transport source
+        
 
         //once AudioProcessingComponent returns...
         playButton.setEnabled(true);
@@ -96,17 +100,35 @@ private:
 
     void playButtonClicked()
     {
+        //call appropriate function of AudioProcessingComponent
+        //to start transport source from beginning
 
+        //once AudioProcessingComponent returns...
+        playButton.setEnabled(false);
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(true);
     }
 
     void pauseButtonClicked()
     {
+        //call appropriate function of AudioProcessingComponent
+        //to stop transport source and store position
 
+        //once AudioProcessingComponent returns...
+        pauseButton.setEnabled(false);
+        playButton.setEnabled(true);
+        stopButton.setEnabled(true);
     }
 
     void stopButtonClicked()
     {
+        //call appropriate function of AudioProcessingComponent
+        //to stop transport source and set position to beginning
 
+        //once AudioProcessingComponent returns...
+        stopButton.setEnabled(false);
+        playButton.setEnabled(true);
+        pauseButton.setEnabled(false);
     }
 
     /*! Function to search for root project directory
@@ -194,6 +216,7 @@ private:
     ImageFileFormat* fStopOver;
     ImageFileFormat* fStopDown;
 
+    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarIF)
 };

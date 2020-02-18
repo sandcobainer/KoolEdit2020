@@ -26,9 +26,13 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-private:
+protected:
     GUIComponent gui;
     AudioProcessingComponent cap;
+    
+private:
+    //GUIComponent gui;
+    //AudioProcessingComponent cap;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
