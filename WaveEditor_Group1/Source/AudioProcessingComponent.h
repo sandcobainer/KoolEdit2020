@@ -31,12 +31,14 @@ public:
     void openButtonClicked();
     void playButtonClicked();
     void stopButtonClicked();
+    void pauseButtonClicked();
     
 private:
     
     enum TransportState
     {
         Stopped,
+        Paused,
         Pausing,
         Playing,
         

@@ -12,10 +12,11 @@
 #include "GUIComponent.h"
 
 //==============================================================================
-GUIComponent::GUIComponent()
+GUIComponent::GUIComponent(AudioProcessingComponent& c) : cap(c)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    toolbar = new ToolbarIF(cap);
     addAndMakeVisible(toolbar);
     setSize(700, 700);
 }
@@ -48,6 +49,6 @@ void GUIComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    toolbar.setBounds(0, 0, getWidth(), getHeight());
+    toolbar[0].setBounds(0, 0, getWidth(), getHeight());
 
 }

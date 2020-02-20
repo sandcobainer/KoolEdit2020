@@ -16,6 +16,7 @@ MainComponent::MainComponent()
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    gui = new GUIComponent(cap);
     addAndMakeVisible(gui);
     addAndMakeVisible(cap);
     setSize(700, 700);
@@ -50,6 +51,6 @@ void MainComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    gui.setBounds(getLocalBounds());
+    gui[0].setBounds(getLocalBounds());
 
 }
