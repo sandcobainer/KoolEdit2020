@@ -17,7 +17,7 @@
 class ToolbarIF : public Component
 {
 public:
-    ToolbarIF(AudioProcessingComponent& c) : cap(c)
+    ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
         setSize(700, 700);
         const String projRootDir = getProjRootDir();
@@ -92,7 +92,15 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to open file and set up transport source
-        cap.openButtonClicked();
+        FileChooser chooser("Select a Wave file to play...",
+            {},
+            "*.wav");                                        
+
+        if (chooser.browseForFileToOpen())                                   
+        {
+            auto file = chooser.getResult();               
+            apc.loadFile(file);             //go to audio thread
+        }
 
         //once AudioProcessingComponent returns...
         playButton.setEnabled(true);
@@ -102,7 +110,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to start transport source from beginning
-        cap.playButtonClicked();
+        apc.playButtonClicked();
 
         //once AudioProcessingComponent returns...
         playButton.setEnabled(false);
@@ -114,7 +122,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to stop transport source and store position
-        cap.pauseButtonClicked();
+        apc.pauseButtonClicked();
 
         //once AudioProcessingComponent returns...
         pauseButton.setEnabled(false);
@@ -126,7 +134,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to stop transport source and set position to beginning
-        cap.stopButtonClicked();
+        apc.stopButtonClicked();
 
         //once AudioProcessingComponent returns...
         stopButton.setEnabled(false);
@@ -220,7 +228,7 @@ private:
     ImageFileFormat* fStopDown;
 
     //connection to AudioProcessingComponent (passed from parent)
-    AudioProcessingComponent& cap;
+    AudioProcessingComponent& apc;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarIF)
 };

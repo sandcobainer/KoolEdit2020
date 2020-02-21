@@ -27,8 +27,8 @@ public:
 
 private:
     //connection to AudioProcessingComponent (passed from parent)
-    AudioProcessingComponent& cap;
-    ToolbarIF *toolbar;
+    AudioProcessingComponent& apc;
+    ToolbarIF *tlbar;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
 };

@@ -101,15 +101,8 @@ void AudioProcessingComponent::setState (TransportState newState)
     }
 }
 
-void AudioProcessingComponent::openButtonClicked()
+void AudioProcessingComponent::loadFile(File file)
 {
-    FileChooser chooser ("Select a Wave file to play...",
-                         {},
-                         "*.wav");                                        // [7]
-    
-    if (chooser.browseForFileToOpen())                                    // [8]
-    {
-        auto file = chooser.getResult();                                  // [9]
         auto* reader = formatManager.createReaderFor (file);              // [10]
         if (reader != nullptr)
         {
@@ -117,7 +110,6 @@ void AudioProcessingComponent::openButtonClicked()
             transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     // [12]
             readerSource.reset (newSource.release());                                                        // [14]
         }
-    }
 }
 
 void AudioProcessingComponent::playButtonClicked()

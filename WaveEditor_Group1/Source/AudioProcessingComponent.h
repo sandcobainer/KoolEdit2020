@@ -28,7 +28,7 @@ public:
     
     void changeListenerCallback (ChangeBroadcaster* source) override;
     
-    void openButtonClicked();
+    void loadFile(File);
     void playButtonClicked();
     void stopButtonClicked();
     void pauseButtonClicked();
