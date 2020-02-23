@@ -11,66 +11,39 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "SpectrogramAudio.h"
+#include "AudioProcessingComponent.h"
+//#include "SpectrogramAudio.h"
 
-class SpectrogramVisualizer : public AudioAppComponent,
+class SpectrogramVisualizer : public Component,
+                              public ChangeListener,
                               private Timer
 {
 public:
-    SpectrogramVisualizer() :
-         //#ifdef JUCE_DEMO_RUNNER
-         // AudioAppComponent (getSharedAudioDeviceManager (1, 0)),
-         //#endif
-          forwardFFT (fftOrder),
-          spectrogramImage (Image::RGB, 512, 512, true)
+    SpectrogramVisualizer(AudioProcessingComponent& c) :
+    apc(c),
+    forwardFFT (fftOrder),
+    spectrogramImage (Image::RGB, 512, 512, true)
     {
         setOpaque (true);
-
-       //#ifndef JUCE_DEMO_RUNNER
-       // RuntimePermissions::request (RuntimePermissions::recordAudio,
-       //                              [this] (bool granted)
-       //                             {
-       //                                  int numInputChannels = granted ? 2 : 0;
-       //                                  setAudioChannels (numInputChannels, 2);
-       //                             });
-       //#else
-        setAudioChannels (2, 2);
-       //#endif
-
         startTimerHz (60);
-        //setSize (700, 500);
+        setSize (700, 500);
         setBounds(0, 100, 700, 500);
+        apc.addChangeListener(this);
     }
 
     ~SpectrogramVisualizer() override
     {
-        shutdownAudio();
     }
 
     //==============================================================================
-    void prepareToPlay (int /*samplesPerBlockExpected*/, double /*newSampleRate*/) override
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        // (nothing to do here)
+        int numSamples;
+        const auto* channelData = apc.getAudioSampleBuffer(0, numSamples);
+        for (auto i = 0; i < numSamples; ++i)
+            pushNextSampleIntoFifo (channelData[i]);
     }
-
-    void releaseResources() override
-    {
-        // (nothing to do here)
-    }
-
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
-    {
-        if (bufferToFill.buffer->getNumChannels() > 0)
-        {
-            const auto* channelData = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-
-            for (auto i = 0; i < bufferToFill.numSamples; ++i)
-                pushNextSampleIntoFifo (channelData[i]);
-
-            bufferToFill.clearActiveBufferRegion();
-        }
-    }
-
+    
     //==============================================================================
     void paint (Graphics& g) override
     {
@@ -141,6 +114,7 @@ public:
     };
 
 private:
+    AudioProcessingComponent &apc;
     dsp::FFT forwardFFT;
     Image spectrogramImage;
 

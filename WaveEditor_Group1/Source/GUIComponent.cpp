@@ -18,6 +18,8 @@ GUIComponent::GUIComponent(AudioProcessingComponent& c) : apc(c)
     // initialise any special settings that your component needs.
     tlbar = new ToolbarIF(apc);
     addAndMakeVisible(tlbar);
+    specvis = new SpectrogramVisualizer(apc);
+    addAndMakeVisible(specvis);
     setSize(700, 700);
 }
 
