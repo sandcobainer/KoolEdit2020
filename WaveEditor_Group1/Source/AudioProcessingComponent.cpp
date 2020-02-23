@@ -12,7 +12,9 @@
 #include "AudioProcessingComponent.h"
 
 //==============================================================================
-AudioProcessingComponent::AudioProcessingComponent():state(Stopped)
+AudioProcessingComponent::AudioProcessingComponent():state(Stopped),
+                                                     thumbnailCache (5),
+                                                     thumbnail (512, formatManager, thumbnailCache)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -59,6 +61,10 @@ void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source
             setState(Stopped);
         else if (state == Pausing)
             setState(Paused);
+    }
+    if (source == &thumbnail)
+    {
+        thumbnail.sendChangeMessage();
     }
 }
 
@@ -127,7 +133,8 @@ void AudioProcessingComponent::loadFile(File file)
         if (reader != nullptr)
         {
             std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
-            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     
+            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
+            thumbnail.setSource (new FileInputSource (file)); 
             readerSource.reset (newSource.release());                                                        
         }
 }

@@ -18,7 +18,6 @@ class ToolbarIF : public Component, public ChangeListener
 public:
     ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
-        setSize(700, 700);
         const String projRootDir = getProjRootDir();
         state = apc.getState(); //initialize transport source state
         apc.transportSource.addChangeListener(this); //listen to changes in the transport source
@@ -110,7 +109,7 @@ public:
         }
     }
 
-    void paint(Graphics& g)
+    void paint(Graphics& g) override
     {
         g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
         
@@ -124,7 +123,7 @@ public:
             pauseButton.setState(Button::ButtonState::buttonDown);
     }
 
-    void resized()
+    void resized() override
     {
         //button positioning
         openButton.setBounds(10, 10, getWidth() - 20, 20);

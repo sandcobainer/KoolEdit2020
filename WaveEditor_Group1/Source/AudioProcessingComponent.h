@@ -27,6 +27,10 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
     void changeListenerCallback (ChangeBroadcaster* source) override;
     
+    /*! Call from any of GUI components(WaveVisualizer.h) to get FormatManager of APC
+     */
+    AudioThumbnail getThumbnail();
+    
     /*! Takes juce::File object passed from ToolbarIF.h
     \   reads user chosen audio file and sets up transport source
     \   transport state should still be STOPPED
@@ -53,6 +57,10 @@ public:
     const String getState();
 
     AudioTransportSource transportSource;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;                  // [1]
+    AudioThumbnail thumbnail;                            // [2]
+    
 
 private:
     
@@ -66,7 +74,6 @@ private:
         Stopping  //stops transport
     };
     
-    AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
 
     TransportState state;
