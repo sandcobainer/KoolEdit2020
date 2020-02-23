@@ -16,8 +16,8 @@ AudioProcessingComponent::AudioProcessingComponent():state(Stopped)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    formatManager.registerBasicFormats();       // [1]
-    transportSource.addChangeListener (this);   // [2]
+    formatManager.registerBasicFormats();
+    transportSource.addChangeListener (this);
     currentPosition = 0.0;
     
     setAudioChannels (0, 2);
@@ -48,6 +48,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
     transportSource.getNextAudioBlock(bufferToFill);
 }
 
+//-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source) 
 {
     if (source == &transportSource)
@@ -61,8 +62,23 @@ void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source
     }
 }
 
-void AudioProcessingComponent::getState (TransportState newState) {
+const String AudioProcessingComponent::getState () 
+{
+    String sState;
+    switch (state)
+    {
+        case Stopped:
+            sState = "Stopped";
+            break;
+        case Playing:
+            sState = "Playing";
+            break;
+        case Paused:
+            sState = "Paused";
+            break;
+    }
     
+    return sState;
 }
 
 void AudioProcessingComponent::setState (TransportState newState)
@@ -72,19 +88,21 @@ void AudioProcessingComponent::setState (TransportState newState)
 
         switch (newState)
         {
-            case Stopped:                           // [3]
-                transportSource.setPosition (0.0);
+            case Stopped:                           
+                currentPosition = 0.0;
+                transportSource.setPosition(0.0);
                 break;
                 
-            case Starting:                          // [4]
+            case Starting:                          
                 transportSource.setPosition(currentPosition);
                 transportSource.start();
                 break;
                 
-            case Playing:                           // [5]
+            case Playing: //THIS CASE IS MAINLY FOR GUI/TOOLBARIF INFORMATION ***KEEP***                          
                 break;
                 
-            case Stopping:                          // [6]
+            case Stopping:                          
+                currentPosition = 0.0;
                 transportSource.stop();
                 break;
             
@@ -93,41 +111,43 @@ void AudioProcessingComponent::setState (TransportState newState)
                 transportSource.stop();
                 break;
 
-            case Paused:
+            case Paused: //THIS CASE IS MAINLY FOR GUI/TOOLBARIF INFORMATION ***KEEP***
                 break;
         }
         
         state = newState;
+        transportSource.sendChangeMessage(); //send notification of state change
     }
 }
 
+//-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
 {
-        auto* reader = formatManager.createReaderFor (file);              // [10]
+        auto* reader = formatManager.createReaderFor (file);              
         if (reader != nullptr)
         {
-            std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); // [11]
-            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     // [12]
-            readerSource.reset (newSource.release());                                                        // [14]
+            std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
+            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     
+            readerSource.reset (newSource.release());                                                        
         }
 }
 
-void AudioProcessingComponent::playButtonClicked()
+void AudioProcessingComponent::playRequested()
 {
     if((state == Stopped) || (state == Paused))
-        setState (Starting);
+        setState (Starting); //start transport
 }
 
-void AudioProcessingComponent::stopButtonClicked()
+void AudioProcessingComponent::stopRequested()
 {
     if (state == Paused)
-        setState(Stopped);
+        setState(Stopped); //reset transport position to 0
     else
-        setState(Stopping);
+        setState(Stopping); //stop transport
 }
 
-void AudioProcessingComponent::pauseButtonClicked()
+void AudioProcessingComponent::pauseRequested()
 {
     if (state == Playing)
-        setState(Pausing);
+        setState(Pausing); //stop transport, save current position
 }

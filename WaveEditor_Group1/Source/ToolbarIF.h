@@ -11,16 +11,17 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "AudioProcessingComponent.h"
-//#include "MainComponent.h"
 
 
-class ToolbarIF : public Component
+class ToolbarIF : public Component, public ChangeListener
 {
 public:
     ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
         setSize(700, 700);
         const String projRootDir = getProjRootDir();
+        state = apc.getState(); //initialize transport source state
+        apc.transportSource.addChangeListener(this); //listen to changes in the transport source
 
         //-----------------------GUI Images------------------------------------
         //Play
@@ -72,9 +73,55 @@ public:
     }
 
     //==========================================================================
+    /*! Listen to changes in the transport state 
+    \   Set buttons accordingly
+    */
+    void changeListenerCallback(ChangeBroadcaster* source) override
+    {
+        if (source == &apc.transportSource)
+        {
+            if (apc.getState() == "Playing")
+            {
+                playButton.setEnabled(false);
+                playButton.setState(Button::ButtonState::buttonDown);
+                pauseButton.setEnabled(true);
+                pauseButton.setState(Button::ButtonState::buttonNormal);
+                stopButton.setEnabled(true);
+                stopButton.setState(Button::ButtonState::buttonNormal);
+            }
+            else if (apc.getState() == "Stopped")
+            {
+                stopButton.setEnabled(false);
+                stopButton.setState(Button::ButtonState::buttonDown);
+                pauseButton.setEnabled(false);
+                pauseButton.setState(Button::ButtonState::buttonNormal);
+                playButton.setEnabled(true);
+                playButton.setState(Button::ButtonState::buttonNormal);
+            }
+            else if (apc.getState() == "Paused")
+            {
+                pauseButton.setEnabled(false);
+                pauseButton.setState(Button::ButtonState::buttonDown);
+                playButton.setEnabled(true);
+                playButton.setState(Button::ButtonState::buttonNormal);
+                stopButton.setEnabled(true);
+                stopButton.setState(Button::ButtonState::buttonNormal);
+            }
+        }
+    }
+
     void paint(Graphics& g)
     {
         g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+        
+        //paint buttons based on current audio state
+        state = apc.getState();
+        if (state == "Playing")
+            playButton.setState(Button::ButtonState::buttonDown);
+        else if (state == "Stopped")
+            stopButton.setState(Button::ButtonState::buttonDown);
+        else if (state == "Paused")
+            pauseButton.setState(Button::ButtonState::buttonDown);
     }
 
     void resized()
@@ -90,8 +137,7 @@ public:
 private:
     void openButtonClicked()
     {
-        //call appropriate function of AudioProcessingComponent
-        //to open file and set up transport source
+        //open file browser
         FileChooser chooser("Select a Wave file to play...",
             {},
             "*.wav");                                        
@@ -110,7 +156,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to start transport source from beginning
-        apc.playButtonClicked();
+        apc.playRequested();
 
         //once AudioProcessingComponent returns...
         playButton.setEnabled(false);
@@ -122,7 +168,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to stop transport source and store position
-        apc.pauseButtonClicked();
+        apc.pauseRequested();
 
         //once AudioProcessingComponent returns...
         pauseButton.setEnabled(false);
@@ -134,7 +180,7 @@ private:
     {
         //call appropriate function of AudioProcessingComponent
         //to stop transport source and set position to beginning
-        apc.stopButtonClicked();
+        apc.stopRequested();
 
         //once AudioProcessingComponent returns...
         stopButton.setEnabled(false);
@@ -229,6 +275,7 @@ private:
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
+    String state; //transport state (from apc.getState() function)
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarIF)
 };

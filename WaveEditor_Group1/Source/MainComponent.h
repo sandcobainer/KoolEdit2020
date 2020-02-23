@@ -25,11 +25,7 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
-/*
-protected:
-    GUIComponent gui;
-    AudioProcessingComponent cap;
-    */
+
 private:
     GUIComponent *gui;
     AudioProcessingComponent cap;

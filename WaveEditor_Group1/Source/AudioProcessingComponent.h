@@ -16,7 +16,7 @@
 //==============================================================================
 /*
 */
-class AudioProcessingComponent    : public AudioAppComponent, public ChangeListener
+class AudioProcessingComponent    : public AudioAppComponent, public ChangeBroadcaster, public ChangeListener
 {
 public:
     AudioProcessingComponent();
@@ -24,37 +24,57 @@ public:
 
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
-    
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
     void changeListenerCallback (ChangeBroadcaster* source) override;
     
+    /*! Takes juce::File object passed from ToolbarIF.h
+    \   reads user chosen audio file and sets up transport source
+    \   transport state should still be STOPPED
+    */
     void loadFile(File);
-    void playButtonClicked();
-    void stopButtonClicked();
-    void pauseButtonClicked();
-    
+
+    /*! Called from ToolbarIF.h when user clicks play button
+    \   evaluates current transport states and determines action
+    */
+    void playRequested();
+
+    /*! Called from ToolbarIF.h when user clicks stop button
+    \   evaluates current transport states and determines action
+    */
+    void stopRequested();
+
+    /*! Called from ToolbarIF.h when user clicks pause button
+    \   evaluate current transport states and determines action
+    */
+    void pauseRequested();
+
+    /*! Called by ToolbarIF.h to get current transport state info
+    */
+    const String getState();
+
+    AudioTransportSource transportSource;
+
 private:
     
     enum TransportState
     {
-        Stopped,
-        Paused,
-        Pausing,
+        Stopped,  //initial state, position 0 
+        Pausing,  //stopped, last position saved
         Playing,
-        
-        Starting,
-        Stopping
+        Paused,
+        Starting, //starts transport
+        Stopping  //stops transport
     };
     
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
-    AudioTransportSource transportSource;
-    
+
     TransportState state;
     double currentPosition;
     
+    /*! Internal function to change the transport state
+    */
     void setState(TransportState state);
-    void getState(TransportState state);
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
