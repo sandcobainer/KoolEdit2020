@@ -23,6 +23,7 @@ AudioProcessingComponent::AudioProcessingComponent():state(Stopped),
     currentPosition = 0.0;
     
     setAudioChannels (0, 2);
+    startTimer (40);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -48,6 +49,11 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
     }
 
     transportSource.getNextAudioBlock(bufferToFill);
+}
+
+void AudioProcessingComponent::timerCallback()
+{
+    thumbnail.sendChangeMessage();
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------

@@ -21,7 +21,7 @@ GUIComponent::GUIComponent(AudioProcessingComponent& c) : apc(c)
 
     wavViewer = new WaveVisualizer(apc);
     addAndMakeVisible(wavViewer);
-
+    
 }
 
 GUIComponent::~GUIComponent()
@@ -52,7 +52,7 @@ void GUIComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    tlbar->setBounds(0, 0, getWidth(), getHeight());
+    tlbar->setBounds(0, 0, getWidth(), 100);
+    wavViewer->setBounds(0,100,getWidth(),getHeight()-520);
     
-    wavViewer->setBounds(200,200,getWidth(),getHeight());
 }

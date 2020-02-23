@@ -23,6 +23,7 @@ public:
     {
         state = apc.getState(); //initialize transport source state
         apc.thumbnail.addChangeListener(this); //listen to changes in the transport source
+        
     }
 
     ~WaveVisualizer()
@@ -60,6 +61,8 @@ public:
             repaint();
         }
     }
+    
+   
             
     
     void paintIfNoFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
@@ -82,6 +85,16 @@ public:
                                 0.0,                                    // start time
                                 apc.thumbnail.getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
+        
+        
+        g.setColour (Colours::green);
+        
+        auto audioLength (apc.thumbnail.getTotalLength());
+        auto audioPosition (apc.transportSource.getCurrentPosition());
+        auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
+                           + thumbnailBounds.getX());                                        // [13]
+        g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
+                    thumbnailBounds.getBottom(), 2.0f);
     }
 
 private:
