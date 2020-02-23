@@ -1,9 +1,12 @@
 /*
- ==============================================================================
- This file was auto-generated!
- It contains the basic startup code for a JUCE application.
- ==============================================================================
- */
+  ==============================================================================
+
+    This file was auto-generated!
+
+    It contains the basic startup code for a JUCE application.
+
+  ==============================================================================
+*/
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
@@ -41,7 +44,7 @@ public:
         // request and let the app carry on running, or call quit() to allow the app to close.
         quit();
     }
-    
+
     void anotherInstanceStarted (const String& commandLine) override
     {
         // When another instance of the app is launched while this one is running,
@@ -84,7 +87,7 @@ private:
             // whatever you need.
             app.systemRequestedQuit();
         }
-        
+
         /* Note: Be careful if you override any DocumentWindow methods - the base
          class uses a lot of them, so by overriding you might break its functionality.
          It's best to do all your work in your content component instead, but if
@@ -96,8 +99,7 @@ private:
         JUCEApplication& app;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
-    
-    
+
     std::unique_ptr<MainWindow> mainWindow;
 };
 

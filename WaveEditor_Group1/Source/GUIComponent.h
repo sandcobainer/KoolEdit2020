@@ -19,14 +19,16 @@
 class GUIComponent    : public Component
 {
 public:
-    GUIComponent();
+    GUIComponent(AudioProcessingComponent&);
     ~GUIComponent();
 
     void paint (Graphics&) override;
     void resized() override;
 
 private:
-    
-    ToolbarIF toolbar;
+    //connection to AudioProcessingComponent (passed from parent)
+    AudioProcessingComponent& apc;
+    ToolbarIF *tlbar;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
 };
