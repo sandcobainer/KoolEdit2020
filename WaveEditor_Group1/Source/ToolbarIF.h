@@ -38,11 +38,30 @@ public:
         iStopOver = fStopOver->loadFrom(File(projRootDir + sStopOver));
         iStopDown = fStopDown->loadFrom(File(projRootDir + sStopDown));
 
+        //Open
+        iOpenNormal = fOpenNormal->loadFrom(File(projRootDir + sOpenNormal));
+        iOpenOver = fOpenOver->loadFrom(File(projRootDir + sOpenOver));
+        iOpenDown = fOpenDown->loadFrom(File(projRootDir + sOpenDown));
+
+        //Save
+        iSaveNormal = fSaveNormal->loadFrom(File(projRootDir + sSaveNormal));
+        iSaveOver = fSaveOver->loadFrom(File(projRootDir + sSaveOver));
+        iSaveDown = fSaveDown->loadFrom(File(projRootDir + sSaveDown));
+
         //-----------------------GUI Buttons-----------------------------------
         //Open
         addAndMakeVisible(&openButton);
-        openButton.setButtonText("Open...");
+        openButton.setImages(false, true, true, iOpenNormal, 1.0, Colours::transparentWhite, iOpenOver, 1.0, Colours::transparentWhite, iOpenDown, 1.0, Colours::transparentWhite);
+        openButton.setState(Button::ButtonState::buttonNormal);
         openButton.onClick = [this] {openButtonClicked(); };
+        openButton.setEnabled(true);
+
+        //Save
+        addAndMakeVisible(&saveButton);
+        saveButton.setImages(false, true, true, iSaveNormal, 1.0, Colours::transparentWhite, iSaveOver, 1.0, Colours::transparentWhite, iSaveDown, 1.0, Colours::transparentWhite);
+        saveButton.setState(Button::ButtonState::buttonNormal);
+        saveButton.onClick = [this] {saveButtonClicked(); };
+        saveButton.setEnabled(false);
 
         //Play
         addAndMakeVisible(&playButton);
@@ -126,7 +145,8 @@ public:
     void resized() override
     {
         //button positioning
-        openButton.setBounds(10, 10, getWidth() - 20, 20);
+        openButton.setBounds(2, 10, 30, 30);
+        saveButton.setBounds(35, 10, 30, 30);
         playButton.setBounds(2, getHeight() - 32, 30, 30);
         pauseButton.setBounds(35, getHeight() - 32, 30, 30);
         stopButton.setBounds(67, getHeight() - 32, 30, 30);
@@ -149,6 +169,11 @@ private:
 
         //once AudioProcessingComponent returns...
         playButton.setEnabled(true);
+        saveButton.setEnabled(true);
+    }
+
+    void saveButtonClicked()
+    {
     }
 
     void playButtonClicked()
@@ -213,7 +238,8 @@ private:
     //==========================================================================
     //Additional variables
     //Buttons
-    TextButton openButton;
+    ImageButton openButton;
+    ImageButton saveButton;
     ImageButton playButton;
     ImageButton pauseButton;
     ImageButton stopButton;
@@ -232,6 +258,14 @@ private:
         const String sStopNormal = "\\Source\\Assets\\stop_normal.png";
         const String sStopOver = "\\Source\\Assets\\stop_over.png";
         const String sStopDown = "\\Source\\Assets\\stop_down.png";
+
+        const String sOpenNormal = "\\Source\\Assets\\openfile_normal.png";
+        const String sOpenOver = "\\Source\\Assets\\openfile_over.png";
+        const String sOpenDown = "\\Source\\Assets\\openfile_down.png";
+
+        const String sSaveNormal = "\\Source\\Assets\\savefile_normal.png";
+        const String sSaveOver = "\\Source\\Assets\\savefile_over.png";
+        const String sSaveDown = "\\Source\\Assets\\savefile_down.png";
     #else
         const String sPlayNormal = "/Source/Assets/play_normal.png";
         const String sPlayOver = "/Source/Assets/play_over.png";
@@ -244,6 +278,14 @@ private:
         const String sStopNormal = "/Source/Assets/stop_normal.png";
         const String sStopOver = "/Source/Assets/stop_over.png";
         const String sStopDown = "/Source/Assets/stop_down.png";
+
+        const String sOpenNormal = "/Source/Assets/openfile_normal.png";
+        const String sOpenOver = "/Source/Assets/openfile_over.png";
+        const String sOpenDown = "/Source/Assets/openfile_down.png";
+
+        const String sSaveNormal = "/Source/Assets/savefile_normal.png";
+        const String sSaveOver = "/Source/Assets/savefile_over.png";
+        const String sSaveDown = "/Source/Assets/savefile_down.png";
     #endif
 
     //Image objects
@@ -259,6 +301,14 @@ private:
     Image iStopOver;
     Image iStopDown;
 
+    Image iOpenNormal;
+    Image iOpenOver;
+    Image iOpenDown;
+
+    Image iSaveNormal;
+    Image iSaveOver;
+    Image iSaveDown;
+
     //Image file objects
     ImageFileFormat* fPlayNormal;
     ImageFileFormat* fPlayOver;
@@ -271,6 +321,14 @@ private:
     ImageFileFormat* fStopNormal;
     ImageFileFormat* fStopOver;
     ImageFileFormat* fStopDown;
+
+    ImageFileFormat* fOpenNormal;
+    ImageFileFormat* fOpenOver;
+    ImageFileFormat* fOpenDown;
+
+    ImageFileFormat* fSaveNormal;
+    ImageFileFormat* fSaveOver;
+    ImageFileFormat* fSaveDown;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
