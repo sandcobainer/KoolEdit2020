@@ -54,6 +54,6 @@ void GUIComponent::resized()
     // This method is where you should set the bounds of any child
     // components that your component contains..
     tlbar->setBounds(0, 0, getWidth(), 100);
-    wavViewer->setBounds(0,100,getWidth(),getHeight()-520);
-    specvis->setBounds(0, 300, getWidth(), 500); // TODO: have to re-set the size
+    wavViewer->setBounds(0,100,getWidth(),(getHeight()-100)/2);
+    specvis->setBounds(0, 100+(getHeight()-100)/2, getWidth(), (getHeight()-100)/2);
 }
