@@ -17,7 +17,9 @@ state(Stopped),
 audioSampleBuffer(nullptr),
 maxNumChannels(2),
 numSamples(0),
-audioSampleBufferSize(0)
+audioSampleBufferSize(0),
+thumbnailCache (5),
+thumbnail (512, formatManager, thumbnailCache)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -26,6 +28,7 @@ audioSampleBufferSize(0)
     currentPosition = 0.0;
     
     setAudioChannels (0, maxNumChannels);
+    startTimer (40);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -95,6 +98,11 @@ float* AudioProcessingComponent::getAudioSampleBuffer(int numChannel, int &numSa
     return audioSampleBuffer[numChannel];
 }
 
+void AudioProcessingComponent::timerCallback()
+{
+    thumbnail.sendChangeMessage();
+}
+
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source) 
 {
@@ -106,6 +114,10 @@ void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source
             setState(Stopped);
         else if (state == Pausing)
             setState(Paused);
+    }
+    if (source == &thumbnail)
+    {
+        thumbnail.sendChangeMessage();
     }
 }
 
@@ -174,7 +186,8 @@ void AudioProcessingComponent::loadFile(File file)
         if (reader != nullptr)
         {
             std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
-            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);                     
+            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
+            thumbnail.setSource (new FileInputSource (file)); 
             readerSource.reset (newSource.release());                                                        
         }
 }

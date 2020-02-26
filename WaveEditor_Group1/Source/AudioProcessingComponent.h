@@ -16,7 +16,7 @@
 //==============================================================================
 /*
 */
-class AudioProcessingComponent    : public AudioAppComponent, public ChangeBroadcaster, public ChangeListener
+class AudioProcessingComponent    : public AudioAppComponent, public ChangeBroadcaster, public ChangeListener, private Timer
 {
 public:
     AudioProcessingComponent();
@@ -26,6 +26,11 @@ public:
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
     void changeListenerCallback (ChangeBroadcaster* source) override;
+    void timerCallback() override;
+    
+    
+    /*! Call from any of GUI components(WaveVisualizer.h) to get FormatManager of APC
+     */
     
     /*! Takes juce::File object passed from ToolbarIF.h
     \   reads user chosen audio file and sets up transport source
@@ -59,6 +64,10 @@ public:
     float* getAudioSampleBuffer(int numChannel, int &numSamples);
 
     AudioTransportSource transportSource;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;                  // [1]
+    AudioThumbnail thumbnail;                            // [2]
+    
 
 private:
     
@@ -83,7 +92,7 @@ private:
     */
     void flushAudioSampleBuffer();
     
-    AudioFormatManager formatManager;
+    //AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
 
     TransportState state;
