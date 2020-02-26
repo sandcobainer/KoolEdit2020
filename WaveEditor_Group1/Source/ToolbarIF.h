@@ -147,9 +147,9 @@ public:
         //button positioning
         openButton.setBounds(2, 10, 30, 30);
         saveButton.setBounds(35, 10, 30, 30);
-        playButton.setBounds(2, getHeight() - 32, 30, 30);
-        pauseButton.setBounds(35, getHeight() - 32, 30, 30);
-        stopButton.setBounds(67, getHeight() - 32, 30, 30);
+        playButton.setBounds(100, 10, 30, 30);
+        pauseButton.setBounds(133, 10, 30, 30);
+        stopButton.setBounds(166, 10, 30, 30);
     }
     //==========================================================================
 
