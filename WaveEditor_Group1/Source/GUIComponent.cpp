@@ -18,7 +18,11 @@ GUIComponent::GUIComponent(AudioProcessingComponent& c) : apc(c)
     // initialise any special settings that your component needs.
     tlbar = new ToolbarIF(apc);
     addAndMakeVisible(tlbar);
-    setSize(700, 700);
+    specvis = new SpectrogramVisualizer(apc);
+    addAndMakeVisible(specvis);
+
+    wavViewer = new WaveVisualizer(apc);
+    addAndMakeVisible(wavViewer);
 }
 
 GUIComponent::~GUIComponent()
@@ -49,6 +53,7 @@ void GUIComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    tlbar->setBounds(0, 0, getWidth(), getHeight());
-
+    tlbar->setBounds(0, 0, getWidth(), 100);
+    wavViewer->setBounds(0,100,getWidth(),(getHeight()-100)/2);
+    specvis->setBounds(0, 100+(getHeight()-100)/2, getWidth(), (getHeight()-100)/2);
 }
