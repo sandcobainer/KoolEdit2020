@@ -48,6 +48,16 @@ public:
         iSaveOver = fSaveOver->loadFrom(File(projRootDir + sSaveOver));
         iSaveDown = fSaveDown->loadFrom(File(projRootDir + sSaveDown));
 
+        //Fastforward
+        iFFWDNormal = fFFWDNormal->loadFrom(File(projRootDir + sFFWDNormal));
+        iFFWDOver = fFFWDOver->loadFrom(File(projRootDir + sFFWDOver));
+        iFFWDDown = fFFWDDown->loadFrom(File(projRootDir + sFFWDDown));
+
+        //Rewind
+        iRewindNormal = fRewindNormal->loadFrom(File(projRootDir + sRewindNormal));
+        iRewindOver = fRewindOver->loadFrom(File(projRootDir + sRewindOver));
+        iRewindDown = fRewindDown->loadFrom(File(projRootDir + sRewindDown));
+
         //-----------------------GUI Buttons-----------------------------------
         //Open
         addAndMakeVisible(&openButton);
@@ -83,6 +93,20 @@ public:
         stopButton.setState(Button::ButtonState::buttonNormal);
         stopButton.onClick = [this] {stopButtonClicked(); };
         stopButton.setEnabled(false);
+
+        //Fastforward
+        addAndMakeVisible(&ffwdButton);
+        ffwdButton.setImages(false, true, true, iFFWDNormal, 1.0, Colours::transparentWhite, iFFWDOver, 1.0, Colours::transparentWhite, iFFWDDown, 1.0, Colours::transparentWhite);
+        ffwdButton.setState(Button::ButtonState::buttonNormal);
+        ffwdButton.onClick = [this] {ffwdButtonClicked(); };
+        ffwdButton.setEnabled(false);
+
+        //Rewind
+        addAndMakeVisible(&rewindButton);
+        rewindButton.setImages(false, true, true, iRewindNormal, 1.0, Colours::transparentWhite, iRewindOver, 1.0, Colours::transparentWhite, iRewindDown, 1.0, Colours::transparentWhite);
+        rewindButton.setState(Button::ButtonState::buttonNormal);
+        rewindButton.onClick = [this] {rewindButtonClicked(); };
+        rewindButton.setEnabled(false);
     }
 
     ~ToolbarIF()
@@ -150,6 +174,8 @@ public:
         playButton.setBounds(100, 10, 30, 30);
         pauseButton.setBounds(133, 10, 30, 30);
         stopButton.setBounds(166, 10, 30, 30);
+        rewindButton.setBounds(199, 10, 30, 30);
+        ffwdButton.setBounds(232, 10, 30, 30);
     }
     //==========================================================================
 
@@ -170,6 +196,8 @@ private:
         //once AudioProcessingComponent returns...
         playButton.setEnabled(true);
         saveButton.setEnabled(true);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -186,6 +214,8 @@ private:
         playButton.setEnabled(false);
         pauseButton.setEnabled(true);
         stopButton.setEnabled(true);
+        ffwdButton.setEnabled(false);
+        rewindButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -198,6 +228,8 @@ private:
         pauseButton.setEnabled(false);
         playButton.setEnabled(true);
         stopButton.setEnabled(true);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
     }
 
     void stopButtonClicked()
@@ -210,6 +242,18 @@ private:
         stopButton.setEnabled(false);
         playButton.setEnabled(true);
         pauseButton.setEnabled(false);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
+    }
+
+    void ffwdButtonClicked()
+    {
+
+    }
+
+    void rewindButtonClicked()
+    {
+
     }
 
     /*! Function to search for root project directory
@@ -243,6 +287,8 @@ private:
     ImageButton playButton;
     ImageButton pauseButton;
     ImageButton stopButton;
+    ImageButton ffwdButton;
+    ImageButton rewindButton;
 
     //Image files
     //all should be located in ../Source/Assets/
@@ -266,6 +312,15 @@ private:
         const String sSaveNormal = "\\Source\\Assets\\savefile_normal.png";
         const String sSaveOver = "\\Source\\Assets\\savefile_over.png";
         const String sSaveDown = "\\Source\\Assets\\savefile_down.png";
+
+        const String sFFWDNormal = "\\Source\\Assets\\ffwd_normal.png";
+        const String sFFWDOver = "\\Source\\Assets\\ffwd_over.png";
+        const String sFFWDDown = "\\Source\\Assets\\ffwd_down.png";
+
+        const String sRewindNormal = "\\Source\\Assets\\rewind_normal.png";
+        const String sRewindOver = "\\Source\\Assets\\rewind_over.png";
+        const String sRewindDown = "\\Source\\Assets\\rewind_down.png";
+
     #else
         const String sPlayNormal = "/Source/Assets/play_normal.png";
         const String sPlayOver = "/Source/Assets/play_over.png";
@@ -286,6 +341,14 @@ private:
         const String sSaveNormal = "/Source/Assets/savefile_normal.png";
         const String sSaveOver = "/Source/Assets/savefile_over.png";
         const String sSaveDown = "/Source/Assets/savefile_down.png";
+
+        const String sFFWDNormal = "/Source/Assets/ffwd_normal.png";
+        const String sFFWDOver = "/Source/Assets/ffwd_over.png";
+        const String sFFWDDown = "/Source/Assets/ffwd_down.png";
+
+        const String sRewindNormal = "/Source/Assets/rewind_normal.png";
+        const String sRewindOver = "/Source/Assets/rewind_over.png";
+        const String sRewindDown = "/Source/Assets/rewind_down.png";
     #endif
 
     //Image objects
@@ -309,6 +372,14 @@ private:
     Image iSaveOver;
     Image iSaveDown;
 
+    Image iFFWDNormal;
+    Image iFFWDOver;
+    Image iFFWDDown;
+
+    Image iRewindNormal;
+    Image iRewindOver;
+    Image iRewindDown;
+
     //Image file objects
     ImageFileFormat* fPlayNormal;
     ImageFileFormat* fPlayOver;
@@ -329,6 +400,14 @@ private:
     ImageFileFormat* fSaveNormal;
     ImageFileFormat* fSaveOver;
     ImageFileFormat* fSaveDown;
+
+    ImageFileFormat* fFFWDNormal;
+    ImageFileFormat* fFFWDOver;
+    ImageFileFormat* fFFWDDown;
+
+    ImageFileFormat* fRewindNormal;
+    ImageFileFormat* fRewindOver;
+    ImageFileFormat* fRewindDown;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
