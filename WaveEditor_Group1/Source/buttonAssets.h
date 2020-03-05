@@ -14,13 +14,13 @@ namespace buttonAssets
     const int           ffwd_over_pngSize = 1246;
 
     extern const char*  loop_down_png;
-    const int           loop_down_pngSize = 1238;
+    const int           loop_down_pngSize = 1247;
 
     extern const char*  loop_normal_png;
-    const int           loop_normal_pngSize = 1224;
+    const int           loop_normal_pngSize = 1211;
 
     extern const char*  loop_over_png;
-    const int           loop_over_pngSize = 1251;
+    const int           loop_over_pngSize = 1233;
 
     extern const char*  openfile_down_png;
     const int           openfile_down_pngSize = 1084;
