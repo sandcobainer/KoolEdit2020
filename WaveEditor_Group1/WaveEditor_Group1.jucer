@@ -18,6 +18,9 @@
         <FILE id="yu5tyA" name="WaveVisualizer.h" compile="0" resource="0"
               file="Source/WaveVisualizer.h"/>
       </GROUP>
+      <FILE id="JzjW8T" name="buttonAssets.cpp" compile="1" resource="0"
+            file="Source/buttonAssets.cpp"/>
+      <FILE id="ODQBxB" name="buttonAssets.h" compile="0" resource="0" file="Source/buttonAssets.h"/>
       <FILE id="xP2Hny" name="AudioProcessingComponent.cpp" compile="1" resource="0"
             file="Source/AudioProcessingComponent.cpp"/>
       <FILE id="Q3HFvT" name="AudioProcessingComponent.h" compile="0" resource="0"
