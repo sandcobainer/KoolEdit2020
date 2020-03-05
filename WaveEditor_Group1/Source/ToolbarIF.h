@@ -58,6 +58,11 @@ public:
         iRewindOver = ImageFileFormat::loadFrom(buttonAssets::rewind_over_png, (size_t)buttonAssets::rewind_over_pngSize);
         iRewindDown = ImageFileFormat::loadFrom(buttonAssets::rewind_down_png, (size_t)buttonAssets::rewind_down_pngSize);
 
+        //Loop
+        iLoopNormal = ImageFileFormat::loadFrom(buttonAssets::loop_normal_png, (size_t)buttonAssets::loop_normal_pngSize);
+        iLoopOver = ImageFileFormat::loadFrom(buttonAssets::loop_over_png, (size_t)buttonAssets::loop_over_pngSize);
+        iLoopDown = ImageFileFormat::loadFrom(buttonAssets::loop_down_png, (size_t)buttonAssets::loop_down_pngSize);
+
         //-----------------------GUI Buttons-----------------------------------
         //Open
         addAndMakeVisible(&openButton);
@@ -107,6 +112,13 @@ public:
         rewindButton.setState(Button::ButtonState::buttonNormal);
         rewindButton.onClick = [this] {rewindButtonClicked(); };
         rewindButton.setEnabled(false);
+
+        //Loop
+        addAndMakeVisible(&loopButton);
+        loopButton.setImages(false, true, true, iLoopNormal, 1.0, Colours::transparentWhite, iLoopOver, 1.0, Colours::transparentWhite, iLoopDown, 1.0, Colours::transparentWhite);
+        loopButton.setState(Button::ButtonState::buttonNormal);
+        loopButton.onClick = [this] {loopButtonClicked(); };
+        loopButton.setEnabled(false);
     }
 
     ~ToolbarIF()
@@ -176,6 +188,7 @@ public:
         stopButton.setBounds(166, 10, 30, 30);
         rewindButton.setBounds(199, 10, 30, 30);
         ffwdButton.setBounds(232, 10, 30, 30);
+        loopButton.setBounds(getWidth()-40, 10, 30, 30);
     }
     //==========================================================================
 
@@ -198,6 +211,7 @@ private:
         saveButton.setEnabled(true);
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
+        loopButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -256,6 +270,11 @@ private:
 
     }
 
+    void loopButtonClicked()
+    {
+
+    }
+
     //==========================================================================
     //Additional variables
     //Buttons
@@ -266,6 +285,7 @@ private:
     ImageButton stopButton;
     ImageButton ffwdButton;
     ImageButton rewindButton;
+    ImageButton loopButton;
 
     //Image objects
     Image iPlayNormal;
@@ -295,6 +315,10 @@ private:
     Image iRewindNormal;
     Image iRewindOver;
     Image iRewindDown;
+
+    Image iLoopNormal;
+    Image iLoopOver;
+    Image iLoopDown;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
