@@ -57,12 +57,22 @@ public:
     */
     const String getState();
     
-    /*! Get one block and one channel of data from audioSampleBuffer
+    /*! Get a read pointer to one block and one channel of data
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
     const float* getAudioBlockReadPointer(int numChannel, int &numBlockSamples);
+
+    /*! Get a read pointer to one channel of audio data
+        @param numChannel the specific channel need to be fetched
+        @param numSamples the sample size
+    */
     const float* getAudioReadPointer(int numChannel, int &numAudioSamples);
+
+    /*! Get a write pointer to one channel of audio data
+        @param numChannel the specific channel need to be fetched
+        @param numSamples the sample size
+    */
     const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
     AudioTransportSource transportSource;
@@ -84,11 +94,10 @@ private:
     };
     
     /*! Fill the audioSampleBuffer with new coming data.
-        @param bufferWritePointer a pointer to one block of data.
         @param channelData one channel of data.
-        @param numSamples the number of samples.
+        @param numChannel the number of channel that will be filled.
     */
-    void fillAudioBlockBuffer(float* bufferWritePointer, const float* channelData, int numSamples);
+    void fillAudioBlockBuffer(const float* channelData, int numChannel);
 
     //AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;

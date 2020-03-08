@@ -10,7 +10,6 @@
 
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
-#include <iostream>
 
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent():
@@ -60,8 +59,8 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
         for (auto c = 0; c < numChannels; ++c)
         {
             channelData = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-            numBlockSamples = bufferToFill.buffer->getNumSamples();
-            fillAudioBlockBuffer(audioBlockBuffer.getWritePointer(c), channelData, numBlockSamples);
+            numBlockSamples = bufferToFill.buffer->getNumSamples(); // update the sample number before fill the buffer
+            fillAudioBlockBuffer(channelData, c);
         }
 
         sendChangeMessage(); // TODO: maybe try send messages instead
@@ -72,10 +71,11 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 
 //---------------------------------AUDIO BUFFER HANDLING--------------------------------------
 
-void AudioProcessingComponent::fillAudioBlockBuffer(float* bufferWritePointer, const float* channelData, int numBlockSamples)
+void AudioProcessingComponent::fillAudioBlockBuffer(const float* channelData, int numChannel)
 {
+    float* writePointer = audioBlockBuffer.getWritePointer(numChannel);
     for (auto i = 0; i < numBlockSamples; ++i)
-        bufferWritePointer[i] = channelData[i];
+        writePointer[i] = channelData[i];
 }
 
 const float* AudioProcessingComponent::getAudioBlockReadPointer(int numChannel, int &numAudioSamples) // public
