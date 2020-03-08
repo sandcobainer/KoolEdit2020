@@ -11,6 +11,7 @@
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "AudioProcessingComponent.h"
+#include "buttonAssets.h"
 
 
 class ToolbarIF : public Component, public ChangeListener
@@ -18,35 +19,49 @@ class ToolbarIF : public Component, public ChangeListener
 public:
     ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
-        const String projRootDir = getProjRootDir();
         state = apc.getState(); //initialize transport source state
         apc.transportSource.addChangeListener(this); //listen to changes in the transport source
 
         //-----------------------GUI Images------------------------------------
         //Play
-        iPlayNormal = fPlayNormal->loadFrom(File(projRootDir + sPlayNormal));
-        iPlayOver = fPlayOver->loadFrom(File(projRootDir + sPlayOver));
-        iPlayDown = fPlayDown->loadFrom(File(projRootDir + sPlayDown));
+        iPlayNormal = ImageFileFormat::loadFrom(buttonAssets::play_normal_png, (size_t)buttonAssets::play_normal_pngSize);
+        iPlayOver = ImageFileFormat::loadFrom(buttonAssets::play_over_png, (size_t)buttonAssets::play_over_pngSize);
+        iPlayDown = ImageFileFormat::loadFrom(buttonAssets::play_down_png, (size_t)buttonAssets::play_down_pngSize);
         
         //Pause
-        iPauseNormal = fPauseNormal->loadFrom(File(projRootDir + sPauseNormal));
-        iPauseOver = fPauseOver->loadFrom(File(projRootDir + sPauseOver));
-        iPauseDown = fPauseDown->loadFrom(File(projRootDir + sPauseDown));
+        iPauseNormal = ImageFileFormat::loadFrom(buttonAssets::pause_normal_png, (size_t)buttonAssets::pause_normal_pngSize);
+        iPauseOver = ImageFileFormat::loadFrom(buttonAssets::pause_over_png, (size_t)buttonAssets::pause_over_pngSize);
+        iPauseDown = ImageFileFormat::loadFrom(buttonAssets::pause_down_png, (size_t)buttonAssets::pause_down_pngSize);
 
         //Stop
-        iStopNormal = fStopNormal->loadFrom(File(projRootDir + sStopNormal));
-        iStopOver = fStopOver->loadFrom(File(projRootDir + sStopOver));
-        iStopDown = fStopDown->loadFrom(File(projRootDir + sStopDown));
+        iStopNormal = ImageFileFormat::loadFrom(buttonAssets::stop_normal_png, (size_t)buttonAssets::stop_normal_pngSize);
+        iStopOver = ImageFileFormat::loadFrom(buttonAssets::stop_over_png, (size_t)buttonAssets::stop_over_pngSize);
+        iStopDown = ImageFileFormat::loadFrom(buttonAssets::stop_down_png, (size_t)buttonAssets::stop_down_pngSize);
 
         //Open
-        iOpenNormal = fOpenNormal->loadFrom(File(projRootDir + sOpenNormal));
-        iOpenOver = fOpenOver->loadFrom(File(projRootDir + sOpenOver));
-        iOpenDown = fOpenDown->loadFrom(File(projRootDir + sOpenDown));
+        iOpenNormal = ImageFileFormat::loadFrom(buttonAssets::openfile_normal_png, (size_t)buttonAssets::openfile_normal_pngSize);
+        iOpenOver = ImageFileFormat::loadFrom(buttonAssets::openfile_over_png, (size_t)buttonAssets::openfile_over_pngSize);
+        iOpenDown = ImageFileFormat::loadFrom(buttonAssets::openfile_down_png, (size_t)buttonAssets::openfile_down_pngSize);
 
         //Save
-        iSaveNormal = fSaveNormal->loadFrom(File(projRootDir + sSaveNormal));
-        iSaveOver = fSaveOver->loadFrom(File(projRootDir + sSaveOver));
-        iSaveDown = fSaveDown->loadFrom(File(projRootDir + sSaveDown));
+        iSaveNormal = ImageFileFormat::loadFrom(buttonAssets::savefile_normal_png, (size_t)buttonAssets::savefile_normal_pngSize);
+        iSaveOver = ImageFileFormat::loadFrom(buttonAssets::savefile_over_png, (size_t)buttonAssets::savefile_over_pngSize);
+        iSaveDown = ImageFileFormat::loadFrom(buttonAssets::savefile_down_png, (size_t)buttonAssets::savefile_down_pngSize);
+
+        //Fastforward
+        iFFWDNormal = ImageFileFormat::loadFrom(buttonAssets::ffwd_normal_png, (size_t)buttonAssets::ffwd_normal_pngSize);
+        iFFWDOver = ImageFileFormat::loadFrom(buttonAssets::ffwd_over_png, (size_t)buttonAssets::ffwd_over_pngSize);
+        iFFWDDown = ImageFileFormat::loadFrom(buttonAssets::ffwd_down_png, (size_t)buttonAssets::ffwd_down_pngSize);
+
+        //Rewind
+        iRewindNormal = ImageFileFormat::loadFrom(buttonAssets::rewind_normal_png, (size_t)buttonAssets::rewind_normal_pngSize);
+        iRewindOver = ImageFileFormat::loadFrom(buttonAssets::rewind_over_png, (size_t)buttonAssets::rewind_over_pngSize);
+        iRewindDown = ImageFileFormat::loadFrom(buttonAssets::rewind_down_png, (size_t)buttonAssets::rewind_down_pngSize);
+
+        //Loop
+        iLoopNormal = ImageFileFormat::loadFrom(buttonAssets::loop_normal_png, (size_t)buttonAssets::loop_normal_pngSize);
+        iLoopOver = ImageFileFormat::loadFrom(buttonAssets::loop_over_png, (size_t)buttonAssets::loop_over_pngSize);
+        iLoopDown = ImageFileFormat::loadFrom(buttonAssets::loop_down_png, (size_t)buttonAssets::loop_down_pngSize);
 
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -83,6 +98,27 @@ public:
         stopButton.setState(Button::ButtonState::buttonNormal);
         stopButton.onClick = [this] {stopButtonClicked(); };
         stopButton.setEnabled(false);
+
+        //Fastforward
+        addAndMakeVisible(&ffwdButton);
+        ffwdButton.setImages(false, true, true, iFFWDNormal, 1.0, Colours::transparentWhite, iFFWDOver, 1.0, Colours::transparentWhite, iFFWDDown, 1.0, Colours::transparentWhite);
+        ffwdButton.setState(Button::ButtonState::buttonNormal);
+        ffwdButton.onClick = [this] {ffwdButtonClicked(); };
+        ffwdButton.setEnabled(false);
+
+        //Rewind
+        addAndMakeVisible(&rewindButton);
+        rewindButton.setImages(false, true, true, iRewindNormal, 1.0, Colours::transparentWhite, iRewindOver, 1.0, Colours::transparentWhite, iRewindDown, 1.0, Colours::transparentWhite);
+        rewindButton.setState(Button::ButtonState::buttonNormal);
+        rewindButton.onClick = [this] {rewindButtonClicked(); };
+        rewindButton.setEnabled(false);
+
+        //Loop
+        addAndMakeVisible(&loopButton);
+        loopButton.setImages(false, true, true, iLoopNormal, 1.0, Colours::transparentWhite, iLoopOver, 1.0, Colours::transparentWhite, iLoopDown, 1.0, Colours::transparentWhite);
+        loopButton.setState(Button::ButtonState::buttonNormal);
+        loopButton.onClick = [this] {loopButtonClicked(); };
+        loopButton.setEnabled(false);
     }
 
     ~ToolbarIF()
@@ -150,6 +186,9 @@ public:
         playButton.setBounds(100, 10, 30, 30);
         pauseButton.setBounds(133, 10, 30, 30);
         stopButton.setBounds(166, 10, 30, 30);
+        rewindButton.setBounds(199, 10, 30, 30);
+        ffwdButton.setBounds(232, 10, 30, 30);
+        loopButton.setBounds(getWidth()-40, 10, 30, 30);
     }
     //==========================================================================
 
@@ -170,6 +209,9 @@ private:
         //once AudioProcessingComponent returns...
         playButton.setEnabled(true);
         saveButton.setEnabled(true);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
+        loopButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -186,6 +228,8 @@ private:
         playButton.setEnabled(false);
         pauseButton.setEnabled(true);
         stopButton.setEnabled(true);
+        ffwdButton.setEnabled(false);
+        rewindButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -198,6 +242,8 @@ private:
         pauseButton.setEnabled(false);
         playButton.setEnabled(true);
         stopButton.setEnabled(true);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
     }
 
     void stopButtonClicked()
@@ -210,29 +256,23 @@ private:
         stopButton.setEnabled(false);
         playButton.setEnabled(true);
         pauseButton.setEnabled(false);
+        ffwdButton.setEnabled(true);
+        rewindButton.setEnabled(true);
     }
 
-    /*! Function to search for root project directory
-    \ return root directory as string to be able to
-    \ navigate to Assets folder
-    */
-    const String getProjRootDir()
+    void ffwdButtonClicked()
     {
-        File projectRootDir = File::getCurrentWorkingDirectory().getParentDirectory();
-        String searchFor;
 
-        #if JUCE_WINDOWS
-            searchFor = "..\\..\\WaveEditor_Group1";
-        #else
-            searchFor = "../../WaveEditor_Group1";
-        #endif
-        
-        while (projectRootDir.getParentDirectory().getRelativePathFrom(projectRootDir) != searchFor)
-        {
-            projectRootDir = projectRootDir.getParentDirectory();
-        }
+    }
 
-        return(projectRootDir.getParentDirectory().getFullPathName());
+    void rewindButtonClicked()
+    {
+
+    }
+
+    void loopButtonClicked()
+    {
+
     }
 
     //==========================================================================
@@ -243,50 +283,9 @@ private:
     ImageButton playButton;
     ImageButton pauseButton;
     ImageButton stopButton;
-
-    //Image files
-    //all should be located in ../Source/Assets/
-    #if JUCE_WINDOWS
-        const String sPlayNormal = "\\Source\\Assets\\play_normal.png";
-        const String sPlayOver = "\\Source\\Assets\\play_over.png";
-        const String sPlayDown = "\\Source\\Assets\\play_down.png";
-
-        const String sPauseNormal = "\\Source\\Assets\\pause_normal.png";
-        const String sPauseOver = "\\Source\\Assets\\pause_over.png";
-        const String sPauseDown = "\\Source\\Assets\\pause_down.png";
-
-        const String sStopNormal = "\\Source\\Assets\\stop_normal.png";
-        const String sStopOver = "\\Source\\Assets\\stop_over.png";
-        const String sStopDown = "\\Source\\Assets\\stop_down.png";
-
-        const String sOpenNormal = "\\Source\\Assets\\openfile_normal.png";
-        const String sOpenOver = "\\Source\\Assets\\openfile_over.png";
-        const String sOpenDown = "\\Source\\Assets\\openfile_down.png";
-
-        const String sSaveNormal = "\\Source\\Assets\\savefile_normal.png";
-        const String sSaveOver = "\\Source\\Assets\\savefile_over.png";
-        const String sSaveDown = "\\Source\\Assets\\savefile_down.png";
-    #else
-        const String sPlayNormal = "/Source/Assets/play_normal.png";
-        const String sPlayOver = "/Source/Assets/play_over.png";
-        const String sPlayDown = "/Source/Assets/play_down.png";
-
-        const String sPauseNormal = "/Source/Assets/pause_normal.png";
-        const String sPauseOver = "/Source/Assets/pause_over.png";
-        const String sPauseDown = "/Source/Assets/pause_down.png";
-
-        const String sStopNormal = "/Source/Assets/stop_normal.png";
-        const String sStopOver = "/Source/Assets/stop_over.png";
-        const String sStopDown = "/Source/Assets/stop_down.png";
-
-        const String sOpenNormal = "/Source/Assets/openfile_normal.png";
-        const String sOpenOver = "/Source/Assets/openfile_over.png";
-        const String sOpenDown = "/Source/Assets/openfile_down.png";
-
-        const String sSaveNormal = "/Source/Assets/savefile_normal.png";
-        const String sSaveOver = "/Source/Assets/savefile_over.png";
-        const String sSaveDown = "/Source/Assets/savefile_down.png";
-    #endif
+    ImageButton ffwdButton;
+    ImageButton rewindButton;
+    ImageButton loopButton;
 
     //Image objects
     Image iPlayNormal;
@@ -309,26 +308,17 @@ private:
     Image iSaveOver;
     Image iSaveDown;
 
-    //Image file objects
-    ImageFileFormat* fPlayNormal;
-    ImageFileFormat* fPlayOver;
-    ImageFileFormat* fPlayDown;
+    Image iFFWDNormal;
+    Image iFFWDOver;
+    Image iFFWDDown;
 
-    ImageFileFormat* fPauseNormal;
-    ImageFileFormat* fPauseOver;
-    ImageFileFormat* fPauseDown;
+    Image iRewindNormal;
+    Image iRewindOver;
+    Image iRewindDown;
 
-    ImageFileFormat* fStopNormal;
-    ImageFileFormat* fStopOver;
-    ImageFileFormat* fStopDown;
-
-    ImageFileFormat* fOpenNormal;
-    ImageFileFormat* fOpenOver;
-    ImageFileFormat* fOpenDown;
-
-    ImageFileFormat* fSaveNormal;
-    ImageFileFormat* fSaveOver;
-    ImageFileFormat* fSaveDown;
+    Image iLoopNormal;
+    Image iLoopOver;
+    Image iLoopDown;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;

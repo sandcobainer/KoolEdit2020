@@ -61,7 +61,7 @@ public:
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
-    float* getAudioSampleBuffer(int numChannel, int &numSamples);
+    const float* getAudioBlockBuffer(int numChannel, int &numSamples);
 
     AudioTransportSource transportSource;
     AudioFormatManager formatManager;
@@ -82,16 +82,12 @@ private:
     };
     
     /*! Fill the audioSampleBuffer with new coming data.
-        @param channelData a pointer to one block of data.
-        @param numChannel the number of channels
-        @param numSamples the number of samples
+        @param bufferWritePointer a pointer to one block of data.
+        @param channelData one channel of data.
+        @param numSamples the number of samples.
     */
-    void fillAudioSampleBuffer(const float* const channelData, int numChannel, int numSamples);
-    
-    /*! Flush the audioSampleBuffer
-    */
-    void flushAudioSampleBuffer();
-    
+    void fillAudioSampleBuffer(float* bufferWritePointer, const float* channelData, int numSamples);
+
     //AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
 
@@ -102,10 +98,10 @@ private:
     */
     void setState(TransportState state);
     
-    float **audioSampleBuffer; // This buffer is mainly for GUI
+    // AudioBuffer
     int maxNumChannels;
     int numSamples;
-    int audioSampleBufferSize;
-    
+    AudioBuffer<float> audioBlockBuffer;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
