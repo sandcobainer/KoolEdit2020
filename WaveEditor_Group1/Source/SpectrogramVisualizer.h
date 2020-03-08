@@ -39,7 +39,7 @@ public:
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         int numSamples;
-        const auto* channelData = apc.getAudioBlockBuffer(0, numSamples);
+        const auto* channelData = apc.getAudioBlockReadPointer(0, numSamples);
         for (auto i = 0; i < numSamples; ++i)
             pushNextSampleIntoFifo (channelData[i]);
     }
