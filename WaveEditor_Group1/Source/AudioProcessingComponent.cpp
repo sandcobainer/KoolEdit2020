@@ -37,16 +37,15 @@ void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, doubl
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     // allocate memory for JUCE audio buffer
-    audioBlockBuffer = new AudioBuffer<float>(maxNumChannels, samplesPerBlockExpected);
-    audioBlockBuffer->clear(); // initialize the buffer with 0 values
+    numSamples = samplesPerBlockExpected;
+    audioBlockBuffer.setSize(maxNumChannels, samplesPerBlockExpected);
+    //audioBlockBuffer = new AudioBuffer<float>(maxNumChannels, samplesPerBlockExpected);
+    //audioBlockBuffer->clear(); // initialize the buffer with 0 values
 }
 
 void AudioProcessingComponent::releaseResources() 
 {
     transportSource.releaseResources();
-    
-    // free JUCE audio buffer
-    delete audioBlockBuffer;
 }
 
 void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) 
@@ -62,7 +61,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
             channelData = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
             numSamples = bufferToFill.buffer->getNumSamples();
             //fillAudioSampleBuffer(channelData, c, numSamples);
-            fillAudioSampleBuffer(audioBlockBuffer->getWritePointer(c), channelData, numSamples);
+            fillAudioSampleBuffer(audioBlockBuffer.getWritePointer(c), channelData, numSamples);
         }
 
         sendChangeMessage(); // TODO: maybe try send messages instead
@@ -82,7 +81,7 @@ void AudioProcessingComponent::fillAudioSampleBuffer(float* bufferWritePointer, 
 const float* AudioProcessingComponent::getAudioBlockBuffer(int numChannel, int &numSamples)
 {
     numSamples = this->numSamples;
-    return audioBlockBuffer->getReadPointer(numChannel);
+    return audioBlockBuffer.getReadPointer(numChannel);
 }
 
 void AudioProcessingComponent::timerCallback()

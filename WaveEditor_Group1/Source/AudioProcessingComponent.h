@@ -101,7 +101,7 @@ private:
     // AudioBuffer
     int maxNumChannels;
     int numSamples;
-    AudioBuffer<float> *audioBlockBuffer;
+    AudioBuffer<float> audioBlockBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
