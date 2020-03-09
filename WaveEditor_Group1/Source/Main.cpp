@@ -10,6 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
+#include "buttonAssets.h"
 
 //==============================================================================
 class WaveEditor_Group1Application  : public JUCEApplication
@@ -27,7 +28,12 @@ public:
     {
         // This method is where you should put your application's initialisation code..
         
-        mainWindow.reset (new MainWindow (getApplicationName(), new MainComponent(), *this));
+        splash = new SplashScreen("koolEdit", 
+            ImageFileFormat::loadFrom(buttonAssets::koolEdit2020_logo_png, (size_t)buttonAssets::koolEdit2020_logo_pngSize), 
+            true);
+        splash->deleteAfterDelay(RelativeTime::seconds(4), true);
+
+        mainWindow.reset(new MainWindow(getApplicationName(), new MainComponent(), *this));
     }
     
     void shutdown() override
@@ -76,7 +82,6 @@ private:
             setResizeLimits(400, 400, 10000, 10000);
             centreWithSize (getWidth(), getHeight());
 #endif
-            
             setVisible (true);
         }
         
@@ -101,6 +106,7 @@ private:
     };
 
     std::unique_ptr<MainWindow> mainWindow;
+    SplashScreen* splash;
 };
 
 //==============================================================================
