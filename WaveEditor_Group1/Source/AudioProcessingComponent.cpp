@@ -15,7 +15,8 @@
 AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
 maxNumChannels(2), // TODO: The channel number is fixed here
-numSamples(0),
+numAudioSamples(0),
+numBlockSamples(0),
 thumbnailCache (5),
 thumbnail (512, formatManager, thumbnailCache)
 {
@@ -37,10 +38,9 @@ void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, doubl
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     // allocate memory for JUCE audio buffer
-    numSamples = samplesPerBlockExpected;
+    numBlockSamples = samplesPerBlockExpected;
     audioBlockBuffer.setSize(maxNumChannels, samplesPerBlockExpected);
-    //audioBlockBuffer = new AudioBuffer<float>(maxNumChannels, samplesPerBlockExpected);
-    //audioBlockBuffer->clear(); // initialize the buffer with 0 values
+    audioBlockBuffer.clear();
 }
 
 void AudioProcessingComponent::releaseResources() 
@@ -59,9 +59,8 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
         for (auto c = 0; c < numChannels; ++c)
         {
             channelData = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-            numSamples = bufferToFill.buffer->getNumSamples();
-            //fillAudioSampleBuffer(channelData, c, numSamples);
-            fillAudioSampleBuffer(audioBlockBuffer.getWritePointer(c), channelData, numSamples);
+            numBlockSamples = bufferToFill.buffer->getNumSamples(); // update the sample number before fill the buffer
+            fillAudioBlockBuffer(channelData, c);
         }
 
         sendChangeMessage(); // TODO: maybe try send messages instead
@@ -72,16 +71,29 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 
 //---------------------------------AUDIO BUFFER HANDLING--------------------------------------
 
-void AudioProcessingComponent::fillAudioSampleBuffer(float* bufferWritePointer, const float* channelData, int numSamples)
+void AudioProcessingComponent::fillAudioBlockBuffer(const float* channelData, int numChannel)
 {
-    for (auto i = 0; i < numSamples; ++i)
-        bufferWritePointer[i] = channelData[i];
+    float* writePointer = audioBlockBuffer.getWritePointer(numChannel);
+    for (auto i = 0; i < numBlockSamples; ++i)
+        writePointer[i] = channelData[i];
 }
 
-const float* AudioProcessingComponent::getAudioBlockBuffer(int numChannel, int &numSamples)
+const float* AudioProcessingComponent::getAudioBlockReadPointer(int numChannel, int &numAudioSamples) // public
 {
-    numSamples = this->numSamples;
+    numAudioSamples = this->numBlockSamples;
     return audioBlockBuffer.getReadPointer(numChannel);
+}
+
+const float* AudioProcessingComponent::getAudioReadPointer(int numChannel, int &numAudioSamples) // public
+{
+    numAudioSamples = this->numAudioSamples;
+    return audioBuffer.getReadPointer(numChannel);
+}
+
+const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
+{
+    numAudioSamples = this->numAudioSamples;
+    return audioBuffer.getWritePointer(numChannel);
 }
 
 void AudioProcessingComponent::timerCallback()
@@ -168,13 +180,18 @@ void AudioProcessingComponent::setState (TransportState newState)
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
 {
-        auto* reader = formatManager.createReaderFor (file);              
+        auto* reader = formatManager.createReaderFor (file);
         if (reader != nullptr)
         {
             std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
             transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
             thumbnail.setSource (new FileInputSource (file)); 
-            readerSource.reset (newSource.release());                                                        
+            readerSource.reset (newSource.release());
+
+            // read the entire audio into audioBuffer
+            numAudioSamples = reader->lengthInSamples;
+            audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
+            reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
         }
 }
 
