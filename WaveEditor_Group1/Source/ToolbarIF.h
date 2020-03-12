@@ -20,7 +20,8 @@ public:
     ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
         state = apc.getState(); //initialize transport source state
-        apc.transportSource.addChangeListener(this); //listen to changes in the transport source
+        //apc.transportSource.addChangeListener(this); //listen to changes in the transport source
+        apc.transportState.addChangeListener(this);
 
         //-----------------------GUI Images------------------------------------
         //Play
@@ -132,7 +133,7 @@ public:
     */
     void changeListenerCallback(ChangeBroadcaster* source) override
     {
-        if (source == &apc.transportSource)
+        if (source == &apc.transportState)
         {
             if (apc.getState() == "Playing")
             {

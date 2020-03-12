@@ -11,6 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
 #include "buttonAssets.h"
+#include <iostream>
 
 //==============================================================================
 class WaveEditor_Group1Application  : public JUCEApplication
@@ -32,7 +33,6 @@ public:
             ImageFileFormat::loadFrom(buttonAssets::koolEdit2020_logo_png, (size_t)buttonAssets::koolEdit2020_logo_pngSize), 
             true);
         splash->deleteAfterDelay(RelativeTime::seconds(4), true);
-
         mainWindow.reset(new MainWindow(getApplicationName(), new MainComponent(), *this));
     }
     
