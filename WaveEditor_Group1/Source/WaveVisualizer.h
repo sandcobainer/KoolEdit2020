@@ -78,17 +78,17 @@ public:
         g.setColour (Colours::red);                                     // [8]
         
         
-        
-        apc.thumbnail.drawChannels (g,                                      // [9]
+        auto thumbnailRef = apc.getThumbnail();
+        thumbnailRef-> drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
-                                apc.getThumbnailLength(),             // end time
+                                thumbnailRef->getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
         
         
         g.setColour (Colours::green);
         
-        auto audioLength (apc.getThumbnailLength());
+        auto audioLength (thumbnailRef->getTotalLength());
         auto audioPosition (apc.getCurrentPosition());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]

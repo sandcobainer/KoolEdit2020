@@ -75,6 +75,11 @@ public:
     */
     const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
+    /*! Returns current audio thumbnail 
+    */
+    AudioThumbnail* getThumbnail();
+    
+    
     /*! Returns current audio position
     */
     const double getCurrentPosition();
@@ -82,10 +87,6 @@ public:
     /*! Returns number of audio channels in loaded file
     */
     const int getNumChannels();
-
-    /*! Returns total length of audio thumbnail
-    */
-    const double getThumbnailLength();
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state    
     ChangeBroadcaster thumbnailChange;          //!< public broadcaster for audio thumbnail
