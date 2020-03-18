@@ -56,12 +56,39 @@ public:
     /*! Called by ToolbarIF.h to get current transport state info
     */
     const String getState();
-
-    AudioTransportSource transportSource;
-    AudioFormatManager formatManager;
-    AudioThumbnailCache thumbnailCache;                  // [1]
-    AudioThumbnail thumbnail;                            // [2]
     
+    /*! Get a read pointer to one block and one channel of data
+        @param numChannel the specific channel need to be fetched
+        @param numSamples the sample size
+    */
+    const float* getAudioBlockReadPointer(int numChannel, int &numBlockSamples);
+
+    /*! Get a read pointer to one channel of audio data
+        @param numChannel the specific channel need to be fetched
+        @param numSamples the sample size
+    */
+    const float* getAudioReadPointer(int numChannel, int &numAudioSamples);
+
+    /*! Get a write pointer to one channel of audio data
+        @param numChannel the specific channel need to be fetched
+        @param numSamples the sample size
+    */
+    const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
+
+    /*! Returns current audio position
+    */
+    const double getCurrentPosition();
+
+    /*! Returns number of audio channels in loaded file
+    */
+    const int getNumChannels();
+
+    /*! Returns total length of audio thumbnail
+    */
+    const double getThumbnailLength();
+
+    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state    
+    ChangeBroadcaster thumbnailChange;          //!< public broadcaster for audio thumbnail
 
 private:
     
@@ -75,14 +102,31 @@ private:
         Stopping  //stops transport
     };
     
-    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    /*! Fill the audioSampleBuffer with new coming data.
+        @param channelData one channel of data.
+        @param numChannel the number of channel that will be filled.
+    */
+    void fillAudioBlockBuffer(const float* channelData, int numChannel);
 
-    TransportState state;
-    double currentPosition;
-    
     /*! Internal function to change the transport state
     */
     void setState(TransportState state);
+
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    AudioTransportSource transportSource;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;
+    AudioThumbnail thumbnail;
+
+    TransportState state;       //!< enum
+    double currentPosition;
     
+    // AudioBuffer
+    int maxNumChannels;
+    int numBlockSamples;
+    juce::int64 numAudioSamples;
+    AudioBuffer<float> audioBlockBuffer;
+    AudioBuffer<float> audioBuffer;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

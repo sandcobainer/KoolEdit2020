@@ -18,6 +18,9 @@
         <FILE id="yu5tyA" name="WaveVisualizer.h" compile="0" resource="0"
               file="Source/WaveVisualizer.h"/>
       </GROUP>
+      <FILE id="JzjW8T" name="buttonAssets.cpp" compile="1" resource="0"
+            file="Source/buttonAssets.cpp"/>
+      <FILE id="ODQBxB" name="buttonAssets.h" compile="0" resource="0" file="Source/buttonAssets.h"/>
       <FILE id="xP2Hny" name="AudioProcessingComponent.cpp" compile="1" resource="0"
             file="Source/AudioProcessingComponent.cpp"/>
       <FILE id="Q3HFvT" name="AudioProcessingComponent.h" compile="0" resource="0"
@@ -51,6 +54,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../../../../../../Desktop/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2019 targetFolder="Builds/VisualStudio2019">
@@ -72,6 +76,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../../../../../../Desktop/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2019>
     <CLION targetFolder="Builds/CLion">
@@ -89,6 +94,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../../../../../../Desktop/JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../../../../../../Desktop/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../../JUCE/modules"/>
       </MODULEPATHS>
     </CLION>
   </EXPORTFORMATS>
@@ -101,6 +107,7 @@
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

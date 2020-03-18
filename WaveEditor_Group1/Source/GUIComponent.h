@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "ToolbarIF.h"
+#include "SpectrogramVisualizer.h"
 #include "WaveVisualizer.h"
 
 //==============================================================================
@@ -30,6 +31,7 @@ private:
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
     ToolbarIF *tlbar;
+    SpectrogramVisualizer *specvis;
     WaveVisualizer *wavViewer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
