@@ -101,14 +101,14 @@ void AudioProcessingComponent::timerCallback()
     thumbnailChange.sendChangeMessage();
 }
 
+AudioThumbnail* AudioProcessingComponent::getThumbnail()
+{
+    return &thumbnail;
+}
+
 const int AudioProcessingComponent::getNumChannels()
 {
     return thumbnail.getNumChannels();
-}
-
-const double AudioProcessingComponent::getThumbnailLength()
-{
-    return thumbnail.getTotalLength();
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
