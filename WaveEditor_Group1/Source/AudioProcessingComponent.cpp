@@ -98,7 +98,17 @@ const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int 
 
 void AudioProcessingComponent::timerCallback()
 {
-    thumbnail.sendChangeMessage();
+    thumbnailChange.sendChangeMessage();
+}
+
+AudioThumbnail* AudioProcessingComponent::getThumbnail()
+{
+    return &thumbnail;
+}
+
+const int AudioProcessingComponent::getNumChannels()
+{
+    return thumbnail.getNumChannels();
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
@@ -115,7 +125,7 @@ void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source
     }
     if (source == &thumbnail)
     {
-        thumbnail.sendChangeMessage();
+        thumbnailChange.sendChangeMessage();
     }
 }
 
@@ -164,7 +174,7 @@ void AudioProcessingComponent::setState (TransportState newState)
                 break;
             
             case Pausing:
-                currentPosition = transportSource.getCurrentPosition();
+                currentPosition = getCurrentPosition();
                 transportSource.stop();
                 break;
 
@@ -173,8 +183,13 @@ void AudioProcessingComponent::setState (TransportState newState)
         }
         
         state = newState;
-        transportSource.sendChangeMessage(); //send notification of state change
+        transportState.sendChangeMessage(); //send notification of state change
     }
+}
+
+const double AudioProcessingComponent::getCurrentPosition()
+{
+    return transportSource.getCurrentPosition();
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------

@@ -22,7 +22,7 @@ public:
     WaveVisualizer(AudioProcessingComponent& c):apc(c)
     {
         state = apc.getState(); //initialize transport source state
-        apc.thumbnail.addChangeListener(this); //listen to changes in the transport source
+        apc.thumbnailChange.addChangeListener(this); //listen to changes in the transport source
         
     }
 
@@ -40,7 +40,7 @@ public:
         */
         Rectangle<int> thumbnailBounds (0,0, getWidth(), getHeight());
         
-        if (apc.thumbnail.getNumChannels() == 0)
+        if (apc.getNumChannels() == 0)
             paintIfNoFileLoaded (g, thumbnailBounds);
         else
             paintIfFileLoaded (g, thumbnailBounds);
@@ -56,14 +56,11 @@ public:
     
     void changeListenerCallback(ChangeBroadcaster* source) override
     {
-        if (source == &apc.thumbnail)
+        if (source == &apc.thumbnailChange)
         {
             repaint();
         }
     }
-    
-   
-            
     
     void paintIfNoFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
@@ -80,17 +77,19 @@ public:
         
         g.setColour (Colours::red);                                     // [8]
         
-        apc.thumbnail.drawChannels (g,                                      // [9]
+        
+        auto thumbnailRef = apc.getThumbnail();
+        thumbnailRef-> drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
-                                apc.thumbnail.getTotalLength(),             // end time
+                                thumbnailRef->getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
         
         
         g.setColour (Colours::green);
         
-        auto audioLength (apc.thumbnail.getTotalLength());
-        auto audioPosition (apc.transportSource.getCurrentPosition());
+        auto audioLength (thumbnailRef->getTotalLength());
+        auto audioPosition (apc.getCurrentPosition());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,

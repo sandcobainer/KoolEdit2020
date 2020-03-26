@@ -75,11 +75,21 @@ public:
     */
     const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
-    AudioTransportSource transportSource;
-    AudioFormatManager formatManager;
-    AudioThumbnailCache thumbnailCache;                  // [1]
-    AudioThumbnail thumbnail;                            // [2]
+    /*! Returns current audio thumbnail 
+    */
+    AudioThumbnail* getThumbnail();
     
+    
+    /*! Returns current audio position
+    */
+    const double getCurrentPosition();
+
+    /*! Returns number of audio channels in loaded file
+    */
+    const int getNumChannels();
+
+    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state    
+    ChangeBroadcaster thumbnailChange;          //!< public broadcaster for audio thumbnail
 
 private:
     
@@ -99,15 +109,18 @@ private:
     */
     void fillAudioBlockBuffer(const float* channelData, int numChannel);
 
-    //AudioFormatManager formatManager;
-    std::unique_ptr<AudioFormatReaderSource> readerSource;
-
-    TransportState state;
-    double currentPosition;
-    
     /*! Internal function to change the transport state
     */
     void setState(TransportState state);
+
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    AudioTransportSource transportSource;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;
+    AudioThumbnail thumbnail;
+
+    TransportState state;       //!< enum
+    double currentPosition;
     
     // AudioBuffer
     int maxNumChannels;

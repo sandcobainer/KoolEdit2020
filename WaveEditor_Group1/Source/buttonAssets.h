@@ -13,6 +13,9 @@ namespace buttonAssets
     extern const char*  ffwd_over_png;
     const int           ffwd_over_pngSize = 1246;
 
+    extern const char*  koolEdit2020_logo_png;
+    const int           koolEdit2020_logo_pngSize = 133624;
+
     extern const char*  loop_down_png;
     const int           loop_down_pngSize = 1247;
 

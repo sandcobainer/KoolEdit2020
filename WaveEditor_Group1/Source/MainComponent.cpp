@@ -20,7 +20,6 @@ MainComponent::MainComponent()
     addAndMakeVisible(gui);
     addAndMakeVisible(cap);
     setSize(700, 700);
-
 }
 
 MainComponent::~MainComponent()
