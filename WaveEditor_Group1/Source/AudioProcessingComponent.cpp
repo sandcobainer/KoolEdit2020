@@ -111,11 +111,6 @@ const int AudioProcessingComponent::getNumChannels()
     return thumbnail.getNumChannels();
 }
 
-void AudioProcessingComponent::timerCallback()
-{
-    thumbnail.sendChangeMessage();
-}
-
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source) 
 {
