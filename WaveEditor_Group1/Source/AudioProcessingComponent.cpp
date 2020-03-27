@@ -14,20 +14,13 @@
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
-maxNumChannels(2), // TODO: The channel number is fixed here
-numAudioSamples(0),
+numChannels(0),
 numBlockSamples(0),
-thumbnailCache (5),
-thumbnail (512, formatManager, thumbnailCache)
+sampleRate(0.f),
+numAudioSamples(0),
+currentPosition(0)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
     formatManager.registerBasicFormats();
-    transportSource.addChangeListener (this);
-    currentPosition = 0.0;
-    
-    setAudioChannels (0, maxNumChannels);
-    startTimer (40);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -36,36 +29,58 @@ AudioProcessingComponent::~AudioProcessingComponent()  {
 
 void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate) 
 {
-    transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     // allocate memory for JUCE audio buffer
     numBlockSamples = samplesPerBlockExpected;
-    audioBlockBuffer.setSize(maxNumChannels, samplesPerBlockExpected);
+    audioBlockBuffer.setSize(numChannels, samplesPerBlockExpected);
     audioBlockBuffer.clear();
+    // TODO: the playback speed is not correct if the device sample rate doesn't match the audio sample rate
+    //auto audioDeviceSetup = deviceManager.getAudioDeviceSetup();
+    //audioDeviceSetup.sampleRate = sampleRate;
+    //deviceManager.setAudioDeviceSetup(audioDeviceSetup, true);
 }
 
 void AudioProcessingComponent::releaseResources() 
 {
-    transportSource.releaseResources();
 }
 
 void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) 
 {
-    transportSource.getNextAudioBlock(bufferToFill);
-    int numChannels = 0;
-    const float* channelData = nullptr;
-    if (readerSource.get() != nullptr)
+    if (state == Playing)
     {
-        numChannels = bufferToFill.buffer->getNumChannels();
-        for (auto c = 0; c < numChannels; ++c)
-        {
-            channelData = bufferToFill.buffer->getReadPointer (0, bufferToFill.startSample);
-            numBlockSamples = bufferToFill.buffer->getNumSamples(); // update the sample number before fill the buffer
-            fillAudioBlockBuffer(channelData, c);
-        }
+        auto numInputChannels = audioBuffer.getNumChannels();
+        auto numOutputChannels = bufferToFill.buffer->getNumChannels();
 
-        sendChangeMessage(); // TODO: maybe try send messages instead
-    } else {
-        bufferToFill.clearActiveBufferRegion();
+        auto outputSamplesRemaining = bufferToFill.numSamples;
+        auto outputSamplesOffset = bufferToFill.startSample;
+
+        while (outputSamplesRemaining > 0)
+        {
+            auto bufferSamplesRemaining = audioBuffer.getNumSamples() - currentPosition;
+            auto samplesThisTime = jmin (outputSamplesRemaining, bufferSamplesRemaining);
+
+            for (auto channel = 0; channel < numOutputChannels; ++channel)
+            {
+                bufferToFill.buffer->copyFrom (channel,
+                                               outputSamplesOffset,
+                                               audioBuffer,
+                                               channel % numInputChannels,
+                                               currentPosition,
+                                               samplesThisTime);
+                audioBlockBuffer.copyFrom(0, 0, *(bufferToFill.buffer), 0, 0, samplesThisTime);
+                blockReady.sendChangeMessage();
+            }
+
+            outputSamplesRemaining -= samplesThisTime;
+            outputSamplesOffset += samplesThisTime;
+            currentPosition += samplesThisTime;
+
+            if (currentPosition == audioBuffer.getNumSamples())
+            {
+                bufferToFill.clearActiveBufferRegion();
+                stopRequested();
+                break;
+            }
+        }
     }
 }
 
@@ -96,40 +111,23 @@ const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int 
     return audioBuffer.getWritePointer(numChannel);
 }
 
-void AudioProcessingComponent::timerCallback()
+double AudioProcessingComponent::getSampleRate()
 {
-    thumbnailChange.sendChangeMessage();
+    return sampleRate;
 }
 
-AudioThumbnail* AudioProcessingComponent::getThumbnail()
+int AudioProcessingComponent::getNumChannels()
 {
-    return &thumbnail;
+    return audioBuffer.getNumChannels();
 }
 
-const int AudioProcessingComponent::getNumChannels()
+const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 {
-    return thumbnail.getNumChannels();
+    return &audioBuffer;
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
-void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source) 
-{
-    if (source == &transportSource)
-    {
-        if (transportSource.isPlaying())
-            setState(Playing);
-        else if ((state == Stopping) || (state == Playing))
-            setState(Stopped);
-        else if (state == Pausing)
-            setState(Paused);
-    }
-    if (source == &thumbnail)
-    {
-        thumbnailChange.sendChangeMessage();
-    }
-}
-
-const String AudioProcessingComponent::getState () 
+const String AudioProcessingComponent::getState ()
 {
     String sState;
     switch (state)
@@ -152,62 +150,77 @@ void AudioProcessingComponent::setState (TransportState newState)
 {
     if (state != newState)
     {
-
         switch (newState)
         {
             case Stopped:                           
-                currentPosition = 0.0;
-                transportSource.setPosition(0.0);
+                currentPosition = 0;
+                state = Stopped;
                 break;
                 
             case Starting:                          
-                transportSource.setPosition(currentPosition);
-                transportSource.start();
+                prepareToPlay(512, sampleRate); // TODO: block size is hard coded here
+                state = Playing;
                 break;
                 
-            case Playing: //THIS CASE IS MAINLY FOR GUI/TOOLBARIF INFORMATION ***KEEP***                          
+            case Playing: //THIS CASE IS MAINLY FOR GUI/TOOLBARIF INFORMATION ***KEEP***
+                state = Playing;
                 break;
                 
             case Stopping:                          
-                currentPosition = 0.0;
-                transportSource.stop();
+                releaseResources();
+                currentPosition = 0;
+                state = Stopped;
                 break;
             
             case Pausing:
-                currentPosition = getCurrentPosition();
-                transportSource.stop();
+                releaseResources();
+                state = Paused;
                 break;
 
             case Paused: //THIS CASE IS MAINLY FOR GUI/TOOLBARIF INFORMATION ***KEEP***
+                state = Paused;
                 break;
         }
         
-        state = newState;
         transportState.sendChangeMessage(); //send notification of state change
     }
 }
 
-const double AudioProcessingComponent::getCurrentPosition()
+double AudioProcessingComponent::getCurrentPositionInS()
 {
-    return transportSource.getCurrentPosition();
+    return currentPosition / sampleRate;
+}
+
+void AudioProcessingComponent::setPositionInS(double newPosition)
+{
+    currentPosition = (int) (newPosition * sampleRate);
+}
+
+double AudioProcessingComponent::getLengthInS()
+{
+    return numAudioSamples / sampleRate;
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
 {
-        auto* reader = formatManager.createReaderFor (file);
-        if (reader != nullptr)
-        {
-            std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
-            transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
-            thumbnail.setSource (new FileInputSource (file)); 
-            readerSource.reset (newSource.release());
+    shutdownAudio();
+    auto* reader = formatManager.createReaderFor (file);
+    if (reader != nullptr)
+    {
+        // read the entire audio into audioBuffer
+        numAudioSamples = reader->lengthInSamples;
+        audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
+        reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
 
-            // read the entire audio into audioBuffer
-            numAudioSamples = reader->lengthInSamples;
-            audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
-            reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
-        }
+        // set audio channels
+        numChannels = reader->numChannels;
+        setAudioChannels(0, reader->numChannels);
+
+        // set sample rate
+        sampleRate = reader->sampleRate;
+        fileLoaded.sendChangeMessage();
+    }
 }
 
 void AudioProcessingComponent::playRequested()

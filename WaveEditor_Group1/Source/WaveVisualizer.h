@@ -16,14 +16,21 @@
 //==============================================================================
 /*
 */
-class WaveVisualizer    : public Component, public ChangeListener
+class WaveVisualizer    : public Component,
+                          //public ActionListener,
+                          public ChangeListener,
+                          private Timer
 {
 public:
-    WaveVisualizer(AudioProcessingComponent& c):apc(c)
+    WaveVisualizer(AudioProcessingComponent& c):
+    apc(c),
+    thumbnailCache (5),
+    thumbnail (512, formatManager, thumbnailCache)
     {
         state = apc.getState(); //initialize transport source state
-        apc.thumbnailChange.addChangeListener(this); //listen to changes in the transport source
-        
+        //apc.addActionListener(this);
+        apc.fileLoaded.addChangeListener(this);
+        startTimerHz (60); // refresh the visualizer 30 times per second
     }
 
     ~WaveVisualizer()
@@ -32,12 +39,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        /* This demo code just fills the component's background and
-           draws some placeholder text to get you started.
-
-           You should replace everything in this method with your own
-           drawing code..
-        */
+        // TODO: Change this size later
         Rectangle<int> thumbnailBounds (0,0, getWidth(), getHeight());
         
         if (apc.getNumChannels() == 0)
@@ -48,20 +50,21 @@ public:
 
     void resized() override
     {
-        // This method is where you should set the bounds of any child
-        // components that your component contains..
-        
+    }
 
-    }
-    
-    void changeListenerCallback(ChangeBroadcaster* source) override
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (source == &apc.thumbnailChange)
-        {
-            repaint();
-        }
+        auto audioBuffer = apc.getAudioBuffer();
+        thumbnail.reset(apc.getNumChannels(), apc.getSampleRate(), audioBuffer->getNumSamples());
+        thumbnail.addBlock(0, *audioBuffer, 0, audioBuffer->getNumSamples());
+        repaint();
     }
-    
+
+    void timerCallback() override
+    {
+        repaint();
+    }
+
     void paintIfNoFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
         g.setColour (Colours::darkgrey);
@@ -72,33 +75,99 @@ public:
     
     void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
-        g.setColour (Colours::white);
+        g.setColour (Colours::grey);
         g.fillRect (thumbnailBounds);
         
-        g.setColour (Colours::red);                                     // [8]
-        
-        
-        auto thumbnailRef = apc.getThumbnail();
-        thumbnailRef-> drawChannels (g,                                 // [9]
+        g.setColour (Colours::white);                                     // [8]
+        thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
-                                thumbnailRef->getTotalLength(),             // end time
+                                thumbnail.getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
         
         
-        g.setColour (Colours::green);
-        
-        auto audioLength (thumbnailRef->getTotalLength());
-        auto audioPosition (apc.getCurrentPosition());
+        g.setColour (Colours::red);
+        auto audioLength (thumbnail.getTotalLength());
+        auto audioPosition (apc.getCurrentPositionInS());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
     }
 
+    void mouseDown (const MouseEvent &event)
+    {
+        float ratio = float(event.getMouseDownX()) / float(getWidth());
+        apc.setPositionInS(ratio * apc.getLengthInS());
+        repaint();
+    }
+
 private:
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;
+    AudioThumbnail thumbnail;
     String state;                                               //transport state (from apc.getState() function)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
+};
+
+class TrackVisualizer: public Component,
+                       public Slider::Listener
+{
+public:
+    TrackVisualizer (AudioProcessingComponent &c):
+    waveVis(c),
+    waveVisualizerWidthRatio(1.f),
+    waveVisualizerWidth(0),
+    isInitialized(false)
+    {
+        incDecSlider.addListener(this);
+        incDecSlider.setRange(0.1, 10.0, 0.1);
+        incDecSlider.setValue(1.0);
+        addAndMakeVisible(incDecSlider);
+        addAndMakeVisible(trackViewport);
+    }
+    ~TrackVisualizer()
+    {
+    }
+
+    void paint (Graphics& g) override
+    {
+    }
+
+    void resized() override
+    {
+        if (!isInitialized)
+        {
+            waveVisualizerWidth = getWidth();
+            isInitialized = true;
+        }
+        waveVisualizerWidthRatio = incDecSlider.getValue();
+        waveVis.setBounds(0, 0, waveVisualizerWidthRatio*waveVisualizerWidth, getHeight()-50);
+        trackViewport.setViewedComponent(&waveVis);
+        trackViewport.setBounds(0, 50, getWidth(), getHeight()-50);
+        incDecSlider.setBounds(getWidth()-100, 0, 100, 50);
+    }
+
+    void sliderValueChanged(Slider* slider) override
+    {
+        resized();
+    }
+
+    void changeWaveVisualizerWidthRatio(float ratio)
+    {
+        waveVisualizerWidthRatio = ratio;
+        resized();
+    }
+private:
+    Viewport trackViewport;
+    WaveVisualizer waveVis;
+    Slider incDecSlider { Slider::IncDecButtons, Slider::TextBoxBelow };
+
+    float waveVisualizerWidthRatio;
+    int waveVisualizerWidth;
+    bool isInitialized;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackVisualizer)
 };
