@@ -103,9 +103,9 @@ int AudioProcessingComponent::getNumChannels()
     return audioBuffer.getNumChannels();
 }
 
-AudioBuffer<float> AudioProcessingComponent::getAudioBuffer()
+const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 {
-    return audioBuffer;
+    return &audioBuffer;
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------

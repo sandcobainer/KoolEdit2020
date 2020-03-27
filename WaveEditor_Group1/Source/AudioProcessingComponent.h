@@ -79,7 +79,7 @@ public:
 
     /*! Returns a copy of the current audio buffer
     */
-    AudioBuffer<float> getAudioBuffer();
+    const AudioBuffer<float>* getAudioBuffer();
 
     /*! Returns the number of channels of audio data
     */
