@@ -67,7 +67,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
                                                currentPosition,
                                                samplesThisTime);
                 audioBlockBuffer.copyFrom(0, 0, *(bufferToFill.buffer), 0, 0, samplesThisTime);
-                sendChangeMessage(); // TODO: maybe try send messages instead
+                blockReady.sendChangeMessage();
             }
 
             outputSamplesRemaining -= samplesThisTime;

@@ -28,7 +28,7 @@ public:
         startTimerHz (60);
         setSize (700, 500);
         setBounds(0, 100, 700, 500);
-        apc.addChangeListener(this);
+        apc.blockReady.addChangeListener(this);
     }
 
     ~SpectrogramVisualizer() override

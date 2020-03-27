@@ -16,8 +16,7 @@
 //==============================================================================
 /*
 */
-class AudioProcessingComponent    : public AudioAppComponent,
-                                    public ChangeBroadcaster
+class AudioProcessingComponent    : public AudioAppComponent
 {
 public:
     AudioProcessingComponent();
@@ -104,6 +103,7 @@ public:
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
     ChangeBroadcaster fileLoaded;               //!< public broadcaster for the transport state
+    ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
 
 private:
     
