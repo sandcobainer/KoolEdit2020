@@ -63,12 +63,9 @@ public:
     {
         if (message == MSG_FILE_LOADED)
         {
-            int numAudioSamples;
             auto audioBuffer = apc.getAudioBuffer();
             thumbnail.reset(apc.getNumChannels(), apc.getSampleRate(), audioBuffer->getNumSamples());
-
             thumbnail.addBlock(0, *audioBuffer, 0, audioBuffer->getNumSamples());
-
             repaint();
         }
     }
