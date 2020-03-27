@@ -22,8 +22,7 @@ numBlockSamples(0)
     // initialise any special settings that your component needs.
     formatManager.registerBasicFormats();
     transportSource.addChangeListener (this);
-    currentPosition = 0.0;
-    
+
     setAudioChannels (0, maxNumChannels);
 }
 
@@ -149,12 +148,11 @@ void AudioProcessingComponent::setState (TransportState newState)
         switch (newState)
         {
             case Stopped:                           
-                currentPosition = 0.0;
                 transportSource.setPosition(0.0);
                 break;
                 
             case Starting:                          
-                transportSource.setPosition(currentPosition);
+                transportSource.setPosition(transportSource.getCurrentPosition());
                 transportSource.start();
                 break;
                 
@@ -162,12 +160,11 @@ void AudioProcessingComponent::setState (TransportState newState)
                 break;
                 
             case Stopping:                          
-                currentPosition = 0.0;
+                transportSource.setPosition(0.0);
                 transportSource.stop();
                 break;
             
             case Pausing:
-                currentPosition = getCurrentPosition();
                 transportSource.stop();
                 break;
 

@@ -135,8 +135,7 @@ private:
     AudioFormatManager formatManager;
 
     TransportState state;       //!< enum
-    double currentPosition;
-    
+
     // AudioBuffer
     int maxNumChannels;
     int numBlockSamples;
