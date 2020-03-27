@@ -37,12 +37,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        /* This demo code just fills the component's background and
-           draws some placeholder text to get you started.
-
-           You should replace everything in this method with your own
-           drawing code..
-        */
+        // TODO: Change this size later
         Rectangle<int> thumbnailBounds (0,0, getWidth(), getHeight());
         
         if (apc.getNumChannels() == 0)
@@ -53,10 +48,6 @@ public:
 
     void resized() override
     {
-        // This method is where you should set the bounds of any child
-        // components that your component contains..
-        
-
     }
 
     void actionListenerCallback (const String &message) override
@@ -89,8 +80,6 @@ public:
         g.fillRect (thumbnailBounds);
         
         g.setColour (Colours::red);                                     // [8]
-        
-        //auto thumbnailRef = apc.getThumbnail();
         thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
@@ -99,7 +88,6 @@ public:
         
         
         g.setColour (Colours::green);
-        
         auto audioLength (thumbnail.getTotalLength());
         auto audioPosition (apc.getCurrentPosition());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
@@ -116,4 +104,64 @@ private:
     AudioThumbnail thumbnail;
     String state;                                               //transport state (from apc.getState() function)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
+};
+
+class TrackVisualizer: public Component,
+                       public Slider::Listener
+{
+public:
+    TrackVisualizer (AudioProcessingComponent &c):
+    waveVis(c),
+    waveVisualizerWidthRatio(1.f),
+    waveVisualizerWidth(0),
+    isInitialized(false)
+    {
+        incDecSlider.addListener(this);
+        incDecSlider.setRange(0.1, 10.0, 0.1);
+        incDecSlider.setValue(1.0);
+        addAndMakeVisible(incDecSlider);
+        addAndMakeVisible(trackViewport);
+    }
+    ~TrackVisualizer()
+    {
+    }
+
+    void paint (Graphics& g) override
+    {
+    }
+
+    void resized() override
+    {
+        if (!isInitialized)
+        {
+            waveVisualizerWidth = getWidth();
+            isInitialized = true;
+        }
+        waveVisualizerWidthRatio = incDecSlider.getValue();
+        waveVis.setBounds(0, 0, waveVisualizerWidthRatio*waveVisualizerWidth, getHeight()-50);
+        trackViewport.setViewedComponent(&waveVis);
+        trackViewport.setBounds(0, 50, getWidth(), getHeight()-50);
+        incDecSlider.setBounds(getWidth()-100, 0, 100, 50);
+    }
+
+    void sliderValueChanged(Slider* slider) override
+    {
+        resized();
+    }
+
+    void changeWaveVisualizerWidthRatio(float ratio)
+    {
+        waveVisualizerWidthRatio = ratio;
+        resized();
+    }
+private:
+    Viewport trackViewport;
+    WaveVisualizer waveVis;
+    Slider incDecSlider { Slider::IncDecButtons, Slider::TextBoxBelow };
+
+    float waveVisualizerWidthRatio;
+    int waveVisualizerWidth;
+    bool isInitialized;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackVisualizer)
 };

@@ -32,7 +32,8 @@ private:
     AudioProcessingComponent& apc;
     ToolbarIF *tlbar;
     SpectrogramVisualizer *specvis;
-    WaveVisualizer *wavViewer;
+    //WaveVisualizer *wavViewer;
+    TrackVisualizer *trackVis;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIComponent)
 };
