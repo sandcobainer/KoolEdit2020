@@ -12,14 +12,12 @@
 
 #include <JuceHeader.h>
 #include "WaveAudio.h"
-#include "actionMessages.h"
 
 //==============================================================================
 /*
 */
 class AudioProcessingComponent    : public AudioAppComponent,
-                                    public ChangeBroadcaster,
-                                    public ActionBroadcaster
+                                    public ChangeBroadcaster
 {
 public:
     AudioProcessingComponent();
@@ -105,6 +103,7 @@ public:
     //const int getNumChannels();
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
+    ChangeBroadcaster fileLoaded;               //!< public broadcaster for the transport state
 
 private:
     

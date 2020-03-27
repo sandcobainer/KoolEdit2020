@@ -17,7 +17,8 @@
 /*
 */
 class WaveVisualizer    : public Component,
-                          public ActionListener,
+                          //public ActionListener,
+                          public ChangeListener,
                           private Timer
 {
 public:
@@ -27,7 +28,8 @@ public:
     thumbnail (512, formatManager, thumbnailCache)
     {
         state = apc.getState(); //initialize transport source state
-        apc.addActionListener(this);
+        //apc.addActionListener(this);
+        apc.fileLoaded.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
     }
 
@@ -50,15 +52,12 @@ public:
     {
     }
 
-    void actionListenerCallback (const String &message) override
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (message == MSG_FILE_LOADED)
-        {
-            auto audioBuffer = apc.getAudioBuffer();
-            thumbnail.reset(apc.getNumChannels(), apc.getSampleRate(), audioBuffer->getNumSamples());
-            thumbnail.addBlock(0, *audioBuffer, 0, audioBuffer->getNumSamples());
-            repaint();
-        }
+        auto audioBuffer = apc.getAudioBuffer();
+        thumbnail.reset(apc.getNumChannels(), apc.getSampleRate(), audioBuffer->getNumSamples());
+        thumbnail.addBlock(0, *audioBuffer, 0, audioBuffer->getNumSamples());
+        repaint();
     }
 
     void timerCallback() override

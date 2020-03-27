@@ -219,7 +219,7 @@ void AudioProcessingComponent::loadFile(File file)
 
         // set sample rate
         sampleRate = reader->sampleRate;
-        sendActionMessage(MSG_FILE_LOADED);
+        fileLoaded.sendChangeMessage();
     }
 }
 
