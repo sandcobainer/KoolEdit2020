@@ -19,7 +19,6 @@
 */
 class AudioProcessingComponent    : public AudioAppComponent,
                                     public ChangeBroadcaster,
-                                    public ChangeListener,
                                     public ActionBroadcaster
 {
 public:
@@ -29,7 +28,6 @@ public:
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
-    void changeListenerCallback (ChangeBroadcaster* source) override;
 
     /*! Call from any of GUI components(WaveVisualizer.h) to get FormatManager of APC
      */
@@ -89,18 +87,18 @@ public:
     */
     double getSampleRate();
 
-    /*! Returns current audio position
+    /*! Returns current audio position in seconds
     */
-    const double getCurrentPosition();
+    double getCurrentPositionInS();
 
-    /*! Sets the audio position
+    /*! Sets the audio position in seconds
         @param newPosition the new playback position in seconds
     */
-    void setPosition(double newPosition);
+    void setPositionInS(double newPosition);
 
     /*! Returns the stream's length in seconds.
     */
-    double getLengthInSeconds();
+    double getLengthInS();
 
     /*! Returns number of audio channels in loaded file
     */
@@ -130,19 +128,21 @@ private:
     */
     void setState(TransportState state);
 
-    std::unique_ptr<AudioFormatReaderSource> readerSource;
-    AudioTransportSource transportSource;
     AudioFormatManager formatManager;
 
     TransportState state;       //!< enum
 
-    // AudioBuffer
+    //// AudioBuffer
+    // buffer definitions
+    AudioBuffer<float> audioBlockBuffer;
+    AudioBuffer<float> audioBuffer;
+    // meta info
     unsigned int numChannels;
     int numBlockSamples;
     double sampleRate;
     juce::int64 numAudioSamples;
-    AudioBuffer<float> audioBlockBuffer;
-    AudioBuffer<float> audioBuffer;
+    // position info (the unit is always in sample)
+    int currentPosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

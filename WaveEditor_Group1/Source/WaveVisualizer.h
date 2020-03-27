@@ -89,7 +89,7 @@ public:
         
         g.setColour (Colours::red);
         auto audioLength (thumbnail.getTotalLength());
-        auto audioPosition (apc.getCurrentPosition());
+        auto audioPosition (apc.getCurrentPositionInS());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
@@ -99,7 +99,7 @@ public:
     void mouseDown (const MouseEvent &event)
     {
         float ratio = float(event.getMouseDownX()) / float(getWidth());
-        apc.setPosition(ratio * apc.getLengthInSeconds());
+        apc.setPositionInS(ratio * apc.getLengthInS());
         repaint();
     }
 
