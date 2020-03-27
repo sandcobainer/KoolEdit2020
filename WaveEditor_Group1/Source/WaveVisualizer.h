@@ -96,6 +96,13 @@ public:
                     thumbnailBounds.getBottom(), 2.0f);
     }
 
+    void mouseDown (const MouseEvent &event)
+    {
+        float ratio = float(event.getMouseDownX()) / float(getWidth());
+        apc.setPosition(ratio * apc.getLengthInSeconds());
+        repaint();
+    }
+
 private:
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;

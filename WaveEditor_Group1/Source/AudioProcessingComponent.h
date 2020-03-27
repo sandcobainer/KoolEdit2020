@@ -93,6 +93,15 @@ public:
     */
     const double getCurrentPosition();
 
+    /*! Sets the audio position
+        @param newPosition the new playback position in seconds
+    */
+    void setPosition(double newPosition);
+
+    /*! Returns the stream's length in seconds.
+    */
+    double getLengthInSeconds();
+
     /*! Returns number of audio channels in loaded file
     */
     //const int getNumChannels();

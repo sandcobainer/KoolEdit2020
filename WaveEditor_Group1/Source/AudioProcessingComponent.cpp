@@ -185,6 +185,16 @@ const double AudioProcessingComponent::getCurrentPosition()
     return transportSource.getCurrentPosition();
 }
 
+void AudioProcessingComponent::setPosition(double newPosition)
+{
+    transportSource.setPosition(newPosition);
+}
+
+double AudioProcessingComponent::getLengthInSeconds()
+{
+    return transportSource.getLengthInSeconds();
+}
+
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
 {
