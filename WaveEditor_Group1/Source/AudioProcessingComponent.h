@@ -77,7 +77,7 @@ public:
     */
     const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
-    /*! Returns a copy of the current audio buffer
+    /*! Returns a pointer to the current audio buffer
     */
     const AudioBuffer<float>* getAudioBuffer();
 
