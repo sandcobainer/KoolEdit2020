@@ -28,7 +28,7 @@ public:
     {
         state = apc.getState(); //initialize transport source state
         apc.addActionListener(this);
-        startTimerHz (30); // refresh the visualizer 30 times per second
+        startTimerHz (60); // refresh the visualizer 30 times per second
     }
 
     ~WaveVisualizer()
@@ -76,10 +76,10 @@ public:
     
     void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
-        g.setColour (Colours::white);
+        g.setColour (Colours::grey);
         g.fillRect (thumbnailBounds);
         
-        g.setColour (Colours::red);                                     // [8]
+        g.setColour (Colours::white);                                     // [8]
         thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
@@ -87,7 +87,7 @@ public:
                                 1.0f);                                  // vertical zoom
         
         
-        g.setColour (Colours::green);
+        g.setColour (Colours::red);
         auto audioLength (thumbnail.getTotalLength());
         auto audioPosition (apc.getCurrentPosition());
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
