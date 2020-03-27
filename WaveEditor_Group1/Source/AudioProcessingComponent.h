@@ -59,19 +59,19 @@ public:
     */
     const String getState();
     
-    /*! Get a read pointer to one block and one channel of data
+    /*! Returns a read pointer to one block and one channel of data
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
     const float* getAudioBlockReadPointer(int numChannel, int &numBlockSamples);
 
-    /*! Get a read pointer to one channel of audio data
+    /*! Returns a read pointer to one channel of audio data
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
     const float* getAudioReadPointer(int numChannel, int &numAudioSamples);
 
-    /*! Get a write pointer to one channel of audio data
+    /*! Returns a write pointer to one channel of audio data
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
