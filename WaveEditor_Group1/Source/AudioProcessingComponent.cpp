@@ -14,16 +14,14 @@
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
-maxNumChannels(2), // TODO: The channel number is fixed here
-numAudioSamples(0),
-numBlockSamples(0)
+numChannels(0),
+numBlockSamples(0),
+numAudioSamples(0)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     formatManager.registerBasicFormats();
     transportSource.addChangeListener (this);
-
-    setAudioChannels (0, maxNumChannels);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -35,7 +33,7 @@ void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, doubl
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     // allocate memory for JUCE audio buffer
     numBlockSamples = samplesPerBlockExpected;
-    audioBlockBuffer.setSize(maxNumChannels, samplesPerBlockExpected);
+    audioBlockBuffer.setSize(numChannels, samplesPerBlockExpected);
     audioBlockBuffer.clear();
 }
 
@@ -206,6 +204,10 @@ void AudioProcessingComponent::loadFile(File file)
             numAudioSamples = reader->lengthInSamples;
             audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
             reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
+
+            // set audio channels
+            numChannels = reader->numChannels;
+            setAudioChannels(0, reader->numChannels);
 
             // set sample rate
             sampleRate = reader->sampleRate;

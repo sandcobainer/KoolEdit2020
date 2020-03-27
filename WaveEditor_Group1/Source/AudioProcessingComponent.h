@@ -137,7 +137,7 @@ private:
     TransportState state;       //!< enum
 
     // AudioBuffer
-    int maxNumChannels;
+    unsigned int numChannels;
     int numBlockSamples;
     double sampleRate;
     juce::int64 numAudioSamples;
