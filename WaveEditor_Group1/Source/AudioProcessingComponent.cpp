@@ -16,9 +16,7 @@ AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
 maxNumChannels(2), // TODO: The channel number is fixed here
 numAudioSamples(0),
-numBlockSamples(0),
-thumbnailCache (5),
-thumbnail (512, formatManager, thumbnailCache)
+numBlockSamples(0)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -27,7 +25,6 @@ thumbnail (512, formatManager, thumbnailCache)
     currentPosition = 0.0;
     
     setAudioChannels (0, maxNumChannels);
-    startTimer (40);
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -96,19 +93,19 @@ const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int 
     return audioBuffer.getWritePointer(numChannel);
 }
 
-void AudioProcessingComponent::timerCallback()
+double AudioProcessingComponent::getSampleRate()
 {
-    thumbnailChange.sendChangeMessage();
+    return sampleRate;
 }
 
-AudioThumbnail* AudioProcessingComponent::getThumbnail()
+int AudioProcessingComponent::getNumChannels()
 {
-    return &thumbnail;
+    return audioBuffer.getNumChannels();
 }
 
-const int AudioProcessingComponent::getNumChannels()
+AudioBuffer<float> AudioProcessingComponent::getAudioBuffer()
 {
-    return thumbnail.getNumChannels();
+    return audioBuffer;
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
@@ -122,10 +119,6 @@ void AudioProcessingComponent::changeListenerCallback (ChangeBroadcaster* source
             setState(Stopped);
         else if (state == Pausing)
             setState(Paused);
-    }
-    if (source == &thumbnail)
-    {
-        thumbnailChange.sendChangeMessage();
     }
 }
 
@@ -200,13 +193,17 @@ void AudioProcessingComponent::loadFile(File file)
         {
             std::unique_ptr<AudioFormatReaderSource> newSource (new AudioFormatReaderSource (reader, true)); 
             transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
-            thumbnail.setSource (new FileInputSource (file)); 
             readerSource.reset (newSource.release());
 
             // read the entire audio into audioBuffer
             numAudioSamples = reader->lengthInSamples;
             audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
             reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
+
+            // set sample rate
+            sampleRate = reader->sampleRate;
+
+            sendActionMessage(MSG_FILE_LOADED);
         }
 }
 

@@ -12,11 +12,15 @@
 
 #include <JuceHeader.h>
 #include "WaveAudio.h"
+#include "actionMessages.h"
 
 //==============================================================================
 /*
 */
-class AudioProcessingComponent    : public AudioAppComponent, public ChangeBroadcaster, public ChangeListener, private Timer
+class AudioProcessingComponent    : public AudioAppComponent,
+                                    public ChangeBroadcaster,
+                                    public ChangeListener,
+                                    public ActionBroadcaster
 {
 public:
     AudioProcessingComponent();
@@ -26,9 +30,7 @@ public:
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
     void changeListenerCallback (ChangeBroadcaster* source) override;
-    void timerCallback() override;
-    
-    
+
     /*! Call from any of GUI components(WaveVisualizer.h) to get FormatManager of APC
      */
     
@@ -75,21 +77,27 @@ public:
     */
     const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
-    /*! Returns current audio thumbnail 
+    /*! Returns a copy of the current audio buffer
     */
-    AudioThumbnail* getThumbnail();
-    
-    
+    AudioBuffer<float> getAudioBuffer();
+
+    /*! Returns the number of channels of audio data
+    */
+    int getNumChannels();
+
+    /*! Returns the current sample rate
+    */
+    double getSampleRate();
+
     /*! Returns current audio position
     */
     const double getCurrentPosition();
 
     /*! Returns number of audio channels in loaded file
     */
-    const int getNumChannels();
+    //const int getNumChannels();
 
-    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state    
-    ChangeBroadcaster thumbnailChange;          //!< public broadcaster for audio thumbnail
+    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
 
 private:
     
@@ -116,8 +124,6 @@ private:
     std::unique_ptr<AudioFormatReaderSource> readerSource;
     AudioTransportSource transportSource;
     AudioFormatManager formatManager;
-    AudioThumbnailCache thumbnailCache;
-    AudioThumbnail thumbnail;
 
     TransportState state;       //!< enum
     double currentPosition;
@@ -125,6 +131,7 @@ private:
     // AudioBuffer
     int maxNumChannels;
     int numBlockSamples;
+    double sampleRate;
     juce::int64 numAudioSamples;
     AudioBuffer<float> audioBlockBuffer;
     AudioBuffer<float> audioBuffer;
