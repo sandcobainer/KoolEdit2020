@@ -64,6 +64,16 @@ public:
         iLoopOver = ImageFileFormat::loadFrom(buttonAssets::loop_over_png, (size_t)buttonAssets::loop_over_pngSize);
         iLoopDown = ImageFileFormat::loadFrom(buttonAssets::loop_down_png, (size_t)buttonAssets::loop_down_pngSize);
 
+        //Cursor
+        iCursorNormal = ImageFileFormat::loadFrom(buttonAssets::cursor_normal_png, (size_t)buttonAssets::cursor_normal_pngSize);
+        iCursorOver = ImageFileFormat::loadFrom(buttonAssets::cursor_over_png, (size_t)buttonAssets::cursor_over_pngSize);
+        iCursorDown = ImageFileFormat::loadFrom(buttonAssets::cursor_down_png, (size_t)buttonAssets::cursor_down_pngSize);
+
+        //Select
+        iSelectNormal = ImageFileFormat::loadFrom(buttonAssets::select_normal_png, (size_t)buttonAssets::select_normal_pngSize);
+        iSelectOver = ImageFileFormat::loadFrom(buttonAssets::select_over_png, (size_t)buttonAssets::select_over_pngSize);
+        iSelectDown = ImageFileFormat::loadFrom(buttonAssets::select_down_png, (size_t)buttonAssets::select_down_pngSize);
+
         //-----------------------GUI Buttons-----------------------------------
         //Open
         addAndMakeVisible(&openButton);
@@ -120,6 +130,20 @@ public:
         loopButton.setState(Button::ButtonState::buttonNormal);
         loopButton.onClick = [this] {loopButtonClicked(); };
         loopButton.setEnabled(false);
+
+        //Cursor
+        addAndMakeVisible(&cursorButton);
+        cursorButton.setImages(false, true, true, iCursorNormal, 1.0, Colours::transparentWhite, iCursorOver, 1.0, Colours::transparentWhite, iCursorDown, 1.0, Colours::transparentWhite);
+        cursorButton.setState(Button::ButtonState::buttonNormal);
+        cursorButton.onClick = [this] {cursorButtonClicked(); };
+        cursorButton.setEnabled(false);
+
+        //Select
+        addAndMakeVisible(&selectButton);
+        selectButton.setImages(false, true, true, iSelectNormal, 1.0, Colours::transparentWhite, iSelectOver, 1.0, Colours::transparentWhite, iSelectDown, 1.0, Colours::transparentWhite);
+        selectButton.setState(Button::ButtonState::buttonNormal);
+        selectButton.onClick = [this] {selectButtonClicked(); };
+        selectButton.setEnabled(false);
     }
 
     ~ToolbarIF()
@@ -190,6 +214,8 @@ public:
         rewindButton.setBounds(199, 10, 30, 30);
         ffwdButton.setBounds(232, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
+        cursorButton.setBounds(2, 50, 30, 30);
+        selectButton.setBounds(35, 50, 30, 30);
     }
     //==========================================================================
 
@@ -213,6 +239,8 @@ private:
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
         loopButton.setEnabled(true);
+        cursorButton.setEnabled(true);
+        selectButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -276,6 +304,16 @@ private:
 
     }
 
+    void cursorButtonClicked()
+    {
+
+    }
+
+    void selectButtonClicked()
+    {
+
+    }
+
     //==========================================================================
     //Additional variables
     //Buttons
@@ -287,6 +325,8 @@ private:
     ImageButton ffwdButton;
     ImageButton rewindButton;
     ImageButton loopButton;
+    ImageButton cursorButton;
+    ImageButton selectButton;
 
     //Image objects
     Image iPlayNormal;
@@ -320,6 +360,14 @@ private:
     Image iLoopNormal;
     Image iLoopOver;
     Image iLoopDown;
+
+    Image iCursorNormal;
+    Image iCursorOver;
+    Image iCursorDown;
+
+    Image iSelectNormal;
+    Image iSelectOver;
+    Image iSelectDown;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;

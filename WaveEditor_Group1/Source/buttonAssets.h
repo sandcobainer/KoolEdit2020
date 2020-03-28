@@ -4,6 +4,15 @@
 
 namespace buttonAssets
 {
+    extern const char*  cursor_down_png;
+    const int           cursor_down_pngSize = 986;
+
+    extern const char*  cursor_normal_png;
+    const int           cursor_normal_pngSize = 977;
+
+    extern const char*  cursor_over_png;
+    const int           cursor_over_pngSize = 991;
+
     extern const char*  ffwd_down_png;
     const int           ffwd_down_pngSize = 1666;
 
@@ -23,7 +32,7 @@ namespace buttonAssets
     const int           loop_normal_pngSize = 1211;
 
     extern const char*  loop_over_png;
-    const int           loop_over_pngSize = 1233;
+    const int           loop_over_pngSize = 1086;
 
     extern const char*  openfile_down_png;
     const int           openfile_down_pngSize = 1084;
@@ -69,6 +78,15 @@ namespace buttonAssets
 
     extern const char*  savefile_over_png;
     const int           savefile_over_pngSize = 1210;
+
+    extern const char*  select_down_png;
+    const int           select_down_pngSize = 1306;
+
+    extern const char*  select_normal_png;
+    const int           select_normal_pngSize = 1288;
+
+    extern const char*  select_over_png;
+    const int           select_over_pngSize = 1328;
 
     extern const char*  stop_down_png;
     const int           stop_down_pngSize = 810;
