@@ -17,7 +17,7 @@
 class ToolbarIF : public Component, public ChangeListener
 {
 public:
-    ToolbarIF(AudioProcessingComponent& c) : apc(c)
+    ToolbarIF(AudioProcessingComponent& c) : apc(c), selectOn(false)
     {
         state = apc.getState(); //initialize transport source state
         //apc.transportSource.addChangeListener(this); //listen to changes in the transport source
@@ -68,11 +68,6 @@ public:
         iCursorNormal = ImageFileFormat::loadFrom(buttonAssets::cursor_normal_png, (size_t)buttonAssets::cursor_normal_pngSize);
         iCursorOver = ImageFileFormat::loadFrom(buttonAssets::cursor_over_png, (size_t)buttonAssets::cursor_over_pngSize);
         iCursorDown = ImageFileFormat::loadFrom(buttonAssets::cursor_down_png, (size_t)buttonAssets::cursor_down_pngSize);
-
-        //Select
-        iSelectNormal = ImageFileFormat::loadFrom(buttonAssets::select_normal_png, (size_t)buttonAssets::select_normal_pngSize);
-        iSelectOver = ImageFileFormat::loadFrom(buttonAssets::select_over_png, (size_t)buttonAssets::select_over_pngSize);
-        iSelectDown = ImageFileFormat::loadFrom(buttonAssets::select_down_png, (size_t)buttonAssets::select_down_pngSize);
 
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -137,13 +132,6 @@ public:
         cursorButton.setState(Button::ButtonState::buttonNormal);
         cursorButton.onClick = [this] {cursorButtonClicked(); };
         cursorButton.setEnabled(false);
-
-        //Select
-        addAndMakeVisible(&selectButton);
-        selectButton.setImages(false, true, true, iSelectNormal, 1.0, Colours::transparentWhite, iSelectOver, 1.0, Colours::transparentWhite, iSelectDown, 1.0, Colours::transparentWhite);
-        selectButton.setState(Button::ButtonState::buttonNormal);
-        selectButton.onClick = [this] {selectButtonClicked(); };
-        selectButton.setEnabled(false);
     }
 
     ~ToolbarIF()
@@ -201,6 +189,10 @@ public:
             stopButton.setState(Button::ButtonState::buttonDown);
         else if (state == "Paused")
             pauseButton.setState(Button::ButtonState::buttonDown);
+
+        //paint cursor button
+       if (selectOn == true)
+            cursorButton.setState(Button::ButtonState::buttonDown);
     }
 
     void resized() override
@@ -215,7 +207,14 @@ public:
         ffwdButton.setBounds(232, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
         cursorButton.setBounds(2, 50, 30, 30);
-        selectButton.setBounds(35, 50, 30, 30);
+    }
+
+    /*! To be called by WaveVisualizer
+    \   when enabling selection mode
+    */
+    bool isSelectOn()
+    {
+        return selectOn;
     }
     //==========================================================================
 
@@ -240,7 +239,6 @@ private:
         rewindButton.setEnabled(true);
         loopButton.setEnabled(true);
         cursorButton.setEnabled(true);
-        selectButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -306,12 +304,19 @@ private:
 
     void cursorButtonClicked()
     {
-
-    }
-
-    void selectButtonClicked()
-    {
-
+        //change mouse cursor look and toggle selection state
+        if (selectOn == false)
+        {
+            cursorButton.setState(Button::ButtonState::buttonDown);
+            MouseCursor::MouseCursor(MouseCursor::IBeamCursor);
+            selectOn = true;
+        }
+        else if (selectOn == true)
+        {
+            cursorButton.setState(Button::ButtonState::buttonNormal);
+            MouseCursor::MouseCursor(MouseCursor::NormalCursor);
+            selectOn = false;
+        }
     }
 
     //==========================================================================
@@ -326,7 +331,6 @@ private:
     ImageButton rewindButton;
     ImageButton loopButton;
     ImageButton cursorButton;
-    ImageButton selectButton;
 
     //Image objects
     Image iPlayNormal;
@@ -365,9 +369,8 @@ private:
     Image iCursorOver;
     Image iCursorDown;
 
-    Image iSelectNormal;
-    Image iSelectOver;
-    Image iSelectDown;
+
+    bool selectOn;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;

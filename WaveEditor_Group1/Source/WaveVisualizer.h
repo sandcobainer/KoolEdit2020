@@ -102,6 +102,11 @@ public:
         repaint();
     }
 
+    void mouseDrag(const MouseEvent& event)
+    {
+
+    }
+
 private:
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
