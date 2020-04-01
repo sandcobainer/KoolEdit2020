@@ -75,7 +75,7 @@ public:
     
     void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
-        g.setColour (Colours::grey);
+        g.setColour (Colours::dimgrey);
         g.fillRect (thumbnailBounds);
         
         g.setColour (Colours::white);                                     // [8]
@@ -105,6 +105,18 @@ public:
     void mouseDrag(const MouseEvent& event)
     {
 
+    }
+
+    void mouseEnter(const MouseEvent& event)
+    {
+        //automatically change the cursor to IBeam style when over the waveform
+        setMouseCursor(juce::MouseCursor::IBeamCursor);
+    }
+
+    void mouseExit(const MouseEvent& event)
+    {
+        //automatically change the cursor to back to normal when not over the waveform
+        setMouseCursor(juce::MouseCursor::NormalCursor);
     }
 
 private:
