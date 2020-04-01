@@ -25,7 +25,8 @@ public:
     WaveVisualizer(AudioProcessingComponent& c):
     apc(c),
     thumbnailCache (5),
-    thumbnail (512, formatManager, thumbnailCache)
+    thumbnail (512, formatManager, thumbnailCache),
+    selectionBounds(0,0,0,0)
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
@@ -75,9 +76,11 @@ public:
     
     void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
+        //track background
         g.setColour (Colours::dimgrey);
         g.fillRect (thumbnailBounds);
         
+        //waveform
         g.setColour (Colours::white);                                     // [8]
         thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
@@ -85,7 +88,7 @@ public:
                                 thumbnail.getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
         
-        
+        //play marker
         g.setColour (Colours::red);
         auto audioLength (thumbnail.getTotalLength());
         auto audioPosition (apc.getCurrentPositionInS());
@@ -93,18 +96,32 @@ public:
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
+
+        //selection
+        g.setColour(Colours::palevioletred);
+        g.setOpacity(0.4);
+        g.fillRect(selectionBounds);
     }
 
     void mouseDown (const MouseEvent &event)
     {
         float ratio = float(event.getMouseDownX()) / float(getWidth());
         apc.setPositionInS(ratio * apc.getLengthInS());
+
+        selectionBounds.setBounds(0, 0, 0, 0);
         repaint();
     }
 
     void mouseDrag(const MouseEvent& event)
     {
+        float start = float(event.getMouseDownX());
+        float end = float(event.getDistanceFromDragStartX());
 
+        if (end > 0)
+            selectionBounds.setBounds(start, 0, end, getHeight());
+        else if (end < 0)
+            selectionBounds.setBounds(start+end, 0, -end, getHeight());
+        repaint();
     }
 
     void mouseEnter(const MouseEvent& event)
@@ -125,9 +142,13 @@ private:
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
-    String state;                                               //transport state (from apc.getState() function)
+    String state;                                //transport state (from apc.getState() function)
+
+    Rectangle<int> selectionBounds;              //rectangle drawn when user clicks and drags
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
+
+//-----------------------------------------------------------------------------------------------
 
 class TrackVisualizer: public Component,
                        public Slider::Listener
