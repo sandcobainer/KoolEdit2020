@@ -76,11 +76,11 @@ public:
     
     void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
     {
-        //track background
+        //-----------------------------track background--------------------------------------
         g.setColour (Colours::dimgrey);
         g.fillRect (thumbnailBounds);
         
-        //waveform
+        //---------------------------------waveform------------------------------------------
         g.setColour (Colours::white);                                     // [8]
         thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
@@ -88,7 +88,7 @@ public:
                                 thumbnail.getTotalLength(),             // end time
                                 1.0f);                                  // vertical zoom
         
-        //play marker
+        //-------------------------------play marker----------------------------------------
         g.setColour (Colours::red);
         auto audioLength (thumbnail.getTotalLength());
         auto audioPosition (apc.getCurrentPositionInS());
@@ -97,16 +97,29 @@ public:
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
 
-        //selection
+        //--------------------------------selection----------------------------------------
+        auto audioStart(apc.getMarkerInS("start"));
+        auto audioEnd(apc.getMarkerInS("end"));
+        
+        auto selectStart = (audioStart / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
+        auto selectEnd = (audioEnd / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
+
+        selectionBounds.setBounds(selectStart, 0, selectEnd - selectStart, getHeight());
+
         g.setColour(Colours::palevioletred);
-        g.setOpacity(0.4);
+        //if there is no actual selection (start = beginning, end = track end) AND loop is off, don't paint
+        if (audioStart == 0 && audioEnd == apc.getLengthInS())
+            g.setOpacity(0);
+        else
+            g.setOpacity(0.4);
         g.fillRect(selectionBounds);
     }
 
     void mouseDown (const MouseEvent &event)
     {
         float ratio = float(event.getMouseDownX()) / float(getWidth());
-        apc.setPositionInS(ratio * apc.getLengthInS());
+        apc.setPositionInS(ratio * apc.getLengthInS()); //change transport position in APC
+        apc.setMarkersInS(0, apc.getLengthInS()); //reset markers (negate selection)
 
         selectionBounds.setBounds(0, 0, 0, 0);
         repaint();
@@ -114,13 +127,27 @@ public:
 
     void mouseDrag(const MouseEvent& event)
     {
+        //coordinates from mouse event
         float start = float(event.getMouseDownX());
-        float end = float(event.getDistanceFromDragStartX());
+        float dragDist = float(event.getDistanceFromDragStartX());
 
-        if (end > 0)
-            selectionBounds.setBounds(start, 0, end, getHeight());
-        else if (end < 0)
-            selectionBounds.setBounds(start+end, 0, -end, getHeight());
+        //start and end positions in seconds
+        float startPos = 0;
+        float endPos = 0;
+
+        if (dragDist > 0)
+        {
+            startPos = (start / getWidth()) * apc.getLengthInS();
+            endPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
+        }
+        else if (dragDist < 0)
+        {
+            startPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
+            endPos = (start / getWidth()) * apc.getLengthInS();
+        }
+
+        apc.setMarkersInS(startPos, endPos);
+        apc.setPositionInS(startPos);
         repaint();
     }
 
@@ -144,7 +171,7 @@ private:
     AudioThumbnail thumbnail;
     String state;                                //transport state (from apc.getState() function)
 
-    Rectangle<int> selectionBounds;              //rectangle drawn when user clicks and drags
+    Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
 
@@ -186,6 +213,8 @@ public:
         trackViewport.setViewedComponent(&waveVis);
         trackViewport.setBounds(0, 50, getWidth(), getHeight()-50);
         incDecSlider.setBounds(getWidth()-100, 0, 100, 50);
+
+        waveVis.repaint();
     }
 
     void sliderValueChanged(Slider* slider) override

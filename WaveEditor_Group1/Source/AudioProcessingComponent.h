@@ -97,6 +97,17 @@ public:
     */
     double getLengthInS();
 
+    /*! Sets start/stop markers on the track
+        @param startMarker is the start of the selection
+        @param endMarker is the end of the selection
+    */
+    void setMarkersInS(double startMarker, double endMarker);
+
+    /*! Returns requested marker position in seconds
+        @oaram marker <start> or <end> specifies which marker
+    */
+    const double getMarkerInS(String marker);
+
     /*! Returns number of audio channels in loaded file
     */
     //const int getNumChannels();
@@ -142,6 +153,8 @@ private:
     juce::int64 numAudioSamples;
     // position info (the unit is always in sample)
     int currentPosition;
+    int startPos;
+    int endPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
