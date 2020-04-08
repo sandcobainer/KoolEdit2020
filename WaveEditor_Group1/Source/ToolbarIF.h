@@ -143,6 +143,10 @@ public:
                 pauseButton.setState(Button::ButtonState::buttonNormal);
                 stopButton.setEnabled(true);
                 stopButton.setState(Button::ButtonState::buttonNormal);
+                ffwdButton.setEnabled(false);
+                ffwdButton.setState(Button::ButtonState::buttonNormal);
+                rewindButton.setEnabled(false);
+                rewindButton.setState(Button::ButtonState::buttonNormal);
             }
             else if (apc.getState() == "Stopped")
             {
@@ -152,6 +156,10 @@ public:
                 pauseButton.setState(Button::ButtonState::buttonNormal);
                 playButton.setEnabled(true);
                 playButton.setState(Button::ButtonState::buttonNormal);
+                ffwdButton.setEnabled(true);
+                ffwdButton.setState(Button::ButtonState::buttonNormal);
+                rewindButton.setEnabled(true);
+                rewindButton.setState(Button::ButtonState::buttonNormal);
             }
             else if (apc.getState() == "Paused")
             {
@@ -161,6 +169,10 @@ public:
                 playButton.setState(Button::ButtonState::buttonNormal);
                 stopButton.setEnabled(true);
                 stopButton.setState(Button::ButtonState::buttonNormal);
+                ffwdButton.setEnabled(true);
+                ffwdButton.setState(Button::ButtonState::buttonNormal);
+                rewindButton.setEnabled(true);
+                rewindButton.setState(Button::ButtonState::buttonNormal);
             }
         }
     }
@@ -191,6 +203,7 @@ public:
         ffwdButton.setBounds(232, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
     }
+
     //==========================================================================
 
 private:
@@ -263,19 +276,25 @@ private:
 
     void ffwdButtonClicked()
     {
-
+        //move play marker to the end of the track
+        //negate any selection that existed
+        apc.setPositionInS(apc.getLengthInS());
+        apc.setMarkersInS(0, apc.getLengthInS());
     }
 
     void rewindButtonClicked()
     {
-
+        //move play marker to the beginning of the track
+        //negate any selection that existed
+        apc.setPositionInS(0);
+        apc.setMarkersInS(0, apc.getLengthInS());
     }
 
     void loopButtonClicked()
     {
 
     }
-
+    
     //==========================================================================
     //Additional variables
     //Buttons
