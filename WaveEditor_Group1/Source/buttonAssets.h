@@ -34,6 +34,15 @@ namespace buttonAssets
     extern const char*  loop_over_png;
     const int           loop_over_pngSize = 1086;
 
+    extern const char*  mute_down_png;
+    const int           mute_down_pngSize = 1196;
+
+    extern const char*  mute_normal_png;
+    const int           mute_normal_pngSize = 1491;
+
+    extern const char*  mute_over_png;
+    const int           mute_over_pngSize = 1475;
+
     extern const char*  openfile_down_png;
     const int           openfile_down_pngSize = 1084;
 

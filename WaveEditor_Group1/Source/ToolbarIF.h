@@ -22,6 +22,7 @@ public:
         state = apc.getState(); //initialize transport source state
         //apc.transportSource.addChangeListener(this); //listen to changes in the transport source
         apc.transportState.addChangeListener(this);
+        buttonHelp = new TooltipWindow(this);
 
         //-----------------------GUI Images------------------------------------
         //Play
@@ -63,6 +64,11 @@ public:
         iLoopNormal = ImageFileFormat::loadFrom(buttonAssets::loop_normal_png, (size_t)buttonAssets::loop_normal_pngSize);
         iLoopOver = ImageFileFormat::loadFrom(buttonAssets::loop_over_png, (size_t)buttonAssets::loop_over_pngSize);
         iLoopDown = ImageFileFormat::loadFrom(buttonAssets::loop_down_png, (size_t)buttonAssets::loop_down_pngSize);
+
+        //Mute
+        iMuteNormal = ImageFileFormat::loadFrom(buttonAssets::mute_normal_png, (size_t)buttonAssets::mute_normal_pngSize);
+        iMuteOver = ImageFileFormat::loadFrom(buttonAssets::mute_over_png, (size_t)buttonAssets::mute_over_pngSize);
+        iMuteDown = ImageFileFormat::loadFrom(buttonAssets::mute_down_png, (size_t)buttonAssets::mute_down_pngSize);
 
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -120,6 +126,15 @@ public:
         loopButton.setState(Button::ButtonState::buttonNormal);
         loopButton.onClick = [this] {loopButtonClicked(); };
         loopButton.setEnabled(false);
+        
+
+        //Mute
+        addAndMakeVisible(&muteButton);
+        muteButton.setImages(false, true, true, iMuteNormal, 1.0, Colours::transparentWhite, iMuteOver, 1.0, Colours::transparentWhite, iMuteDown, 1.0, Colours::transparentWhite);
+        muteButton.setState(Button::ButtonState::buttonNormal);
+        muteButton.onClick = [this] {muteButtonClicked(); };
+        muteButton.setEnabled(false);
+        muteButton.setTooltip("mute (or right click->Mute)");
     }
 
     ~ToolbarIF()
@@ -147,6 +162,7 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(false);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -160,6 +176,7 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(true);
             }
             else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
@@ -173,6 +190,7 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(true);
             }
         }
     }
@@ -202,6 +220,7 @@ public:
         rewindButton.setBounds(199, 10, 30, 30);
         ffwdButton.setBounds(232, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
+        muteButton.setBounds(2, 43, 30, 30);
     }
 
     //==========================================================================
@@ -226,6 +245,7 @@ private:
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
         loopButton.setEnabled(true);
+        muteButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -244,6 +264,7 @@ private:
         stopButton.setEnabled(true);
         ffwdButton.setEnabled(false);
         rewindButton.setEnabled(false);
+        muteButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -258,6 +279,7 @@ private:
         stopButton.setEnabled(true);
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
+        muteButton.setEnabled(true);
     }
 
     void stopButtonClicked()
@@ -272,6 +294,7 @@ private:
         pauseButton.setEnabled(false);
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
+        muteButton.setEnabled(true);
     }
 
     void ffwdButtonClicked()
@@ -297,6 +320,11 @@ private:
     {
 
     }
+
+    void muteButtonClicked()
+    {
+        apc.muteMarkedRegion();
+    }
     
     //==========================================================================
     //Additional variables
@@ -309,6 +337,7 @@ private:
     ImageButton ffwdButton;
     ImageButton rewindButton;
     ImageButton loopButton;
+    ImageButton muteButton;
 
     //Image objects
     Image iPlayNormal;
@@ -342,6 +371,12 @@ private:
     Image iLoopNormal;
     Image iLoopOver;
     Image iLoopDown;
+
+    Image iMuteNormal;
+    Image iMuteOver;
+    Image iMuteDown;
+
+    TooltipWindow* buttonHelp;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
