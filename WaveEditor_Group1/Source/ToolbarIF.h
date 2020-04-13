@@ -77,6 +77,7 @@ public:
         openButton.setState(Button::ButtonState::buttonNormal);
         openButton.onClick = [this] {openButtonClicked(); };
         openButton.setEnabled(true);
+        openButton.setTooltip("open");
 
         //Save
         addAndMakeVisible(&saveButton);
@@ -84,6 +85,7 @@ public:
         saveButton.setState(Button::ButtonState::buttonNormal);
         saveButton.onClick = [this] {saveButtonClicked(); };
         saveButton.setEnabled(false);
+        saveButton.setTooltip("save");
 
         //Play
         addAndMakeVisible(&playButton);
@@ -91,6 +93,7 @@ public:
         playButton.setState(Button::ButtonState::buttonNormal);
         playButton.onClick = [this] {playButtonClicked(); };
         playButton.setEnabled(false);
+        playButton.setTooltip("play");
 
         //Pause
         addAndMakeVisible(&pauseButton);
@@ -98,6 +101,7 @@ public:
         pauseButton.setState(Button::ButtonState::buttonNormal);
         pauseButton.onClick = [this] {pauseButtonClicked(); };
         pauseButton.setEnabled(false);
+        pauseButton.setTooltip("pause");
 
         //Stop
         addAndMakeVisible(&stopButton);
@@ -105,6 +109,7 @@ public:
         stopButton.setState(Button::ButtonState::buttonNormal);
         stopButton.onClick = [this] {stopButtonClicked(); };
         stopButton.setEnabled(false);
+        stopButton.setTooltip("stop");
 
         //Fastforward
         addAndMakeVisible(&ffwdButton);
@@ -112,6 +117,7 @@ public:
         ffwdButton.setState(Button::ButtonState::buttonNormal);
         ffwdButton.onClick = [this] {ffwdButtonClicked(); };
         ffwdButton.setEnabled(false);
+        ffwdButton.setTooltip("skip to end");
 
         //Rewind
         addAndMakeVisible(&rewindButton);
@@ -119,6 +125,7 @@ public:
         rewindButton.setState(Button::ButtonState::buttonNormal);
         rewindButton.onClick = [this] {rewindButtonClicked(); };
         rewindButton.setEnabled(false);
+        rewindButton.setTooltip("skip to start");
 
         //Loop
         addAndMakeVisible(&loopButton);
@@ -126,7 +133,7 @@ public:
         loopButton.setState(Button::ButtonState::buttonNormal);
         loopButton.onClick = [this] {loopButtonClicked(); };
         loopButton.setEnabled(false);
-        
+        loopButton.setTooltip("loop");
 
         //Mute
         addAndMakeVisible(&muteButton);
