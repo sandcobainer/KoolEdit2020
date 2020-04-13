@@ -222,7 +222,7 @@ void AudioProcessingComponent::muteMarkedRegion ()
         for (int i=markerStartPos; i<=markerEndPos; i++)
             writePointer[i] = 0;
     }
-    fileLoaded.sendChangeMessage();
+    audioBufferChanged.sendChangeMessage();
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
@@ -243,7 +243,7 @@ void AudioProcessingComponent::loadFile(File file)
 
         // set sample rate
         sampleRate = reader->sampleRate;
-        fileLoaded.sendChangeMessage();
+        audioBufferChanged.sendChangeMessage();
 
         //initialize markers
         markerStartPos = 0;

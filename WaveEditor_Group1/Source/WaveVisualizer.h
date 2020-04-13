@@ -29,7 +29,7 @@ public:
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
-        apc.fileLoaded.addChangeListener(this);
+        apc.audioBufferChanged.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
         popupMenu.addItem("Mute", [this](){apc.muteMarkedRegion();});
     }

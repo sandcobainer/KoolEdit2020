@@ -121,7 +121,7 @@ public:
     void muteMarkedRegion();
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
-    ChangeBroadcaster fileLoaded;               //!< public broadcaster for the transport state
+    ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
 
 private:
