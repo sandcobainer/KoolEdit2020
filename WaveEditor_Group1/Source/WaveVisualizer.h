@@ -32,6 +32,7 @@ public:
         //apc.addActionListener(this);
         apc.fileLoaded.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
+        popupMenu.addItem("Mute", [this](){apc.muteMarkedRegion();});
     }
 
     ~WaveVisualizer()
@@ -117,12 +118,20 @@ public:
 
     void mouseDown (const MouseEvent &event)
     {
-        float ratio = float(event.getMouseDownX()) / float(getWidth());
-        apc.setPositionInS(ratio * apc.getLengthInS()); //change transport position in APC
-        apc.setMarkersInS(0, apc.getLengthInS()); //reset markers (negate selection)
+        if (event.mods.isLeftButtonDown())
+        {
+            //popupMenu.clear();
+            float ratio = float(event.getMouseDownX()) / float(getWidth());
+            apc.setPositionInS(ratio * apc.getLengthInS()); //change transport position in APC
+            apc.setMarkersInS(0, apc.getLengthInS()); //reset markers (negate selection)
 
-        selectionBounds.setBounds(0, 0, 0, 0);
-        repaint();
+            selectionBounds.setBounds(0, 0, 0, 0);
+            repaint();
+        }
+        else if (event.mods.isRightButtonDown())
+        {
+            popupMenu.show();
+        }
     }
 
     void mouseDrag(const MouseEvent& event)
@@ -170,6 +179,7 @@ private:
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
     String state;                                //transport state (from apc.getState() function)
+    PopupMenu popupMenu;
 
     Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)

@@ -107,7 +107,7 @@ const float* AudioProcessingComponent::getAudioReadPointer(int numChannel, int &
     return audioBuffer.getReadPointer(numChannel);
 }
 
-const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
+float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
 {
     numAudioSamples = this->numAudioSamples;
     return audioBuffer.getWritePointer(numChannel);
@@ -219,6 +219,19 @@ const double AudioProcessingComponent::getMarkerInS(String marker)
         return -1;
 }
 
+void AudioProcessingComponent::muteMarkedRegion ()
+{
+    int numSamples = 0;
+    float *writePointer = nullptr;
+    for (int c=0; c<numChannels; c++)
+    {
+        writePointer = getAudioWritePointer(c, numSamples);
+
+        for (int i=startPos; i<=endPos; i++)
+            writePointer[i] = 0;
+    }
+    fileLoaded.sendChangeMessage();
+}
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)

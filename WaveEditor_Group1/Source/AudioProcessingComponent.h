@@ -70,7 +70,7 @@ public:
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
-    const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
+    float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
     /*! Returns a pointer to the current audio buffer
     */
@@ -107,6 +107,10 @@ public:
         @oaram marker <start> or <end> specifies which marker
     */
     const double getMarkerInS(String marker);
+
+    /*! Set all the samples in the selected region to be zero
+    */
+    void muteMarkedRegion();
 
     /*! Returns number of audio channels in loaded file
     */
