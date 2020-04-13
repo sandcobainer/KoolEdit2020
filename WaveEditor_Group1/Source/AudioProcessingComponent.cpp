@@ -18,9 +18,9 @@ numChannels(0),
 numBlockSamples(0),
 sampleRate(0.f),
 numAudioSamples(0),
-currentPosition(0),
-startPos(0),
-endPos(0)
+currentPos(0),
+markerStartPos(0),
+markerEndPos(0)
 {
     formatManager.registerBasicFormats();
 }
@@ -57,7 +57,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 
         while (outputSamplesRemaining > 0)
         {
-            auto bufferSamplesRemaining = endPos - currentPosition;
+            auto bufferSamplesRemaining = markerEndPos - currentPos;
             auto samplesThisTime = jmin (outputSamplesRemaining, bufferSamplesRemaining);
 
             for (auto channel = 0; channel < numOutputChannels; ++channel)
@@ -66,7 +66,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
                                                outputSamplesOffset,
                                                audioBuffer,
                                                channel % numInputChannels,
-                                               currentPosition,
+                                               currentPos,
                                                samplesThisTime);
                 audioBlockBuffer.copyFrom(0, 0, *(bufferToFill.buffer), 0, 0, samplesThisTime);
                 blockReady.sendChangeMessage();
@@ -74,9 +74,9 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 
             outputSamplesRemaining -= samplesThisTime;
             outputSamplesOffset += samplesThisTime;
-            currentPosition += samplesThisTime;
+            currentPos += samplesThisTime;
 
-            if (currentPosition == endPos)
+            if (currentPos == markerEndPos)
             {
                 bufferToFill.clearActiveBufferRegion();
                 stopRequested();
@@ -107,7 +107,7 @@ const float* AudioProcessingComponent::getAudioReadPointer(int numChannel, int &
     return audioBuffer.getReadPointer(numChannel);
 }
 
-const float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
+float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
 {
     numAudioSamples = this->numAudioSamples;
     return audioBuffer.getWritePointer(numChannel);
@@ -129,23 +129,9 @@ const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
-const String AudioProcessingComponent::getState ()
+AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {
-    String sState;
-    switch (state)
-    {
-        case Stopped:
-            sState = "Stopped";
-            break;
-        case Playing:
-            sState = "Playing";
-            break;
-        case Paused:
-            sState = "Paused";
-            break;
-    }
-    
-    return sState;
+    return state;
 }
 
 void AudioProcessingComponent::setState (TransportState newState)
@@ -155,7 +141,7 @@ void AudioProcessingComponent::setState (TransportState newState)
         switch (newState)
         {
             case Stopped:                           
-                currentPosition = startPos;
+                currentPos = markerStartPos;
                 state = Stopped;
                 break;
                 
@@ -170,7 +156,7 @@ void AudioProcessingComponent::setState (TransportState newState)
                 
             case Stopping:                          
                 releaseResources();
-                currentPosition = startPos;
+                currentPos = markerStartPos;
                 state = Stopped;
                 break;
             
@@ -188,14 +174,36 @@ void AudioProcessingComponent::setState (TransportState newState)
     }
 }
 
-double AudioProcessingComponent::getCurrentPositionInS()
+void AudioProcessingComponent::setPositionInS(AudioProcessingComponent::PositionType positionType, double newPosition)
 {
-    return currentPosition / sampleRate;
+    switch (positionType)
+    {
+        case Cursor:
+            currentPos = static_cast<int>(newPosition * sampleRate);
+            break;
+        case MarkerStart:
+            markerStartPos = static_cast<int>(newPosition * sampleRate);
+            break;
+        case MarkerEnd:
+            markerEndPos = static_cast<int>(newPosition * sampleRate);
+            break;
+    }
 }
 
-void AudioProcessingComponent::setPositionInS(double newPosition)
+double AudioProcessingComponent::getPositionInS(AudioProcessingComponent::PositionType positionType)
 {
-    currentPosition = (int) (newPosition * sampleRate);
+
+    switch (positionType)
+    {
+        case Cursor:
+            return currentPos / sampleRate;
+        case MarkerStart:
+            return markerStartPos / sampleRate;
+        case MarkerEnd:
+            return markerEndPos / sampleRate;
+        default:
+            return 0.0f;
+    }
 }
 
 double AudioProcessingComponent::getLengthInS()
@@ -203,22 +211,19 @@ double AudioProcessingComponent::getLengthInS()
     return numAudioSamples / sampleRate;
 }
 
-void AudioProcessingComponent::setMarkersInS(double startMarker, double endMarker)
+void AudioProcessingComponent::muteMarkedRegion ()
 {
-    startPos = (int)(startMarker * sampleRate);
-    endPos = (int)(endMarker * sampleRate);
-}
+    int numSamples = 0;
+    float *writePointer = nullptr;
+    for (int c=0; c<numChannels; c++)
+    {
+        writePointer = getAudioWritePointer(c, numSamples);
 
-const double AudioProcessingComponent::getMarkerInS(String marker)
-{
-    if (marker == "start")
-        return startPos / sampleRate;
-    else if (marker == "end")
-        return endPos / sampleRate;
-    else
-        return -1;
+        for (int i=markerStartPos; i<=markerEndPos; i++)
+            writePointer[i] = 0;
+    }
+    audioBufferChanged.sendChangeMessage();
 }
-
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
@@ -238,11 +243,11 @@ void AudioProcessingComponent::loadFile(File file)
 
         // set sample rate
         sampleRate = reader->sampleRate;
-        fileLoaded.sendChangeMessage();
+        audioBufferChanged.sendChangeMessage();
 
         //initialize markers
-        startPos = 0;
-        endPos = numAudioSamples;
+        markerStartPos = 0;
+        markerEndPos = numAudioSamples;
     }
 }
 

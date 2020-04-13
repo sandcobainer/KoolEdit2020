@@ -135,7 +135,7 @@ public:
     {
         if (source == &apc.transportState)
         {
-            if (apc.getState() == "Playing")
+            if (apc.getState() == AudioProcessingComponent::Playing)
             {
                 playButton.setEnabled(false);
                 playButton.setState(Button::ButtonState::buttonDown);
@@ -148,7 +148,7 @@ public:
                 rewindButton.setEnabled(false);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
             }
-            else if (apc.getState() == "Stopped")
+            else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
                 stopButton.setEnabled(false);
                 stopButton.setState(Button::ButtonState::buttonDown);
@@ -161,7 +161,7 @@ public:
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
             }
-            else if (apc.getState() == "Paused")
+            else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
                 pauseButton.setEnabled(false);
                 pauseButton.setState(Button::ButtonState::buttonDown);
@@ -183,11 +183,11 @@ public:
         
         //paint buttons based on current audio state
         state = apc.getState();
-        if (state == "Playing")
+        if (state == AudioProcessingComponent::Playing)
             playButton.setState(Button::ButtonState::buttonDown);
-        else if (state == "Stopped")
+        else if (state == AudioProcessingComponent::Stopped)
             stopButton.setState(Button::ButtonState::buttonDown);
-        else if (state == "Paused")
+        else if (state == AudioProcessingComponent::Paused)
             pauseButton.setState(Button::ButtonState::buttonDown);
     }
 
@@ -278,16 +278,19 @@ private:
     {
         //move play marker to the end of the track
         //negate any selection that existed
-        apc.setPositionInS(apc.getLengthInS());
-        apc.setMarkersInS(0, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::Cursor, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0.0f);
+        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
     }
 
     void rewindButtonClicked()
     {
         //move play marker to the beginning of the track
         //negate any selection that existed
-        apc.setPositionInS(0);
-        apc.setMarkersInS(0, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::Cursor, 0);
+        apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
+        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
+
     }
 
     void loopButtonClicked()
@@ -342,7 +345,7 @@ private:
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
-    String state; //transport state (from apc.getState() function)
+    AudioProcessingComponent::TransportState state; //transport state (from apc.getState() function)
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarIF)
 };

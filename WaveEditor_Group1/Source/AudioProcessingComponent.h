@@ -22,6 +22,23 @@ public:
     AudioProcessingComponent();
     ~AudioProcessingComponent();
 
+    enum TransportState
+    {
+        Stopped,  //initial state, position 0
+        Pausing,  //stopped, last position saved
+        Playing,
+        Paused,
+        Starting, //starts transport
+        Stopping  //stops transport
+    };
+
+    enum PositionType
+    {
+        Cursor,
+        MarkerStart,
+        MarkerEnd
+    };
+
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
@@ -52,7 +69,7 @@ public:
 
     /*! Called by ToolbarIF.h to get current transport state info
     */
-    const String getState();
+    TransportState getState();
     
     /*! Returns a read pointer to one block and one channel of data
         @param numChannel the specific channel need to be fetched
@@ -70,7 +87,7 @@ public:
         @param numChannel the specific channel need to be fetched
         @param numSamples the sample size
     */
-    const float* getAudioWritePointer(int numChannel, int &numAudioSamples);
+    float* getAudioWritePointer(int numChannel, int &numAudioSamples);
 
     /*! Returns a pointer to the current audio buffer
     */
@@ -84,50 +101,32 @@ public:
     */
     double getSampleRate();
 
-    /*! Returns current audio position in seconds
-    */
-    double getCurrentPositionInS();
-
-    /*! Sets the audio position in seconds
+    /*! Sets the cursor position or marker position in seconds
+        @param PositionType the position type
         @param newPosition the new playback position in seconds
     */
-    void setPositionInS(double newPosition);
+    void setPositionInS(PositionType positionType, double position);
+
+    /*! Gets the cursor position or marker position in seconds
+        @param PositionType the position type
+    */
+    double getPositionInS(PositionType positionType);
 
     /*! Returns the stream's length in seconds.
     */
     double getLengthInS();
 
-    /*! Sets start/stop markers on the track
-        @param startMarker is the start of the selection
-        @param endMarker is the end of the selection
+    /*! Set all the samples in the selected region to be zero
     */
-    void setMarkersInS(double startMarker, double endMarker);
-
-    /*! Returns requested marker position in seconds
-        @oaram marker <start> or <end> specifies which marker
-    */
-    const double getMarkerInS(String marker);
-
-    /*! Returns number of audio channels in loaded file
-    */
-    //const int getNumChannels();
+    void muteMarkedRegion();
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
-    ChangeBroadcaster fileLoaded;               //!< public broadcaster for the transport state
+    ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
 
 private:
     
-    enum TransportState
-    {
-        Stopped,  //initial state, position 0 
-        Pausing,  //stopped, last position saved
-        Playing,
-        Paused,
-        Starting, //starts transport
-        Stopping  //stops transport
-    };
-    
+
     /*! Fill the audioSampleBuffer with new coming data.
         @param channelData one channel of data.
         @param numChannel the number of channel that will be filled.
@@ -152,9 +151,9 @@ private:
     double sampleRate;
     juce::int64 numAudioSamples;
     // position info (the unit is always in sample)
-    int currentPosition;
-    int startPos;
-    int endPos;
+    int currentPos;
+    int markerStartPos;
+    int markerEndPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

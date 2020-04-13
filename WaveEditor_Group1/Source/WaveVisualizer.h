@@ -17,7 +17,6 @@
 /*
 */
 class WaveVisualizer    : public Component,
-                          //public ActionListener,
                           public ChangeListener,
                           private Timer
 {
@@ -30,8 +29,9 @@ public:
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
-        apc.fileLoaded.addChangeListener(this);
+        apc.audioBufferChanged.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
+        popupMenu.addItem("Mute", [this](){apc.muteMarkedRegion();});
     }
 
     ~WaveVisualizer()
@@ -91,15 +91,15 @@ public:
         //-------------------------------play marker----------------------------------------
         g.setColour (Colours::red);
         auto audioLength (thumbnail.getTotalLength());
-        auto audioPosition (apc.getCurrentPositionInS());
+        auto audioPosition (apc.getPositionInS(AudioProcessingComponent::Cursor));
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
 
         //--------------------------------selection----------------------------------------
-        auto audioStart(apc.getMarkerInS("start"));
-        auto audioEnd(apc.getMarkerInS("end"));
+        auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
+        auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
         
         auto selectStart = (audioStart / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
         auto selectEnd = (audioEnd / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
@@ -115,17 +115,25 @@ public:
         g.fillRect(selectionBounds);
     }
 
-    void mouseDown (const MouseEvent &event)
+    void mouseDown (const MouseEvent &event) override
     {
-        float ratio = float(event.getMouseDownX()) / float(getWidth());
-        apc.setPositionInS(ratio * apc.getLengthInS()); //change transport position in APC
-        apc.setMarkersInS(0, apc.getLengthInS()); //reset markers (negate selection)
+        if (event.mods.isLeftButtonDown())
+        {
+            float ratio = float(event.getMouseDownX()) / float(getWidth());
+            apc.setPositionInS(AudioProcessingComponent::Cursor, ratio*apc.getLengthInS());
+            apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
+            apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
 
-        selectionBounds.setBounds(0, 0, 0, 0);
-        repaint();
+            selectionBounds.setBounds(0, 0, 0, 0);
+            repaint();
+        }
+        else if (event.mods.isRightButtonDown())
+        {
+            popupMenu.show();
+        }
     }
 
-    void mouseDrag(const MouseEvent& event)
+    void mouseDrag(const MouseEvent& event) override
     {
         //coordinates from mouse event
         float start = float(event.getMouseDownX());
@@ -146,18 +154,19 @@ public:
             endPos = (start / getWidth()) * apc.getLengthInS();
         }
 
-        apc.setMarkersInS(startPos, endPos);
-        apc.setPositionInS(startPos);
+        apc.setPositionInS(AudioProcessingComponent::MarkerStart, startPos);
+        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, endPos);
+        apc.setPositionInS(AudioProcessingComponent::Cursor, startPos);
         repaint();
     }
 
-    void mouseEnter(const MouseEvent& event)
+    void mouseEnter(const MouseEvent& event) override
     {
         //automatically change the cursor to IBeam style when over the waveform
         setMouseCursor(juce::MouseCursor::IBeamCursor);
     }
 
-    void mouseExit(const MouseEvent& event)
+    void mouseExit(const MouseEvent& event) override
     {
         //automatically change the cursor to back to normal when not over the waveform
         setMouseCursor(juce::MouseCursor::NormalCursor);
@@ -169,7 +178,8 @@ private:
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
-    String state;                                //transport state (from apc.getState() function)
+    AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
+    PopupMenu popupMenu;
 
     Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
