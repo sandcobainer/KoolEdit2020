@@ -178,7 +178,7 @@ private:
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
-    String state;                                //transport state (from apc.getState() function)
+    AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
     PopupMenu popupMenu;
 
     Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags

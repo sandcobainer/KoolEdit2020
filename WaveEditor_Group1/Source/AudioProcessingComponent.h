@@ -22,6 +22,16 @@ public:
     AudioProcessingComponent();
     ~AudioProcessingComponent();
 
+    enum TransportState
+    {
+        Stopped,  //initial state, position 0
+        Pausing,  //stopped, last position saved
+        Playing,
+        Paused,
+        Starting, //starts transport
+        Stopping  //stops transport
+    };
+
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
@@ -52,7 +62,7 @@ public:
 
     /*! Called by ToolbarIF.h to get current transport state info
     */
-    const String getState();
+    TransportState getState();
     
     /*! Returns a read pointer to one block and one channel of data
         @param numChannel the specific channel need to be fetched
@@ -122,16 +132,7 @@ public:
 
 private:
     
-    enum TransportState
-    {
-        Stopped,  //initial state, position 0 
-        Pausing,  //stopped, last position saved
-        Playing,
-        Paused,
-        Starting, //starts transport
-        Stopping  //stops transport
-    };
-    
+
     /*! Fill the audioSampleBuffer with new coming data.
         @param channelData one channel of data.
         @param numChannel the number of channel that will be filled.

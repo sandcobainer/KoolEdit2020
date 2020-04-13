@@ -129,23 +129,9 @@ const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
-const String AudioProcessingComponent::getState ()
+AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {
-    String sState;
-    switch (state)
-    {
-        case Stopped:
-            sState = "Stopped";
-            break;
-        case Playing:
-            sState = "Playing";
-            break;
-        case Paused:
-            sState = "Paused";
-            break;
-    }
-    
-    return sState;
+    return state;
 }
 
 void AudioProcessingComponent::setState (TransportState newState)
