@@ -32,6 +32,13 @@ public:
         Stopping  //stops transport
     };
 
+    enum PositionType
+    {
+        Cursor,
+        MarkerStart,
+        MarkerEnd
+    };
+
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void releaseResources() override;
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;   
@@ -94,37 +101,24 @@ public:
     */
     double getSampleRate();
 
-    /*! Returns current audio position in seconds
-    */
-    double getCurrentPositionInS();
-
-    /*! Sets the audio position in seconds
+    /*! Sets the cursor position or marker position in seconds
+        @param PositionType the position type
         @param newPosition the new playback position in seconds
     */
-    void setPositionInS(double newPosition);
+    void setPositionInS(PositionType positionType, double position);
+
+    /*! Gets the cursor position or marker position in seconds
+        @param PositionType the position type
+    */
+    double getPositionInS(PositionType positionType);
 
     /*! Returns the stream's length in seconds.
     */
     double getLengthInS();
 
-    /*! Sets start/stop markers on the track
-        @param startMarker is the start of the selection
-        @param endMarker is the end of the selection
-    */
-    void setMarkersInS(double startMarker, double endMarker);
-
-    /*! Returns requested marker position in seconds
-        @oaram marker <start> or <end> specifies which marker
-    */
-    const double getMarkerInS(String marker);
-
     /*! Set all the samples in the selected region to be zero
     */
     void muteMarkedRegion();
-
-    /*! Returns number of audio channels in loaded file
-    */
-    //const int getNumChannels();
 
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
     ChangeBroadcaster fileLoaded;               //!< public broadcaster for the transport state
@@ -157,9 +151,9 @@ private:
     double sampleRate;
     juce::int64 numAudioSamples;
     // position info (the unit is always in sample)
-    int currentPosition;
-    int startPos;
-    int endPos;
+    int currentPos;
+    int markerStartPos;
+    int markerEndPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

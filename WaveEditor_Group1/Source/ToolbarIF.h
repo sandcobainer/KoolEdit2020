@@ -278,16 +278,19 @@ private:
     {
         //move play marker to the end of the track
         //negate any selection that existed
-        apc.setPositionInS(apc.getLengthInS());
-        apc.setMarkersInS(0, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::Cursor, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0.0f);
+        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
     }
 
     void rewindButtonClicked()
     {
         //move play marker to the beginning of the track
         //negate any selection that existed
-        apc.setPositionInS(0);
-        apc.setMarkersInS(0, apc.getLengthInS());
+        apc.setPositionInS(AudioProcessingComponent::Cursor, 0);
+        apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
+        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
+
     }
 
     void loopButtonClicked()
