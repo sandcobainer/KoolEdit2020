@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
+#include "Selection.h"
 
 //==============================================================================
 /*
@@ -25,7 +26,8 @@ public:
     apc(c),
     thumbnailCache (5),
     thumbnail (512, formatManager, thumbnailCache),
-    selectionBounds(0,0,0,0)
+    waveSelection(c)
+    //selectionBounds(0,0,0,0)
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
@@ -51,6 +53,7 @@ public:
 
     void resized() override
     {
+        waveSelection.repaint();
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
@@ -98,6 +101,7 @@ public:
                     thumbnailBounds.getBottom(), 2.0f);
 
         //--------------------------------selection----------------------------------------
+        /*
         auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
         auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
         
@@ -113,6 +117,7 @@ public:
         else
             g.setOpacity(0.4);
         g.fillRect(selectionBounds);
+        */
     }
 
     void mouseDown (const MouseEvent &event) override
@@ -124,7 +129,8 @@ public:
             apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
             apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
 
-            selectionBounds.setBounds(0, 0, 0, 0);
+            //selectionBounds.setBounds(0, 0, 0, 0);
+            waveSelection.resetBounds();
             repaint();
         }
         else if (event.mods.isRightButtonDown())
@@ -135,6 +141,8 @@ public:
 
     void mouseDrag(const MouseEvent& event) override
     {
+        waveSelection.createBounds(event);
+        /*
         //coordinates from mouse event
         float start = float(event.getMouseDownX());
         float dragDist = float(event.getDistanceFromDragStartX());
@@ -158,6 +166,7 @@ public:
         apc.setPositionInS(AudioProcessingComponent::MarkerEnd, endPos);
         apc.setPositionInS(AudioProcessingComponent::Cursor, startPos);
         repaint();
+        */
     }
 
     void mouseEnter(const MouseEvent& event) override
@@ -181,7 +190,9 @@ private:
     AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
     PopupMenu popupMenu;
 
-    Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
+    Selection waveSelection;
+
+    //Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
 
