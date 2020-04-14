@@ -213,16 +213,22 @@ double AudioProcessingComponent::getLengthInS()
 
 void AudioProcessingComponent::muteMarkedRegion ()
 {
-    int numSamples = 0;
-    float *writePointer = nullptr;
-    for (int c=0; c<numChannels; c++)
+    if (markerStartPos == 0 && markerEndPos == numAudioSamples)
+        return;
+    else
     {
-        writePointer = getAudioWritePointer(c, numSamples);
+        int numSamples = 0;
+        float* writePointer = nullptr;
+        for (int c = 0; c < numChannels; c++)
+        {
+            writePointer = getAudioWritePointer(c, numSamples);
 
-        for (int i=markerStartPos; i<=markerEndPos; i++)
-            writePointer[i] = 0;
+            for (int i = markerStartPos; i <= markerEndPos; i++)
+                writePointer[i] = 0;
+        }
+        audioBufferChanged.sendChangeMessage();
     }
-    audioBufferChanged.sendChangeMessage();
+    return;
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
