@@ -12,15 +12,19 @@
 
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
+#include "WaveVisualizer.h"
 
 class Selection : public Component
 {
 public:
-    Selection(AudioProcessingComponent& c) : 
+    Selection(AudioProcessingComponent& c, AudioThumbnail& t) :
         apc(c),
-        selectionBounds(0, 0, 0, 0)
+        thumb(t),
+        waveVisWidth(0),
+        waveVisHeight(0)
     {
-
+        setSize(0, 0);
+        popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
     }
 
     ~Selection()
@@ -30,33 +34,22 @@ public:
 
     void paint(Graphics& g) override
     {
-
+        if (apc.getNumChannels() == 0)
+            paintIfNoFileLoaded(g);
+        else
+            paintIfFileLoaded(g);
     }
 
     void paintIfNoFileLoaded(Graphics& g)
     {
-
+        setSize(0, 0);
     }
 
     void paintIfFileLoaded(Graphics& g)
     {
-        auto audioLength(thumbnail.getTotalLength());
-
-        auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
-        auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-
-        auto selectStart = (audioStart / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
-        auto selectEnd = (audioEnd / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
-
-        selectionBounds.setBounds(selectStart, 0, selectEnd - selectStart, getHeight());
-
         g.setColour(Colours::palevioletred);
-        //if there is no actual selection (start = beginning, end = track end) AND loop is off, don't paint
-        if (audioStart == 0 && audioEnd == apc.getLengthInS())
-            g.setOpacity(0);
-        else
-            g.setOpacity(0.4);
-        g.fillRect(selectionBounds);
+        g.setOpacity(0.4);
+        g.fillAll();
     }
 
     void resized() override
@@ -64,14 +57,28 @@ public:
 
     }
 
+    /*! Called by WaveVisualizer to pass component dimensions
+    */
+    void parentDimensions(int width, int height)
+    {
+        waveVisWidth = width;
+        waveVisHeight = height;
+        setSelectionSize();
+    }
+
     /*! Called when single mouse press on waveform
     \   zeros out selection bounds
     */
     void resetBounds()
     {
+        setSize(0, 0);
         repaint();
     }
 
+    /*! Called on mouseDrag in WaveVisualizer
+    \   Sets markers in APC
+    \   calls setSelectionSize to redefine this component size
+    */
     void createBounds(const MouseEvent& event)
     {
         //coordinates from mouse event
@@ -84,24 +91,92 @@ public:
 
         if (dragDist > 0)
         {
-            startPos = (start / getWidth()) * apc.getLengthInS();
-            endPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
+            startPos = (start / waveVisWidth) * apc.getLengthInS();
+            endPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
         }
         else if (dragDist < 0)
         {
-            startPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
-            endPos = (start / getWidth()) * apc.getLengthInS();
+            startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
+            endPos = (start / waveVisWidth) * apc.getLengthInS();
         }
 
         apc.setPositionInS(AudioProcessingComponent::MarkerStart, startPos);
         apc.setPositionInS(AudioProcessingComponent::MarkerEnd, endPos);
         apc.setPositionInS(AudioProcessingComponent::Cursor, startPos);
-        repaint();
+
+        setSelectionSize();
+    }
+
+    /*! Gets start stop markers from APC
+    \   and resizes this component
+    \   also called in timer callback in WaveVisualizer
+    */
+    void setSelectionSize()
+    {
+        auto audioLength(thumb.getTotalLength());
+        auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
+        auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
+
+        if (audioStart == 0 && audioEnd == apc.getLengthInS())
+        {
+            resetBounds();
+        }
+        else
+        {
+            auto selectStart = (audioStart / audioLength) * waveVisWidth + 0;
+            auto selectEnd = (audioEnd / audioLength) * waveVisWidth + 0;
+
+            setSize(selectEnd - selectStart, waveVisHeight);
+            setBounds(selectStart, 0, selectEnd - selectStart, waveVisHeight);
+            repaint();
+        }
     }
 
 private:
+    void mouseDown(const MouseEvent& event) override
+    {
+        //calculate apc cursor position if left click inside selection
+        if (event.mods.isLeftButtonDown())
+        {
+            float ratio = float(event.getMouseDownX()) / float(getWidth());
+            auto selectionStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
+            auto selectionEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
+            float selectionLengthInS = 0;
+            if (selectionEnd > selectionStart)
+            {
+                selectionLengthInS = selectionEnd - selectionStart;
+                apc.setPositionInS(AudioProcessingComponent::Cursor, (ratio * selectionLengthInS) + selectionStart);
+            }
+            else
+            {
+                selectionLengthInS = selectionStart - selectionEnd;
+                apc.setPositionInS(AudioProcessingComponent::Cursor, (ratio * selectionLengthInS) + selectionEnd);
+            }
+            apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
+            apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
+
+            resetBounds();
+            repaint();
+        }
+        //only trigger left click menu if clicked inside the selection
+        else if (event.mods.isRightButtonDown())
+        {
+            popupMenu.show();
+        }
+    }
+
+    void mouseEnter(const MouseEvent& event) override
+    {
+        //automatically change the cursor to IBeam style when over the waveform
+        setMouseCursor(juce::MouseCursor::IBeamCursor);
+    }
+
     AudioProcessingComponent& apc;
-    Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
+    AudioThumbnail& thumb;
+    PopupMenu popupMenu;
+
+    int waveVisWidth;
+    int waveVisHeight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selection)
 };
