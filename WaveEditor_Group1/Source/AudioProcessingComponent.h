@@ -52,6 +52,11 @@ public:
     */
     void loadFile(File);
 
+    /*! Takes juce::File object passed from ToolbarIF.h
+    \   saves the current buffer as a file
+    */
+    void saveFile(File);
+
     /*! Called from ToolbarIF.h when user clicks play button
     \   evaluates current transport states and determines action
     */
@@ -140,6 +145,8 @@ private:
     AudioFormatManager formatManager;
 
     TransportState state;       //!< enum
+
+    bool fileLoaded;  // indicates if a file is loaded
 
     //// AudioBuffer
     // buffer definitions
