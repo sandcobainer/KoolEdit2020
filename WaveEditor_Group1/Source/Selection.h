@@ -21,7 +21,8 @@ public:
         apc(c),
         thumb(t),
         waveVisWidth(0),
-        waveVisHeight(0)
+        waveVisHeight(0),
+        thresholdInPixels(5)
     {
         setSize(0, 0);
         popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
@@ -89,17 +90,20 @@ public:
         float startPos = 0;
         float endPos = 0;
 
-        if (dragDist > 0)
+        if (dragDist > thresholdInPixels)
         {
             startPos = (start / waveVisWidth) * apc.getLengthInS();
             endPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
         }
-        else if (dragDist < 0)
+        else if (dragDist < -thresholdInPixels)
         {
             startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
             endPos = (start / waveVisWidth) * apc.getLengthInS();
         }
+        else
+            return; //if threshold is not met, do nothing
 
+        //otherwise set markers in apc and draw
         apc.setPositionInS(AudioProcessingComponent::MarkerStart, startPos);
         apc.setPositionInS(AudioProcessingComponent::MarkerEnd, endPos);
         apc.setPositionInS(AudioProcessingComponent::Cursor, startPos);
@@ -141,17 +145,10 @@ private:
             float ratio = float(event.getMouseDownX()) / float(getWidth());
             auto selectionStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
             auto selectionEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-            float selectionLengthInS = 0;
-            if (selectionEnd > selectionStart)
-            {
-                selectionLengthInS = selectionEnd - selectionStart;
-                apc.setPositionInS(AudioProcessingComponent::Cursor, (ratio * selectionLengthInS) + selectionStart);
-            }
-            else
-            {
-                selectionLengthInS = selectionStart - selectionEnd;
-                apc.setPositionInS(AudioProcessingComponent::Cursor, (ratio * selectionLengthInS) + selectionEnd);
-            }
+
+            float selectionLengthInS = selectionEnd - selectionStart;
+
+            apc.setPositionInS(AudioProcessingComponent::Cursor, (ratio * selectionLengthInS) + selectionStart);
             apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
             apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
 
@@ -163,6 +160,14 @@ private:
         {
             popupMenu.show();
         }
+    }
+
+    /*! Click and drag inside the selection component will
+    \   keep the size constant but move it around
+    */
+    void mouseDrag(const MouseEvent& event) override
+    {
+
     }
 
     void mouseEnter(const MouseEvent& event) override
@@ -177,6 +182,7 @@ private:
 
     int waveVisWidth;
     int waveVisHeight;
+    int thresholdInPixels;     //threshold to fix tiny selection bug
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selection)
 };
