@@ -325,7 +325,15 @@ private:
 
     void loopButtonClicked()
     {
+        //toggle button state
+        bool loopState = !loopButton.getToggleState();
+        loopButton.setToggleState(loopState, false);
 
+        //toggle apc state
+        if (loopState == true)
+            apc.loopOnRequested();
+        else
+            apc.loopOffRequested();
     }
 
     void muteButtonClicked()

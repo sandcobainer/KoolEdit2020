@@ -67,6 +67,20 @@ public:
     */
     void pauseRequested();
 
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to TRUE
+    */
+    void loopOnRequested();
+
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to FALSE
+    */
+    void loopOffRequested();
+
+    /*! Returns true if loop is enabled
+    */
+    const bool isLoopEnabled();
+
     /*! Called by ToolbarIF.h to get current transport state info
     */
     TransportState getState();
@@ -154,6 +168,8 @@ private:
     int currentPos;
     int markerStartPos;
     int markerEndPos;
+
+    bool loopEnabled;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };

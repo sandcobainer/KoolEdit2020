@@ -48,7 +48,10 @@ public:
 
     void paintIfFileLoaded(Graphics& g)
     {
-        g.setColour(Colours::palevioletred);
+        if (apc.isLoopEnabled() == false)
+            g.setColour(Colours::palevioletred);
+        else
+            g.setColour(Colours::aquamarine);
         g.setOpacity(0.4);
         g.fillAll();
     }

@@ -20,7 +20,8 @@ sampleRate(0.f),
 numAudioSamples(0),
 currentPos(0),
 markerStartPos(0),
-markerEndPos(0)
+markerEndPos(0),
+loopEnabled(false)
 {
     formatManager.registerBasicFormats();
 }
@@ -275,4 +276,19 @@ void AudioProcessingComponent::pauseRequested()
 {
     if (state == Playing)
         setState(Pausing); //stop transport, save current position
+}
+
+void AudioProcessingComponent::loopOnRequested()
+{
+    loopEnabled = true;
+}
+
+void AudioProcessingComponent::loopOffRequested()
+{
+    loopEnabled = false;
+}
+
+const bool AudioProcessingComponent::isLoopEnabled()
+{
+    return loopEnabled;
 }
