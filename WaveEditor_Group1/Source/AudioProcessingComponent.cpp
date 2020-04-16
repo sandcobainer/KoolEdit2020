@@ -14,6 +14,7 @@
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
+fileLoaded(false),
 numChannels(0),
 numBlockSamples(0),
 sampleRate(0.f),
@@ -255,7 +256,27 @@ void AudioProcessingComponent::loadFile(File file)
         //initialize markers
         markerStartPos = 0;
         markerEndPos = numAudioSamples;
+
+        fileLoaded = true;
     }
+}
+
+void AudioProcessingComponent::saveFile(File file)
+{
+    // doesn't do anything if no file is loaded
+    if (!fileLoaded)
+        return;
+
+    WavAudioFormat format;
+    std::unique_ptr<AudioFormatWriter> writer;
+    writer.reset (format.createWriterFor (new FileOutputStream (file),
+                                          sampleRate,
+                                          audioBuffer.getNumChannels(),
+                                          24,
+                                          {},
+                                          0));
+    if (writer != nullptr)
+        writer->writeFromAudioSampleBuffer (audioBuffer, 0, audioBuffer.getNumSamples());
 }
 
 void AudioProcessingComponent::playRequested()

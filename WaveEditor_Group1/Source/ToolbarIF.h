@@ -257,6 +257,15 @@ private:
 
     void saveButtonClicked()
     {
+        FileChooser chooser("Save to a Wave file...",
+                            {},
+                            "*.wav");
+
+        if (chooser.browseForFileToSave(true))
+        {
+            auto file = chooser.getResult();
+            apc.saveFile(file);             //go to audio thread
+        }
     }
 
     void playButtonClicked()
