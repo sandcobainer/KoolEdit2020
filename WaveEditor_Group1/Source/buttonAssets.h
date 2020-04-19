@@ -5,10 +5,10 @@
 namespace buttonAssets
 {
     extern const char*  copy_down_png;
-    const int           copy_down_pngSize = 1402;
+    const int           copy_down_pngSize = 1260;
 
     extern const char*  copy_normal_png;
-    const int           copy_normal_pngSize = 1396;
+    const int           copy_normal_pngSize = 1244;
 
     extern const char*  copy_over_png;
     const int           copy_over_pngSize = 1404;
@@ -71,7 +71,7 @@ namespace buttonAssets
     const int           openfile_over_pngSize = 1094;
 
     extern const char*  paste_down_png;
-    const int           paste_down_pngSize = 1323;
+    const int           paste_down_pngSize = 1327;
 
     extern const char*  paste_normal_png;
     const int           paste_normal_pngSize = 1318;

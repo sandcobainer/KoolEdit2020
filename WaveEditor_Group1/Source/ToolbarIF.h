@@ -222,6 +222,9 @@ public:
                 rewindButton.setEnabled(false);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
                 muteButton.setEnabled(false);
+                cutButton.setEnabled(false);
+                copyButton.setEnabled(false);
+                pasteButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -236,6 +239,9 @@ public:
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
                 muteButton.setEnabled(true);
+                cutButton.setEnabled(true);
+                copyButton.setEnabled(true);
+                pasteButton.setEnabled(true);
             }
             else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
@@ -250,6 +256,9 @@ public:
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
                 muteButton.setEnabled(true);
+                cutButton.setEnabled(true);
+                copyButton.setEnabled(true);
+                pasteButton.setEnabled(true);
             }
         }
     }
@@ -309,6 +318,10 @@ private:
         rewindButton.setEnabled(true);
         loopButton.setEnabled(true);
         muteButton.setEnabled(true);
+        mouseButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -337,6 +350,9 @@ private:
         ffwdButton.setEnabled(false);
         rewindButton.setEnabled(false);
         muteButton.setEnabled(false);
+        cutButton.setEnabled(false);
+        copyButton.setEnabled(false);
+        pasteButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -352,6 +368,9 @@ private:
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
         muteButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void stopButtonClicked()
@@ -367,6 +386,9 @@ private:
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
         muteButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void ffwdButtonClicked()
