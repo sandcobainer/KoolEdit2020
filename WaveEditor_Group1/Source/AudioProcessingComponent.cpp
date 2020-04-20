@@ -22,7 +22,8 @@ numAudioSamples(0),
 currentPos(0),
 markerStartPos(0),
 markerEndPos(0),
-loopEnabled(false)
+loopEnabled(false),
+mouseNormal(false)
 {
     formatManager.registerBasicFormats();
 }
@@ -312,4 +313,14 @@ void AudioProcessingComponent::loopOffRequested()
 const bool AudioProcessingComponent::isLoopEnabled()
 {
     return loopEnabled;
+}
+
+void AudioProcessingComponent::setMouseState(bool mouseState)
+{
+    mouseNormal = mouseState;
+}
+
+const bool AudioProcessingComponent::isMouseNormal()
+{
+    return mouseNormal;
 }

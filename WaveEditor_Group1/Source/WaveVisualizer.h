@@ -118,16 +118,14 @@ public:
         }
     }
 
-    void mouseDrag(const MouseEvent& event) override
-    {
-        waveSelection->createBounds(event);
-        repaint();
-    }
-
     void mouseEnter(const MouseEvent& event) override
     {
         //automatically change the cursor to IBeam style when over the waveform
-        setMouseCursor(juce::MouseCursor::IBeamCursor);
+        //and if mouse icon is not clicked
+        if (apc.isMouseNormal())
+            setMouseCursor(juce::MouseCursor::NormalCursor);
+        else
+            setMouseCursor(juce::MouseCursor::IBeamCursor);
     }
 
     void mouseExit(const MouseEvent& event) override

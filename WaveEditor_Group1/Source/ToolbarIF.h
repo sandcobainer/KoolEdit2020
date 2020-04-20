@@ -430,7 +430,12 @@ private:
 
     void mouseButtonClicked()
     {
+        //toggle button state
+        bool mouseState = !mouseButton.getToggleState();
+        mouseButton.setToggleState(mouseState, false);
 
+        //toggle apc state
+        apc.setMouseState(mouseState);
     }
 
     void cutButtonClicked()
