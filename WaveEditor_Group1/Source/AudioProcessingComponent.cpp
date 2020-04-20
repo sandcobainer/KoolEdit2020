@@ -239,6 +239,17 @@ void AudioProcessingComponent::loadFile(File file)
     auto* reader = formatManager.createReaderFor (file);
     if (reader != nullptr)
     {
+        // if there's a file has been loaded, clean the interpolators
+        if (fileLoaded)
+        {
+            for (int channel=0; channel<getNumChannels(); channel++)
+            {
+                delete interpolators[channel];
+            }
+            delete[] interpolators;
+            interpolators = nullptr;
+        }
+
         // read the entire audio into audioBuffer
         auto numSamples = reader->lengthInSamples;
         auto numChannels = reader->numChannels;
@@ -251,15 +262,7 @@ void AudioProcessingComponent::loadFile(File file)
         // set sample rate
         sampleRate = reader->sampleRate;
 
-        if (fileLoaded) // if there's a file has been loaded, clean the interpolators
-        {
-            for (int channel=0; channel<numChannels; channel++)
-            {
-                delete interpolators[channel];
-            }
-            delete[] interpolators;
-            interpolators = nullptr;
-        }
+        // create interpolators
         interpolators = new CatmullRomInterpolator*[numChannels];
         for (int channel=0; channel<numChannels; channel++)
             interpolators[channel] = new CatmullRomInterpolator();
