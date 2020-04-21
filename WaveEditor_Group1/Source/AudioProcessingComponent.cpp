@@ -139,6 +139,9 @@ void AudioProcessingComponent::muteMarkedRegion ()
 {
     int numSamples = 0;
     float *writePointer = nullptr;
+
+    pushMarkedRegionToUndoStack();
+
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         writePointer = getAudioWritePointer(channel, numSamples);
@@ -146,9 +149,55 @@ void AudioProcessingComponent::muteMarkedRegion ()
         for (int i=markerStartPos; i<=markerEndPos; i++)
             writePointer[i] = 0;
     }
+
+    pushMarkedRegionToUndoStack();
+
     audioBufferChanged.sendChangeMessage();
 }
 
+void AudioProcessingComponent::undo()
+{
+    if (!isUndoEnabled())
+        return;
+    undoStack.undo(audioBuffer);
+    audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::redo()
+{
+    if(!isRedoEnabled())
+        return;
+    undoStack.redo(audioBuffer);
+    audioBufferChanged.sendChangeMessage();
+}
+
+bool AudioProcessingComponent::isUndoEnabled()
+{
+    return undoStack.isUndoEnabled();
+}
+
+bool AudioProcessingComponent::isRedoEnabled()
+{
+    return undoStack.isRedoEnabled();
+}
+
+AudioBuffer<float> AudioProcessingComponent::getAudioBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer, int startSample,
+                                                                int endSample, int startChannel, int numChannels)
+{
+    int numSamples = endSample - startSample + 1;
+    AudioBuffer<float> newAudioBuffer(numChannels, numSamples);
+    for (int channel=startChannel; channel<startChannel+numChannels; channel++)
+        newAudioBuffer.copyFrom(channel-startChannel, 0, audioBuffer, channel, startSample, numSamples);
+    return newAudioBuffer;
+}
+
+void AudioProcessingComponent::pushMarkedRegionToUndoStack()
+{
+    undoStack.push(UndoStack::Inplace,
+                   getAudioBufferFromSamplesInRange(audioBuffer,
+                                                    markerStartPos, markerEndPos, 0, getNumChannels()),
+                   markerStartPos, 0);
+}
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {
