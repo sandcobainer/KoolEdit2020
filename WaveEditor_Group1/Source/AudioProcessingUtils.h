@@ -51,8 +51,15 @@ private:
 class UndoStack
 {
 public:
-    UndoStack():stackPos(-1), isJustUndid(false), isJustRedid(false) {}
+    UndoStack():stackPos(-1), isJustUndid(false), isJustRedid(false), maxUndoTimes(0) {}
     ~UndoStack(){}
+
+    void setMaxUndoTimes(int maxUndoTimes)
+    {
+        if (maxUndoTimes < 0)
+            return;
+        this->maxUndoTimes = maxUndoTimes;
+    }
 
     /*! Push undo-stack audio buffer into stack
         @param UndoStackAudioBuffer the audio buffer before editing
@@ -69,7 +76,15 @@ public:
         }
         undoStack.push_back(beforeEditBuffer);
         undoStack.push_back(afterEditBuffer);
-        stackPos += 2;
+        if (getLength() > maxUndoTimes*2) // remove the buffers at the bottom if the length is longer than the limit.
+        {
+            std::reverse(undoStack.begin(),undoStack.end());
+            undoStack.pop_back();
+            undoStack.pop_back();
+            std::reverse(undoStack.begin(),undoStack.end());
+        }
+        else
+            stackPos += 2;
         isJustUndid = false;
         isJustRedid = false;
     }
@@ -143,7 +158,7 @@ public:
 
     int getLength()
     {
-        return undoStack.size();
+        return static_cast<int>(undoStack.size());
     }
 
     int getStackPos()
@@ -170,4 +185,5 @@ private:
     int stackPos;
     bool isJustUndid;
     bool isJustRedid;
+    int maxUndoTimes;
 };

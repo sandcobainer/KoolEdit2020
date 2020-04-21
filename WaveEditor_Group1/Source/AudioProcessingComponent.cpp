@@ -332,6 +332,7 @@ void AudioProcessingComponent::loadFile(File file)
 
         // reset undoStack
         undoStack.reset();
+        undoStack.setMaxUndoTimes(5); // TODO: let our user choose the number
 
         audioBufferChanged.sendChangeMessage();
         fileLoaded = true;
