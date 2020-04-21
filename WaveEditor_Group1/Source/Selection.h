@@ -23,7 +23,10 @@ public:
         waveVisWidth(0),
         waveVisHeight(0),
         thresholdInPixels(5),
-        selectionBounds(0,0,0,0)
+        selectionBounds(0,0,0,0),
+        isMouseDown(false),
+        selectionStart(0),
+        selectionEnd(0)
     {
         popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
     }
@@ -149,19 +152,22 @@ private:
     */
     void slideBounds(const MouseEvent& event)
     {
-        //std::cout << selectionBounds.getX() << " " << selectionBounds.getRight() << std::endl;
         //if click is inside original selection bounds
         int mousePos = event.getMouseDownX() + event.getDistanceFromDragStartX();
         if ((mousePos >= selectionBounds.getX()) && (mousePos <= selectionBounds.getRight()))
         {
             //coordinates from mouse event
-            float start = float(event.getMouseDownX());
             float dragDist = float(event.getDistanceFromDragStartX());
-            //std::cout << dragDist << std::endl;
 
             //initial start and end positions in seconds
-            float initStart = apc.getPositionInS(AudioProcessingComponent::MarkerStart);
-            float initEnd = apc.getPositionInS(AudioProcessingComponent::MarkerEnd);
+            //only want this to happen once per drag operation
+            if (isMouseDown == false)
+            {
+                selectionStart = apc.getPositionInS(AudioProcessingComponent::MarkerStart);
+                selectionEnd = apc.getPositionInS(AudioProcessingComponent::MarkerEnd);
+
+                isMouseDown = true;
+            }
 
             //new start and end positions in seconds
             float startPos = 0;
@@ -169,16 +175,13 @@ private:
 
             if (dragDist > thresholdInPixels)
             {
-                std::cout << initStart << " " << initEnd << std::endl;
-                //startPos = (start / waveVisWidth) * apc.getLengthInS();
-                startPos = ((float(dragDist) / float(getWidth())) * apc.getLengthInS()) - initStart;
-                //endPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
-                endPos = ((float(dragDist) / float(getWidth())) * apc.getLengthInS()) - initEnd;
+                startPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionStart;
+                endPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionEnd;
             }
             else if (dragDist < -thresholdInPixels)
             {
-                //startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
-                //endPos = (start / waveVisWidth) * apc.getLengthInS();
+                startPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionStart;
+                endPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionEnd;
             }
             else
                 return; //if threshold is not met, do nothing
@@ -190,8 +193,6 @@ private:
 
             setSelectionSize();
         }
-        else
-            std::cout << "else" << std::endl;
     }
 
     void mouseDown(const MouseEvent& event) override
@@ -248,6 +249,11 @@ private:
         setMouseCursor(juce::MouseCursor::NormalCursor);
     }
 
+    void mouseUp(const MouseEvent& event) override
+    {
+        isMouseDown = false;
+    }
+
     AudioProcessingComponent& apc;
     AudioThumbnail& thumb;
     PopupMenu popupMenu;
@@ -256,6 +262,10 @@ private:
     int waveVisHeight;
     int thresholdInPixels;     //threshold to fix tiny selection bug
     Rectangle<int> selectionBounds; //member that gets painted
+    
+    bool isMouseDown;
+    float selectionStart;
+    float selectionEnd;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selection)
 };
