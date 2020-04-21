@@ -15,11 +15,11 @@
 class UndoStackAudioBuffer
 {
 public:
-    UndoStackAudioBuffer(AudioBuffer<float> audioBuffer, int startSample, int startChannel)
+    UndoStackAudioBuffer(AudioBuffer<float> audioBuffer, int startChannel, int startSample)
     {
         this->audioBuffer = audioBuffer;
-        this->startSample = startSample;
         this->startChannel = startChannel;
+        this->startSample = startSample;
     }
 
     const AudioBuffer<float>* getAudioBuffer()
@@ -45,6 +45,7 @@ private:
 
 /*
  * Audio buffers should always be pushed to stack in pairs (push the buffer before editing and after editing).
+ * It only supports inplace operations for now.
  */
 
 class UndoStack
@@ -53,38 +54,22 @@ public:
     UndoStack():stackPos(-1), isJustUndid(false), isJustRedid(false) {}
     ~UndoStack(){}
 
-    enum Operation
-    {
-        Inplace,
-        Insert,   // placeholder
-        Delete    // placeholder
-    };
-
-    /*! Push an audio buffer in the undo stack
-        @param Operation the operation type
-        @param modifiedSection the modifiedSection
-        @param startSample the starting point
+    /*! Push undo-stack audio buffer into stack
+        @param UndoStackAudioBuffer the audio buffer before editing
+        @param UndoStackAudioBuffer the audio buffer after editing
     */
-    void push (Operation operation, AudioBuffer<float> modifiedSection, int startSample, int startChannel)
+    void pushUndoStackAudioBuffers(UndoStackAudioBuffer beforeEditBuffer, UndoStackAudioBuffer afterEditBuffer)
     {
-        switch (operation)
+        if (!isEmpty() && stackPos < getLength()-1) // clear the operations that don't need to be stored
         {
-            case Inplace:
-                if (!isEmpty() && stackPos < getLength()-1) // clear the operations that don't need to be stored
-                {
-                    if (stackPos % 2 == 0)
-                        stackPos--;
-                    for (int i=getLength()-1; i>stackPos; i--)
-                        undoStack.pop_back();
-                }
-                undoStack.push_back(UndoStackAudioBuffer(modifiedSection, startSample, startChannel));
-                stackPos++;
-                break;
-            case Insert:
-                break;
-            case Delete:
-                break;
+            if (stackPos % 2 == 0)
+                stackPos--;
+            for (int i=getLength()-1; i>stackPos; i--)
+                undoStack.pop_back();
         }
+        undoStack.push_back(beforeEditBuffer);
+        undoStack.push_back(afterEditBuffer);
+        stackPos += 2;
         isJustUndid = false;
         isJustRedid = false;
     }

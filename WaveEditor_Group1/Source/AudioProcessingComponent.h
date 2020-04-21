@@ -152,8 +152,10 @@ private:
     */
     void setState(TransportState state);
 
-    static AudioBuffer<float> getAudioBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
+    static UndoStackAudioBuffer getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
             int startSample, int endSample, int startChannel, int numChannels);
+
+    UndoStackAudioBuffer getUndoBufferFromMarkedRegion();
 
     void pushMarkedRegionToUndoStack();
 

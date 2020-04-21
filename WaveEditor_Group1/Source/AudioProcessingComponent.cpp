@@ -140,7 +140,7 @@ void AudioProcessingComponent::muteMarkedRegion ()
     int numSamples = 0;
     float *writePointer = nullptr;
 
-    pushMarkedRegionToUndoStack();
+    auto beforeEditBuffer = getUndoBufferFromMarkedRegion();
 
     for (int channel=0; channel<getNumChannels(); channel++)
     {
@@ -150,7 +150,9 @@ void AudioProcessingComponent::muteMarkedRegion ()
             writePointer[i] = 0;
     }
 
-    pushMarkedRegionToUndoStack();
+    auto afterEditBuffer = getUndoBufferFromMarkedRegion();
+
+    undoStack.pushUndoStackAudioBuffers(beforeEditBuffer, afterEditBuffer);
 
     audioBufferChanged.sendChangeMessage();
 }
@@ -181,22 +183,22 @@ bool AudioProcessingComponent::isRedoEnabled()
     return undoStack.isRedoEnabled();
 }
 
-AudioBuffer<float> AudioProcessingComponent::getAudioBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer, int startSample,
+UndoStackAudioBuffer AudioProcessingComponent::getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer, int startSample,
                                                                 int endSample, int startChannel, int numChannels)
 {
     int numSamples = endSample - startSample + 1;
     AudioBuffer<float> newAudioBuffer(numChannels, numSamples);
     for (int channel=startChannel; channel<startChannel+numChannels; channel++)
         newAudioBuffer.copyFrom(channel-startChannel, 0, audioBuffer, channel, startSample, numSamples);
-    return newAudioBuffer;
+    class UndoStackAudioBuffer undoBuffer {newAudioBuffer, startChannel, startSample};
+    return undoBuffer;
 }
 
-void AudioProcessingComponent::pushMarkedRegionToUndoStack()
+UndoStackAudioBuffer AudioProcessingComponent::getUndoBufferFromMarkedRegion()
 {
-    undoStack.push(UndoStack::Inplace,
-                   getAudioBufferFromSamplesInRange(audioBuffer,
-                                                    markerStartPos, markerEndPos, 0, getNumChannels()),
-                   markerStartPos, 0);
+    auto undoBuffer = getUndoBufferFromSamplesInRange(audioBuffer,
+            markerStartPos, markerEndPos, 0, getNumChannels());
+    return undoBuffer;
 }
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
