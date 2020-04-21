@@ -330,6 +330,9 @@ void AudioProcessingComponent::loadFile(File file)
         markerStartPos = 0;
         markerEndPos = numSamples;
 
+        // reset undoStack
+        undoStack.reset();
+
         audioBufferChanged.sendChangeMessage();
         fileLoaded = true;
     }

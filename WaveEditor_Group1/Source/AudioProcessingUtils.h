@@ -128,6 +128,14 @@ public:
         stackPos = newStackPos;
     }
 
+    void reset()
+    {
+        stackPos = -1;
+        isJustUndid = false;
+        isJustRedid = false;
+        undoStack.clear();
+    }
+
     bool isEmpty()
     {
         return undoStack.empty();
