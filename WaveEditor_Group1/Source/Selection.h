@@ -159,21 +159,26 @@ private:
             float dragDist = float(event.getDistanceFromDragStartX());
             //std::cout << dragDist << std::endl;
 
-            //start and end positions in seconds
-            float startPos = apc.getPositionInS(AudioProcessingComponent::MarkerStart);
-            float endPos = apc.getPositionInS(AudioProcessingComponent::MarkerEnd);
+            //initial start and end positions in seconds
+            float initStart = apc.getPositionInS(AudioProcessingComponent::MarkerStart);
+            float initEnd = apc.getPositionInS(AudioProcessingComponent::MarkerEnd);
+
+            //new start and end positions in seconds
+            float startPos = 0;
+            float endPos = 0;
 
             if (dragDist > thresholdInPixels)
             {
+                std::cout << initStart << " " << initEnd << std::endl;
                 //startPos = (start / waveVisWidth) * apc.getLengthInS();
-                startPos = startPos + ((float(dragDist) / float(getWidth())) * apc.getLengthInS());
+                startPos = ((float(dragDist) / float(getWidth())) * apc.getLengthInS()) - initStart;
                 //endPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
-                endPos = endPos + ((float(dragDist) / float(getWidth())) * apc.getLengthInS());
+                endPos = ((float(dragDist) / float(getWidth())) * apc.getLengthInS()) - initEnd;
             }
             else if (dragDist < -thresholdInPixels)
             {
-                startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
-                endPos = (start / waveVisWidth) * apc.getLengthInS();
+                //startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
+                //endPos = (start / waveVisWidth) * apc.getLengthInS();
             }
             else
                 return; //if threshold is not met, do nothing
