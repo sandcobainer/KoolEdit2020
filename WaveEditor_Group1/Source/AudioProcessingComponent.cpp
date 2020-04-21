@@ -198,16 +198,24 @@ void AudioProcessingComponent::setState (TransportState newState)
 //-------------------------------POSITION HANDLING-------------------------------------
 void AudioProcessingComponent::setPositionInS(AudioProcessingComponent::PositionType positionType, double newPosition)
 {
+    int position = static_cast<int>(newPosition * sampleRate);
+
+    // make sure the position is in the range
+    if (position < 0)
+        position = 0;
+    else if (position >= getNumSamples())
+        position = getNumSamples() - 1;
+
     switch (positionType)
     {
         case Cursor:
-            currentPos = static_cast<int>(newPosition * sampleRate);
+            currentPos = position;
             break;
         case MarkerStart:
-            markerStartPos = static_cast<int>(newPosition * sampleRate);
+            markerStartPos = position;
             break;
         case MarkerEnd:
-            markerEndPos = static_cast<int>(newPosition * sampleRate);
+            markerEndPos = position;
             break;
     }
 }
