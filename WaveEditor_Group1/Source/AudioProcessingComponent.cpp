@@ -15,10 +15,9 @@
 AudioProcessingComponent::AudioProcessingComponent():
 state(Stopped),
 fileLoaded(false),
-numChannels(0),
-numBlockSamples(0),
+interpolators(nullptr),
 sampleRate(0.f),
-numAudioSamples(0),
+deviceSampleRate(0.f),
 currentPos(0),
 markerStartPos(0),
 markerEndPos(0)
@@ -28,18 +27,25 @@ markerEndPos(0)
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
     shutdownAudio();
+    if (fileLoaded)
+    {
+        for (int channel=0; channel<getNumChannels(); channel++)
+        {
+            delete interpolators[channel];
+        }
+        delete[] interpolators;
+        interpolators = nullptr;
+    }
 }
 
 void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate) 
 {
-    // allocate memory for JUCE audio buffer
-    numBlockSamples = samplesPerBlockExpected;
-    audioBlockBuffer.setSize(numChannels, samplesPerBlockExpected);
+    audioBlockBuffer.setSize(getNumChannels(), samplesPerBlockExpected);
     audioBlockBuffer.clear();
-    // TODO: the playback speed is not correct if the device sample rate doesn't match the audio sample rate
-    //auto audioDeviceSetup = deviceManager.getAudioDeviceSetup();
-    //audioDeviceSetup.sampleRate = sampleRate;
-    //deviceManager.setAudioDeviceSetup(audioDeviceSetup, true);
+    deviceSampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
+    if (fileLoaded)
+        for (int channel=0; channel<getNumChannels(); channel++)
+            interpolators[channel]->reset();
 }
 
 void AudioProcessingComponent::releaseResources() 
@@ -48,6 +54,11 @@ void AudioProcessingComponent::releaseResources()
 
 void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) 
 {
+    if (deviceSampleRate == 0)
+        return;
+
+    double sampleRateRatio = deviceSampleRate / sampleRate;
+
     if (state == Playing)
     {
         auto numInputChannels = audioBuffer.getNumChannels();
@@ -59,25 +70,48 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
         while (outputSamplesRemaining > 0)
         {
             auto bufferSamplesRemaining = markerEndPos - currentPos;
-            auto samplesThisTime = jmin (outputSamplesRemaining, bufferSamplesRemaining);
+            int outputSamplesThisTime = jmin(
+                    static_cast<int>(round(bufferSamplesRemaining*sampleRateRatio)),
+                    outputSamplesRemaining);
+            if (outputSamplesThisTime == 0)
+                outputSamplesThisTime = 1;
+            int inputSamplesThisTime = 0;
 
-            for (auto channel = 0; channel < numOutputChannels; ++channel)
+            if (getNumChannels() == 1) // if it's single channel, copy channel 0 to channel 1
             {
-                bufferToFill.buffer->copyFrom (channel,
-                                               outputSamplesOffset,
-                                               audioBuffer,
-                                               channel % numInputChannels,
-                                               currentPos,
-                                               samplesThisTime);
-                audioBlockBuffer.copyFrom(0, 0, *(bufferToFill.buffer), 0, 0, samplesThisTime);
-                blockReady.sendChangeMessage();
+                inputSamplesThisTime = interpolators[0]->process(
+                        1/sampleRateRatio,
+                        audioBuffer.getReadPointer(0, currentPos),
+                        bufferToFill.buffer->getWritePointer(0, outputSamplesOffset),
+                        outputSamplesThisTime);
+                for (auto channel = 1; channel < numOutputChannels; channel++)
+                {
+                    bufferToFill.buffer->copyFrom(
+                            channel,
+                            outputSamplesOffset,
+                            bufferToFill.buffer->getReadPointer(0, outputSamplesOffset),
+                            outputSamplesThisTime);
+                }
             }
+            else
+            {
+                for (auto channel = 0; channel < numOutputChannels; channel++)
+                {
+                    inputSamplesThisTime = interpolators[channel]->process(
+                            1/sampleRateRatio,
+                            audioBuffer.getReadPointer(channel, currentPos),
+                            bufferToFill.buffer->getWritePointer(channel, outputSamplesOffset),
+                            outputSamplesThisTime);
+                }
+            }
+            audioBlockBuffer.copyFrom(0, 0, audioBuffer, 0, currentPos, inputSamplesThisTime);
+            blockReady.sendChangeMessage();
 
-            outputSamplesRemaining -= samplesThisTime;
-            outputSamplesOffset += samplesThisTime;
-            currentPos += samplesThisTime;
+            outputSamplesRemaining -= outputSamplesThisTime;
+            outputSamplesOffset += outputSamplesThisTime;
+            currentPos += inputSamplesThisTime;
 
-            if (currentPos == markerEndPos)
+            if (currentPos >= markerEndPos)
             {
                 bufferToFill.clearActiveBufferRegion();
                 stopRequested();
@@ -88,29 +122,21 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
 }
 
 //---------------------------------AUDIO BUFFER HANDLING--------------------------------------
-
-void AudioProcessingComponent::fillAudioBlockBuffer(const float* channelData, int numChannel)
-{
-    float* writePointer = audioBlockBuffer.getWritePointer(numChannel);
-    for (auto i = 0; i < numBlockSamples; ++i)
-        writePointer[i] = channelData[i];
-}
-
 const float* AudioProcessingComponent::getAudioBlockReadPointer(int numChannel, int &numAudioSamples) // public
 {
-    numAudioSamples = this->numBlockSamples;
+    numAudioSamples = audioBlockBuffer.getNumSamples();
     return audioBlockBuffer.getReadPointer(numChannel);
 }
 
 const float* AudioProcessingComponent::getAudioReadPointer(int numChannel, int &numAudioSamples) // public
 {
-    numAudioSamples = this->numAudioSamples;
+    numAudioSamples = getNumSamples();
     return audioBuffer.getReadPointer(numChannel);
 }
 
 float* AudioProcessingComponent::getAudioWritePointer(int numChannel, int &numAudioSamples) // public
 {
-    numAudioSamples = this->numAudioSamples;
+    numAudioSamples = getNumSamples();
     return audioBuffer.getWritePointer(numChannel);
 }
 
@@ -124,9 +150,28 @@ int AudioProcessingComponent::getNumChannels()
     return audioBuffer.getNumChannels();
 }
 
+int AudioProcessingComponent::getNumSamples()
+{
+    return audioBuffer.getNumSamples();
+}
+
 const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 {
     return &audioBuffer;
+}
+
+void AudioProcessingComponent::muteMarkedRegion ()
+{
+    int numSamples = 0;
+    float *writePointer = nullptr;
+    for (int channel=0; channel<getNumChannels(); channel++)
+    {
+        writePointer = getAudioWritePointer(channel, numSamples);
+
+        for (int i=markerStartPos; i<=markerEndPos; i++)
+            writePointer[i] = 0;
+    }
+    audioBufferChanged.sendChangeMessage();
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
@@ -175,25 +220,33 @@ void AudioProcessingComponent::setState (TransportState newState)
     }
 }
 
+//-------------------------------POSITION HANDLING-------------------------------------
 void AudioProcessingComponent::setPositionInS(AudioProcessingComponent::PositionType positionType, double newPosition)
 {
+    int position = static_cast<int>(newPosition * sampleRate);
+
+    // make sure the position is in the range
+    if (position < 0)
+        position = 0;
+    else if (position >= getNumSamples())
+        position = getNumSamples() - 1;
+
     switch (positionType)
     {
         case Cursor:
-            currentPos = static_cast<int>(newPosition * sampleRate);
+            currentPos = position;
             break;
         case MarkerStart:
-            markerStartPos = static_cast<int>(newPosition * sampleRate);
+            markerStartPos = position;
             break;
         case MarkerEnd:
-            markerEndPos = static_cast<int>(newPosition * sampleRate);
+            markerEndPos = position;
             break;
     }
 }
 
 double AudioProcessingComponent::getPositionInS(AudioProcessingComponent::PositionType positionType)
 {
-
     switch (positionType)
     {
         case Cursor:
@@ -209,21 +262,7 @@ double AudioProcessingComponent::getPositionInS(AudioProcessingComponent::Positi
 
 double AudioProcessingComponent::getLengthInS()
 {
-    return numAudioSamples / sampleRate;
-}
-
-void AudioProcessingComponent::muteMarkedRegion ()
-{
-    int numSamples = 0;
-    float *writePointer = nullptr;
-    for (int c=0; c<numChannels; c++)
-    {
-        writePointer = getAudioWritePointer(c, numSamples);
-
-        for (int i=markerStartPos; i<=markerEndPos; i++)
-            writePointer[i] = 0;
-    }
-    audioBufferChanged.sendChangeMessage();
+    return getNumSamples() / sampleRate;
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
@@ -233,24 +272,41 @@ void AudioProcessingComponent::loadFile(File file)
     auto* reader = formatManager.createReaderFor (file);
     if (reader != nullptr)
     {
-        // read the entire audio into audioBuffer
-        numAudioSamples = reader->lengthInSamples;
-        audioBuffer.setSize(reader->numChannels, numAudioSamples); // TODO: There's a precision losing warning
-        reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
+        // if there's a file has been loaded, clean the interpolators
+        if (fileLoaded)
+        {
+            for (int channel=0; channel<getNumChannels(); channel++)
+            {
+                delete interpolators[channel];
+            }
+            delete[] interpolators;
+            interpolators = nullptr;
+            fileLoaded = false;
+        }
 
-        // set audio channels
-        numChannels = reader->numChannels;
-        setAudioChannels(0, reader->numChannels);
+        // read the entire audio into audioBuffer
+        auto numSamples = reader->lengthInSamples;
+        auto numChannels = reader->numChannels;
+        audioBuffer.setSize(numChannels, numSamples); // TODO: There's a precision losing warning
+        reader->read(&audioBuffer, 0, numSamples, 0, true, true);
 
         // set sample rate
         sampleRate = reader->sampleRate;
-        audioBufferChanged.sendChangeMessage();
+
+        // create interpolators
+        interpolators = new CatmullRomInterpolator*[numChannels];
+        for (int channel=0; channel<numChannels; channel++)
+            interpolators[channel] = new CatmullRomInterpolator();
 
         //initialize markers
         markerStartPos = 0;
-        markerEndPos = numAudioSamples;
+        markerEndPos = numSamples;
 
+        audioBufferChanged.sendChangeMessage();
         fileLoaded = true;
+
+        // set audio channels
+        setAudioChannels(0, 2); // TODO: enabling 2 channels is hard-coded here
     }
 }
 
