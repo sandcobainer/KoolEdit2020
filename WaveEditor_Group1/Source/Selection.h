@@ -215,7 +215,10 @@ private:
         //only trigger left click menu if clicked inside the selection
         else if (event.mods.isRightButtonDown())
         {
-            popupMenu.show();
+            //if click is inside original selection bounds
+            int mousePos = event.getMouseDownX() + event.getDistanceFromDragStartX();
+            if ((mousePos >= selectionBounds.getX()) && (mousePos <= selectionBounds.getRight()))
+                popupMenu.show();
         }
     }
 
