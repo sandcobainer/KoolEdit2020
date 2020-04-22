@@ -73,6 +73,8 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
             int outputSamplesThisTime = jmin(
                     static_cast<int>(round(bufferSamplesRemaining*sampleRateRatio)),
                     outputSamplesRemaining);
+            if (outputSamplesThisTime == 0)
+                outputSamplesThisTime = 1;
             int inputSamplesThisTime = 0;
 
             if (getNumChannels() == 1) // if it's single channel, copy channel 0 to channel 1
