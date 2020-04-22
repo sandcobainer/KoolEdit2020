@@ -281,6 +281,7 @@ void AudioProcessingComponent::loadFile(File file)
             }
             delete[] interpolators;
             interpolators = nullptr;
+            fileLoaded = false;
         }
 
         // read the entire audio into audioBuffer
@@ -288,9 +289,6 @@ void AudioProcessingComponent::loadFile(File file)
         auto numChannels = reader->numChannels;
         audioBuffer.setSize(numChannels, numSamples); // TODO: There's a precision losing warning
         reader->read(&audioBuffer, 0, numSamples, 0, true, true);
-
-        // set audio channels
-        setAudioChannels(0, 2); // TODO: enabling 2 channels is hard-coded here
 
         // set sample rate
         sampleRate = reader->sampleRate;
@@ -306,6 +304,9 @@ void AudioProcessingComponent::loadFile(File file)
 
         audioBufferChanged.sendChangeMessage();
         fileLoaded = true;
+
+        // set audio channels
+        setAudioChannels(0, 2); // TODO: enabling 2 channels is hard-coded here
     }
 }
 
