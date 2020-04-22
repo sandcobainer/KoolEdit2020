@@ -174,6 +174,36 @@ void AudioProcessingComponent::muteMarkedRegion ()
     audioBufferChanged.sendChangeMessage();
 }
 
+void AudioProcessingComponent::fadeInMarkedRegion()
+{
+    int markedLength = markerEndPos - markerStartPos + 1;
+    int numAudioSamples;
+    float* channelPointer = nullptr;
+
+    for (int channel=0; channel<getNumChannels(); channel++)
+    {
+        channelPointer = getAudioWritePointer(channel, numAudioSamples);
+        for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
+            channelPointer[i+markerStartPos] *= static_cast<float>(i) / static_cast<float>(markedLength-1);
+    }
+    audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::fadeOutMarkedRegion()
+{
+    int markedLength = markerEndPos - markerStartPos + 1;
+    int numAudioSamples;
+    float* channelPointer = nullptr;
+
+    for (int channel=0; channel<getNumChannels(); channel++)
+    {
+        channelPointer = getAudioWritePointer(channel, numAudioSamples);
+        for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
+            channelPointer[i+markerStartPos] *= (1 - static_cast<float>(i) / static_cast<float>(markedLength-1));
+    }
+    audioBufferChanged.sendChangeMessage();
+}
+
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {

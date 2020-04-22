@@ -129,6 +129,14 @@ public:
     */
     void muteMarkedRegion();
 
+    /*! Fades in the audio in the marked region
+    */
+    void fadeInMarkedRegion();
+
+    /*! Fades out the audio in the marked region
+    */
+    void fadeOutMarkedRegion();
+
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
     ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
