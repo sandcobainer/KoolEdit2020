@@ -43,6 +43,9 @@ void AudioProcessingComponent::prepareToPlay (int samplesPerBlockExpected, doubl
     audioBlockBuffer.setSize(getNumChannels(), samplesPerBlockExpected);
     audioBlockBuffer.clear();
     deviceSampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
+    if (fileLoaded)
+        for (int channel=0; channel<getNumChannels(); channel++)
+            interpolators[channel]->reset();
 }
 
 void AudioProcessingComponent::releaseResources() 
@@ -67,17 +70,39 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
         while (outputSamplesRemaining > 0)
         {
             auto bufferSamplesRemaining = markerEndPos - currentPos;
-            auto outputSamplesThisTime = jmin (outputSamplesRemaining,
-                                               static_cast<int>(bufferSamplesRemaining*sampleRateRatio));
-            auto inputSamplesThisTime = static_cast<int>(outputSamplesThisTime / sampleRateRatio);
+            int outputSamplesThisTime = jmin(
+                    static_cast<int>(round(bufferSamplesRemaining*sampleRateRatio)),
+                    outputSamplesRemaining);
+            if (outputSamplesThisTime == 0)
+                outputSamplesThisTime = 1;
+            int inputSamplesThisTime = 0;
 
-            for (auto channel = 0; channel < numOutputChannels; channel++)
+            if (getNumChannels() == 1) // if it's single channel, copy channel 0 to channel 1
             {
-                interpolators[channel]->process(
+                inputSamplesThisTime = interpolators[0]->process(
                         1/sampleRateRatio,
-                        audioBuffer.getReadPointer(channel, currentPos),
-                        bufferToFill.buffer->getWritePointer(channel, outputSamplesOffset),
+                        audioBuffer.getReadPointer(0, currentPos),
+                        bufferToFill.buffer->getWritePointer(0, outputSamplesOffset),
                         outputSamplesThisTime);
+                for (auto channel = 1; channel < numOutputChannels; channel++)
+                {
+                    bufferToFill.buffer->copyFrom(
+                            channel,
+                            outputSamplesOffset,
+                            bufferToFill.buffer->getReadPointer(0, outputSamplesOffset),
+                            outputSamplesThisTime);
+                }
+            }
+            else
+            {
+                for (auto channel = 0; channel < numOutputChannels; channel++)
+                {
+                    inputSamplesThisTime = interpolators[channel]->process(
+                            1/sampleRateRatio,
+                            audioBuffer.getReadPointer(channel, currentPos),
+                            bufferToFill.buffer->getWritePointer(channel, outputSamplesOffset),
+                            outputSamplesThisTime);
+                }
             }
             audioBlockBuffer.copyFrom(0, 0, audioBuffer, 0, currentPos, inputSamplesThisTime);
             blockReady.sendChangeMessage();
@@ -86,7 +111,7 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
             outputSamplesOffset += outputSamplesThisTime;
             currentPos += inputSamplesThisTime;
 
-            if (currentPos == markerEndPos)
+            if (currentPos >= markerEndPos)
             {
                 bufferToFill.clearActiveBufferRegion();
                 stopRequested();
@@ -307,6 +332,7 @@ void AudioProcessingComponent::loadFile(File file)
             }
             delete[] interpolators;
             interpolators = nullptr;
+            fileLoaded = false;
         }
 
         // read the entire audio into audioBuffer
@@ -314,9 +340,6 @@ void AudioProcessingComponent::loadFile(File file)
         auto numChannels = reader->numChannels;
         audioBuffer.setSize(numChannels, numSamples); // TODO: There's a precision losing warning
         reader->read(&audioBuffer, 0, numSamples, 0, true, true);
-
-        // set audio channels
-        setAudioChannels(0, numChannels);
 
         // set sample rate
         sampleRate = reader->sampleRate;
@@ -336,6 +359,9 @@ void AudioProcessingComponent::loadFile(File file)
 
         audioBufferChanged.sendChangeMessage();
         fileLoaded = true;
+
+        // set audio channels
+        setAudioChannels(0, 2); // TODO: enabling 2 channels is hard-coded here
     }
 }
 
