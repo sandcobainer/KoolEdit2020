@@ -67,9 +67,8 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
         while (outputSamplesRemaining > 0)
         {
             auto bufferSamplesRemaining = markerEndPos - currentPos;
-            auto outputSamplesThisTime = jmin (outputSamplesRemaining,
-                                               static_cast<int>(bufferSamplesRemaining*sampleRateRatio));
-            auto inputSamplesThisTime = static_cast<int>(outputSamplesThisTime / sampleRateRatio);
+            auto inputSamplesThisTime = jmin(bufferSamplesRemaining, static_cast<int>(outputSamplesRemaining/sampleRateRatio));
+            auto outputSamplesThisTime = static_cast<int>(round(inputSamplesThisTime * sampleRateRatio));
 
             for (auto channel = 0; channel < numOutputChannels; channel++)
             {
