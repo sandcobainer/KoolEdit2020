@@ -53,6 +53,10 @@ public:
 
     void paintIfFileLoaded(Graphics& g)
     {
+        //do not paint if markers are at start and end of track
+        if (selectionBounds.getWidth() == 0)
+            return;
+        //paint color according to loop on/off
         if (apc.isLoopEnabled() == false)
             g.setColour(Colours::palevioletred);
         else
@@ -101,8 +105,8 @@ public:
         }
         else
         {
-            auto selectStart = (audioStart / audioLength) * waveVisWidth + 0;
-            auto selectEnd = (audioEnd / audioLength) * waveVisWidth + 0;
+            auto selectStart = (audioStart / audioLength) * waveVisWidth;
+            auto selectEnd = (audioEnd / audioLength) * waveVisWidth;
 
             selectionBounds.setBounds(selectStart, 0, selectEnd - selectStart, waveVisHeight);
             repaint();
@@ -125,15 +129,37 @@ private:
         float startPos = 0;
         float endPos = 0;
 
-        if (dragDist > thresholdInPixels)
+        if (dragDist > thresholdInPixels) //click and drag right
         {
             startPos = (start / waveVisWidth) * apc.getLengthInS();
+            //check out of bounds
+            if (startPos < 0)
+                startPos = 0;
+            else if (startPos > apc.getLengthInS())
+                startPos = apc.getLengthInS();
+
             endPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
+            //check out of bounds
+            if (endPos < 0)
+                endPos = 0;
+            else if (endPos > apc.getLengthInS())
+                endPos = apc.getLengthInS();
         }
-        else if (dragDist < -thresholdInPixels)
+        else if (dragDist < -thresholdInPixels) //click and drag left
         {
             startPos = ((start + dragDist) / waveVisWidth) * apc.getLengthInS();
+            //check out of bounds
+            if (startPos < 0)
+                startPos = 0;
+            else if (startPos > apc.getLengthInS())
+                startPos = apc.getLengthInS();
+
             endPos = (start / waveVisWidth) * apc.getLengthInS();
+            //check out of bounds
+            if (endPos < 0)
+                endPos = 0;
+            else if (endPos > apc.getLengthInS())
+                endPos = apc.getLengthInS();
         }
         else
             return; //if threshold is not met, do nothing
@@ -173,15 +199,33 @@ private:
             float startPos = 0;
             float endPos = 0;
 
-            if (dragDist > thresholdInPixels)
+            if ((dragDist > thresholdInPixels) || (dragDist < -thresholdInPixels))
             {
                 startPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionStart;
                 endPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionEnd;
-            }
-            else if (dragDist < -thresholdInPixels)
-            {
-                startPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionStart;
-                endPos = ((dragDist / float(getWidth())) * apc.getLengthInS()) + selectionEnd;
+                //check out of bounds
+                if (startPos < 0)
+                {
+                    startPos = 0;
+                    endPos = selectionEnd - selectionStart;
+                }
+                else if (startPos > apc.getLengthInS())
+                {
+                    startPos = apc.getLengthInS();
+                    endPos = apc.getLengthInS();
+                }
+
+                //check out of bounds
+                if (endPos < 0)
+                {
+                    startPos = 0;
+                    endPos = 0;
+                }
+                else if (endPos > apc.getLengthInS())
+                {
+                    startPos = apc.getLengthInS() - (selectionEnd - selectionStart);
+                    endPos = apc.getLengthInS();
+                }
             }
             else
                 return; //if threshold is not met, do nothing
@@ -266,9 +310,9 @@ private:
     int thresholdInPixels;     //threshold to fix tiny selection bug
     Rectangle<int> selectionBounds; //member that gets painted
     
-    bool isMouseDown;
-    float selectionStart;
-    float selectionEnd;
+    bool isMouseDown; //used in slideBounds
+    float selectionStart; //used in slideBounds
+    float selectionEnd; //used in slideBounds
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selection)
 };
