@@ -47,7 +47,7 @@ namespace buttonAssets
     const int           loop_down_pngSize = 1247;
 
     extern const char*  loop_normal_png;
-    const int           loop_normal_pngSize = 1211;
+    const int           loop_normal_pngSize = 1244;
 
     extern const char*  loop_over_png;
     const int           loop_over_pngSize = 1086;
@@ -97,6 +97,15 @@ namespace buttonAssets
     extern const char*  play_over_png;
     const int           play_over_pngSize = 833;
 
+    extern const char*  redo_down_png;
+    const int           redo_down_pngSize = 1622;
+
+    extern const char*  redo_normal_png;
+    const int           redo_normal_pngSize = 1607;
+
+    extern const char*  redo_over_png;
+    const int           redo_over_pngSize = 1630;
+
     extern const char*  rewind_down_png;
     const int           rewind_down_pngSize = 1580;
 
@@ -132,5 +141,14 @@ namespace buttonAssets
 
     extern const char*  stop_over_png;
     const int           stop_over_pngSize = 670;
+
+    extern const char*  undo_down_png;
+    const int           undo_down_pngSize = 1619;
+
+    extern const char*  undo_normal_png;
+    const int           undo_normal_pngSize = 1602;
+
+    extern const char*  undo_over_png;
+    const int           undo_over_pngSize = 1624;
 
 }
