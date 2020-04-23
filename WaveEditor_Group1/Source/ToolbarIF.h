@@ -89,6 +89,16 @@ public:
         iPasteNormal = ImageFileFormat::loadFrom(buttonAssets::paste_normal_png, (size_t)buttonAssets::paste_normal_pngSize);
         iPasteOver = ImageFileFormat::loadFrom(buttonAssets::paste_over_png, (size_t)buttonAssets::paste_over_pngSize);
         iPasteDown = ImageFileFormat::loadFrom(buttonAssets::paste_down_png, (size_t)buttonAssets::paste_down_pngSize);
+
+        //Undo
+        iUndoNormal = ImageFileFormat::loadFrom(buttonAssets::undo_normal_png, (size_t)buttonAssets::undo_normal_pngSize);
+        iUndoOver = ImageFileFormat::loadFrom(buttonAssets::undo_over_png, (size_t)buttonAssets::undo_over_pngSize);
+        iUndoDown = ImageFileFormat::loadFrom(buttonAssets::undo_down_png, (size_t)buttonAssets::undo_down_pngSize);
+
+        //Redo
+        iRedoNormal = ImageFileFormat::loadFrom(buttonAssets::redo_normal_png, (size_t)buttonAssets::redo_normal_pngSize);
+        iRedoOver = ImageFileFormat::loadFrom(buttonAssets::redo_over_png, (size_t)buttonAssets::redo_over_pngSize);
+        iRedoDown = ImageFileFormat::loadFrom(buttonAssets::redo_down_png, (size_t)buttonAssets::redo_down_pngSize);
         
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -194,6 +204,22 @@ public:
         pasteButton.onClick = [this] {pasteButtonClicked(); };
         pasteButton.setEnabled(false);
         pasteButton.setTooltip("paste");
+
+        //Undo
+        addAndMakeVisible(&undoButton);
+        undoButton.setImages(false, true, true, iUndoNormal, 1.0, Colours::transparentBlack, iUndoOver, 1.0, Colours::transparentBlack, iUndoDown, 1.0, Colours::transparentBlack);
+        undoButton.setState(Button::ButtonState::buttonNormal);
+        undoButton.onClick = [this] {undoButtonClicked(); };
+        undoButton.setEnabled(false);
+        undoButton.setTooltip("undo");
+
+        //Redo
+        addAndMakeVisible(&redoButton);
+        redoButton.setImages(false, true, true, iRedoNormal, 1.0, Colours::transparentBlack, iRedoOver, 1.0, Colours::transparentBlack, iRedoDown, 1.0, Colours::transparentBlack);
+        redoButton.setState(Button::ButtonState::buttonNormal);
+        redoButton.onClick = [this] {redoButtonClicked(); };
+        redoButton.setEnabled(false);
+        redoButton.setTooltip("redo");
     }
 
     ~ToolbarIF()
@@ -225,6 +251,8 @@ public:
                 cutButton.setEnabled(false);
                 copyButton.setEnabled(false);
                 pasteButton.setEnabled(false);
+                undoButton.setEnabled(false);
+                redoButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -242,6 +270,15 @@ public:
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
                 pasteButton.setEnabled(true);
+
+                if (apc.isUndoEnabled())
+                    undoButton.setEnabled(true);
+                else
+                    undoButton.setEnabled(false);
+                if (apc.isRedoEnabled())
+                    redoButton.setEnabled(true);
+                else
+                    redoButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
@@ -259,6 +296,15 @@ public:
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
                 pasteButton.setEnabled(true);
+
+                if (apc.isUndoEnabled())
+                    undoButton.setEnabled(true);
+                else
+                    undoButton.setEnabled(false);
+                if (apc.isRedoEnabled())
+                    redoButton.setEnabled(true);
+                else
+                    redoButton.setEnabled(false);
             }
         }
     }
@@ -272,9 +318,31 @@ public:
         if (state == AudioProcessingComponent::Playing)
             playButton.setState(Button::ButtonState::buttonDown);
         else if (state == AudioProcessingComponent::Stopped)
+        {
             stopButton.setState(Button::ButtonState::buttonDown);
+
+            if (apc.isUndoEnabled())
+                undoButton.setEnabled(true);
+            else
+                undoButton.setEnabled(false);
+            if (apc.isRedoEnabled())
+                redoButton.setEnabled(true);
+            else
+                redoButton.setEnabled(false);
+        }
         else if (state == AudioProcessingComponent::Paused)
+        {
             pauseButton.setState(Button::ButtonState::buttonDown);
+
+            if (apc.isUndoEnabled())
+                undoButton.setEnabled(true);
+            else
+                undoButton.setEnabled(false);
+            if (apc.isRedoEnabled())
+                redoButton.setEnabled(true);
+            else
+                redoButton.setEnabled(false);
+        }
     }
 
     void resized() override
@@ -289,10 +357,12 @@ public:
         ffwdButton.setBounds(232, 10, 30, 30);
         mouseButton.setBounds(getWidth() - 73, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
-        muteButton.setBounds(2, 43, 30, 30);
-        cutButton.setBounds(35, 43, 30, 30);
-        copyButton.setBounds(68, 43, 30, 30);
-        pasteButton.setBounds(101, 43, 30, 30);
+        muteButton.setBounds(100, 43, 30, 30);
+        cutButton.setBounds(133, 43, 30, 30);
+        copyButton.setBounds(166, 43, 30, 30);
+        pasteButton.setBounds(199, 43, 30, 30);
+        undoButton.setBounds(2, 43, 30, 30);
+        redoButton.setBounds(35, 43, 30, 30);
     }
 
     //==========================================================================
@@ -353,6 +423,8 @@ private:
         cutButton.setEnabled(false);
         copyButton.setEnabled(false);
         pasteButton.setEnabled(false);
+        undoButton.setEnabled(false);
+        redoButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -371,6 +443,15 @@ private:
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
         pasteButton.setEnabled(true);
+
+        if (apc.isUndoEnabled())
+            undoButton.setEnabled(true);
+        else
+            undoButton.setEnabled(false);
+        if (apc.isRedoEnabled())
+            redoButton.setEnabled(true);
+        else
+            redoButton.setEnabled(false);
     }
 
     void stopButtonClicked()
@@ -389,6 +470,15 @@ private:
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
         pasteButton.setEnabled(true);
+
+        if(apc.isUndoEnabled())
+            undoButton.setEnabled(true);
+        else
+            undoButton.setEnabled(false);
+        if (apc.isRedoEnabled())
+            redoButton.setEnabled(true);
+        else
+            redoButton.setEnabled(false);
     }
 
     void ffwdButtonClicked()
@@ -452,6 +542,16 @@ private:
     {
 
     }
+
+    void undoButtonClicked()
+    {
+        apc.undo();
+    }
+
+    void redoButtonClicked()
+    {
+        apc.redo();
+    }
     
     //==========================================================================
     //Additional variables
@@ -469,6 +569,8 @@ private:
     ImageButton cutButton;
     ImageButton copyButton;
     ImageButton pasteButton;
+    ImageButton undoButton;
+    ImageButton redoButton;
 
     //Image objects
     Image iPlayNormal;
@@ -522,6 +624,14 @@ private:
     Image iPasteNormal;
     Image iPasteOver;
     Image iPasteDown;
+
+    Image iUndoNormal;
+    Image iUndoOver;
+    Image iUndoDown;
+
+    Image iRedoNormal;
+    Image iRedoOver;
+    Image iRedoDown;
 
     TooltipWindow* buttonHelp;
 
