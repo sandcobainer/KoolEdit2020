@@ -28,7 +28,6 @@ public:
         selectionStart(0),
         selectionEnd(0)
     {
-        popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
     }
 
     ~Selection()
@@ -262,7 +261,12 @@ private:
             //if click is inside original selection bounds
             int mousePos = event.getMouseDownX() + event.getDistanceFromDragStartX();
             if ((mousePos >= selectionBounds.getX()) && (mousePos <= selectionBounds.getRight()))
+            {
+                popupMenu.clear();
+                popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
                 popupMenu.show();
+            }
+
         }
     }
 

@@ -170,6 +170,7 @@ void AudioProcessingComponent::muteMarkedRegion ()
     {
         int numSamples = 0;
         float* writePointer = nullptr;
+        auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
         for (int c = 0; c < getNumChannels(); c++)
         {
             writePointer = getAudioWritePointer(c, numSamples);
@@ -177,11 +178,56 @@ void AudioProcessingComponent::muteMarkedRegion ()
             for (int i = markerStartPos; i <= markerEndPos; i++)
                 writePointer[i] = 0;
         }
+        auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
+        undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
         audioBufferChanged.sendChangeMessage();
     }
     return;
 }
 
+void AudioProcessingComponent::undo()
+{
+    if(!isUndoEnabled())
+        return;
+    undoStack.undo(audioBuffer);
+    audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::redo()
+{
+    if(!isRedoEnabled())
+        return;
+    undoStack.redo(audioBuffer);
+    audioBufferChanged.sendChangeMessage();
+}
+
+bool AudioProcessingComponent::isUndoEnabled()
+{
+    return undoStack.isUndoEnabled();
+}
+
+bool AudioProcessingComponent::isRedoEnabled()
+{
+    return undoStack.isRedoEnabled();
+}
+
+UndoStackAudioBuffer AudioProcessingComponent::getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer, int startSample,
+                                                                int endSample, int startChannel, int numChannels)
+{
+    int numSamples = endSample - startSample + 1;
+    AudioBuffer<float> newAudioBuffer(numChannels, numSamples);
+    for (int channel=startChannel; channel<startChannel+numChannels; channel++)
+        newAudioBuffer.copyFrom(channel-startChannel, 0, audioBuffer, channel, startSample, numSamples);
+    class UndoStackAudioBuffer undoBuffer {newAudioBuffer, startChannel, startSample};
+    return undoBuffer;
+}
+
+UndoStackAudioBuffer AudioProcessingComponent::getUndoBufferFromMarkedRegion()
+{
+    auto undoBuffer = getUndoBufferFromSamplesInRange(audioBuffer,
+            markerStartPos, markerEndPos, 0, getNumChannels());
+    return undoBuffer;
+}
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {
@@ -310,6 +356,10 @@ void AudioProcessingComponent::loadFile(File file)
         //initialize markers
         markerStartPos = 0;
         markerEndPos = numSamples;
+
+        // reset undoStack
+        undoStack.reset();
+        undoStack.setMaxUndoTimes(5); // TODO: let our user choose the number
 
         audioBufferChanged.sendChangeMessage();
         fileLoaded = true;

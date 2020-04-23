@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "WaveAudio.h"
+#include "AudioProcessingUtils.h"
 
 //==============================================================================
 /*
@@ -153,6 +154,18 @@ public:
     */
     void muteMarkedRegion();
 
+    /*! Undo the last operation
+    */
+    void undo();
+
+    /*! Redo the last operation
+    */
+    void redo();
+
+    bool isUndoEnabled();
+
+    bool isRedoEnabled();
+
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
     ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
@@ -163,10 +176,18 @@ private:
     */
     void setState(TransportState state);
 
+    static UndoStackAudioBuffer getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
+            int startSample, int endSample, int startChannel, int numChannels);
+
+    UndoStackAudioBuffer getUndoBufferFromMarkedRegion();
+
+    void pushMarkedRegionToUndoStack();
+
     AudioFormatManager formatManager;
     TransportState state;
     bool fileLoaded;  // indicates if a file is loaded
     CatmullRomInterpolator** interpolators;
+    UndoStack undoStack;
 
     //// AudioBuffer
     // buffer definitions
