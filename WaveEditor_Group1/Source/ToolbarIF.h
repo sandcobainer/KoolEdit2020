@@ -22,6 +22,7 @@ public:
         state = apc.getState(); //initialize transport source state
         //apc.transportSource.addChangeListener(this); //listen to changes in the transport source
         apc.transportState.addChangeListener(this);
+        buttonHelp = new TooltipWindow(this);
 
         //-----------------------GUI Images------------------------------------
         //Play
@@ -64,6 +65,31 @@ public:
         iLoopOver = ImageFileFormat::loadFrom(buttonAssets::loop_over_png, (size_t)buttonAssets::loop_over_pngSize);
         iLoopDown = ImageFileFormat::loadFrom(buttonAssets::loop_down_png, (size_t)buttonAssets::loop_down_pngSize);
 
+        //Mute
+        iMuteNormal = ImageFileFormat::loadFrom(buttonAssets::mute_normal_png, (size_t)buttonAssets::mute_normal_pngSize);
+        iMuteOver = ImageFileFormat::loadFrom(buttonAssets::mute_over_png, (size_t)buttonAssets::mute_over_pngSize);
+        iMuteDown = ImageFileFormat::loadFrom(buttonAssets::mute_down_png, (size_t)buttonAssets::mute_down_pngSize);
+
+        //Mouse
+        iMouseNormal = ImageFileFormat::loadFrom(buttonAssets::select_normal_png, (size_t)buttonAssets::select_normal_pngSize);
+        iMouseOver = ImageFileFormat::loadFrom(buttonAssets::select_over_png, (size_t)buttonAssets::select_over_pngSize);
+        iMouseDown = ImageFileFormat::loadFrom(buttonAssets::select_down_png, (size_t)buttonAssets::select_down_pngSize);
+
+        //Cut
+        iCutNormal = ImageFileFormat::loadFrom(buttonAssets::cut_normal_png, (size_t)buttonAssets::cut_normal_pngSize);
+        iCutOver = ImageFileFormat::loadFrom(buttonAssets::cut_over_png, (size_t)buttonAssets::cut_over_pngSize);
+        iCutDown = ImageFileFormat::loadFrom(buttonAssets::cut_down_png, (size_t)buttonAssets::cut_down_pngSize);
+
+        //Copy
+        iCopyNormal = ImageFileFormat::loadFrom(buttonAssets::copy_normal_png, (size_t)buttonAssets::copy_normal_pngSize);
+        iCopyOver = ImageFileFormat::loadFrom(buttonAssets::copy_over_png, (size_t)buttonAssets::copy_over_pngSize);
+        iCopyDown = ImageFileFormat::loadFrom(buttonAssets::copy_down_png, (size_t)buttonAssets::copy_down_pngSize);
+
+        //Paste
+        iPasteNormal = ImageFileFormat::loadFrom(buttonAssets::paste_normal_png, (size_t)buttonAssets::paste_normal_pngSize);
+        iPasteOver = ImageFileFormat::loadFrom(buttonAssets::paste_over_png, (size_t)buttonAssets::paste_over_pngSize);
+        iPasteDown = ImageFileFormat::loadFrom(buttonAssets::paste_down_png, (size_t)buttonAssets::paste_down_pngSize);
+        
         //-----------------------GUI Buttons-----------------------------------
         //Open
         addAndMakeVisible(&openButton);
@@ -71,6 +97,7 @@ public:
         openButton.setState(Button::ButtonState::buttonNormal);
         openButton.onClick = [this] {openButtonClicked(); };
         openButton.setEnabled(true);
+        openButton.setTooltip("open");
 
         //Save
         addAndMakeVisible(&saveButton);
@@ -78,6 +105,7 @@ public:
         saveButton.setState(Button::ButtonState::buttonNormal);
         saveButton.onClick = [this] {saveButtonClicked(); };
         saveButton.setEnabled(false);
+        saveButton.setTooltip("save");
 
         //Play
         addAndMakeVisible(&playButton);
@@ -85,6 +113,7 @@ public:
         playButton.setState(Button::ButtonState::buttonNormal);
         playButton.onClick = [this] {playButtonClicked(); };
         playButton.setEnabled(false);
+        playButton.setTooltip("play");
 
         //Pause
         addAndMakeVisible(&pauseButton);
@@ -92,6 +121,7 @@ public:
         pauseButton.setState(Button::ButtonState::buttonNormal);
         pauseButton.onClick = [this] {pauseButtonClicked(); };
         pauseButton.setEnabled(false);
+        pauseButton.setTooltip("pause");
 
         //Stop
         addAndMakeVisible(&stopButton);
@@ -99,6 +129,7 @@ public:
         stopButton.setState(Button::ButtonState::buttonNormal);
         stopButton.onClick = [this] {stopButtonClicked(); };
         stopButton.setEnabled(false);
+        stopButton.setTooltip("stop");
 
         //Fastforward
         addAndMakeVisible(&ffwdButton);
@@ -106,6 +137,7 @@ public:
         ffwdButton.setState(Button::ButtonState::buttonNormal);
         ffwdButton.onClick = [this] {ffwdButtonClicked(); };
         ffwdButton.setEnabled(false);
+        ffwdButton.setTooltip("skip to end");
 
         //Rewind
         addAndMakeVisible(&rewindButton);
@@ -113,6 +145,7 @@ public:
         rewindButton.setState(Button::ButtonState::buttonNormal);
         rewindButton.onClick = [this] {rewindButtonClicked(); };
         rewindButton.setEnabled(false);
+        rewindButton.setTooltip("skip to start");
 
         //Loop
         addAndMakeVisible(&loopButton);
@@ -120,6 +153,47 @@ public:
         loopButton.setState(Button::ButtonState::buttonNormal);
         loopButton.onClick = [this] {loopButtonClicked(); };
         loopButton.setEnabled(false);
+        loopButton.setTooltip("loop");
+
+        //Mute
+        addAndMakeVisible(&muteButton);
+        muteButton.setImages(false, true, true, iMuteNormal, 1.0, Colours::transparentWhite, iMuteOver, 1.0, Colours::transparentWhite, iMuteDown, 1.0, Colours::transparentWhite);
+        muteButton.setState(Button::ButtonState::buttonNormal);
+        muteButton.onClick = [this] {muteButtonClicked(); };
+        muteButton.setEnabled(false);
+        muteButton.setTooltip("mute (or right click->Mute)");
+
+        //Mouse
+        addAndMakeVisible(&mouseButton);
+        mouseButton.setImages(false, true, true, iMouseNormal, 1.0, Colours::transparentBlack, iMouseOver, 1.0, Colours::transparentBlack, iMouseDown, 1.0, Colours::transparentBlack);
+        mouseButton.setState(Button::ButtonState::buttonNormal);
+        mouseButton.onClick = [this] {mouseButtonClicked(); };
+        mouseButton.setEnabled(false);
+        mouseButton.setTooltip("select/drag");
+
+        //Cut
+        addAndMakeVisible(&cutButton);
+        cutButton.setImages(false, true, true, iCutNormal, 1.0, Colours::transparentBlack, iCutOver, 1.0, Colours::transparentBlack, iCutDown, 1.0, Colours::transparentBlack);
+        cutButton.setState(Button::ButtonState::buttonNormal);
+        cutButton.onClick = [this] {cutButtonClicked(); };
+        cutButton.setEnabled(false);
+        cutButton.setTooltip("cut");
+
+        //Copy
+        addAndMakeVisible(&copyButton);
+        copyButton.setImages(false, true, true, iCopyNormal, 1.0, Colours::transparentBlack, iCopyOver, 1.0, Colours::transparentBlack, iCopyDown, 1.0, Colours::transparentBlack);
+        copyButton.setState(Button::ButtonState::buttonNormal);
+        copyButton.onClick = [this] {copyButtonClicked(); };
+        copyButton.setEnabled(false);
+        copyButton.setTooltip("copy");
+
+        //Paste
+        addAndMakeVisible(&pasteButton);
+        pasteButton.setImages(false, true, true, iPasteNormal, 1.0, Colours::transparentBlack, iPasteOver, 1.0, Colours::transparentBlack, iPasteDown, 1.0, Colours::transparentBlack);
+        pasteButton.setState(Button::ButtonState::buttonNormal);
+        pasteButton.onClick = [this] {pasteButtonClicked(); };
+        pasteButton.setEnabled(false);
+        pasteButton.setTooltip("paste");
     }
 
     ~ToolbarIF()
@@ -147,6 +221,10 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(false);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(false);
+                cutButton.setEnabled(false);
+                copyButton.setEnabled(false);
+                pasteButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -160,6 +238,10 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(true);
+                cutButton.setEnabled(true);
+                copyButton.setEnabled(true);
+                pasteButton.setEnabled(true);
             }
             else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
@@ -173,6 +255,10 @@ public:
                 ffwdButton.setState(Button::ButtonState::buttonNormal);
                 rewindButton.setEnabled(true);
                 rewindButton.setState(Button::ButtonState::buttonNormal);
+                muteButton.setEnabled(true);
+                cutButton.setEnabled(true);
+                copyButton.setEnabled(true);
+                pasteButton.setEnabled(true);
             }
         }
     }
@@ -201,7 +287,12 @@ public:
         stopButton.setBounds(166, 10, 30, 30);
         rewindButton.setBounds(199, 10, 30, 30);
         ffwdButton.setBounds(232, 10, 30, 30);
+        mouseButton.setBounds(getWidth() - 73, 10, 30, 30);
         loopButton.setBounds(getWidth()-40, 10, 30, 30);
+        muteButton.setBounds(2, 43, 30, 30);
+        cutButton.setBounds(35, 43, 30, 30);
+        copyButton.setBounds(68, 43, 30, 30);
+        pasteButton.setBounds(101, 43, 30, 30);
     }
 
     //==========================================================================
@@ -226,6 +317,11 @@ private:
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
         loopButton.setEnabled(true);
+        muteButton.setEnabled(true);
+        mouseButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -253,6 +349,10 @@ private:
         stopButton.setEnabled(true);
         ffwdButton.setEnabled(false);
         rewindButton.setEnabled(false);
+        muteButton.setEnabled(false);
+        cutButton.setEnabled(false);
+        copyButton.setEnabled(false);
+        pasteButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -267,6 +367,10 @@ private:
         stopButton.setEnabled(true);
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
+        muteButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void stopButtonClicked()
@@ -281,6 +385,10 @@ private:
         pauseButton.setEnabled(false);
         ffwdButton.setEnabled(true);
         rewindButton.setEnabled(true);
+        muteButton.setEnabled(true);
+        cutButton.setEnabled(true);
+        copyButton.setEnabled(true);
+        pasteButton.setEnabled(true);
     }
 
     void ffwdButtonClicked()
@@ -304,6 +412,44 @@ private:
 
     void loopButtonClicked()
     {
+        //toggle button state
+        bool loopState = !loopButton.getToggleState();
+        loopButton.setToggleState(loopState, false);
+
+        //toggle apc state
+        if (loopState == true)
+            apc.loopOnRequested();
+        else
+            apc.loopOffRequested();
+    }
+
+    void muteButtonClicked()
+    {
+        apc.muteMarkedRegion();
+    }
+
+    void mouseButtonClicked()
+    {
+        //toggle button state
+        bool mouseState = !mouseButton.getToggleState();
+        mouseButton.setToggleState(mouseState, false);
+
+        //toggle apc state
+        apc.setMouseState(mouseState);
+    }
+
+    void cutButtonClicked()
+    {
+
+    }
+
+    void copyButtonClicked()
+    {
+
+    }
+
+    void pasteButtonClicked()
+    {
 
     }
     
@@ -318,6 +464,11 @@ private:
     ImageButton ffwdButton;
     ImageButton rewindButton;
     ImageButton loopButton;
+    ImageButton muteButton;
+    ImageButton mouseButton;
+    ImageButton cutButton;
+    ImageButton copyButton;
+    ImageButton pasteButton;
 
     //Image objects
     Image iPlayNormal;
@@ -351,6 +502,28 @@ private:
     Image iLoopNormal;
     Image iLoopOver;
     Image iLoopDown;
+
+    Image iMuteNormal;
+    Image iMuteOver;
+    Image iMuteDown;
+
+    Image iMouseNormal;
+    Image iMouseOver;
+    Image iMouseDown;
+
+    Image iCutNormal;
+    Image iCutOver;
+    Image iCutDown;
+
+    Image iCopyNormal;
+    Image iCopyOver;
+    Image iCopyDown;
+
+    Image iPasteNormal;
+    Image iPasteOver;
+    Image iPasteDown;
+
+    TooltipWindow* buttonHelp;
 
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;

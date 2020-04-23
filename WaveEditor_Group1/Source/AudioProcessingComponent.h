@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "WaveAudio.h"
+#include "AudioProcessingUtils.h"
 
 //==============================================================================
 /*
@@ -71,6 +72,30 @@ public:
     \   evaluate current transport states and determines action
     */
     void pauseRequested();
+
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to TRUE
+    */
+    void loopOnRequested();
+
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to FALSE
+    */
+    void loopOffRequested();
+
+    /*! Returns true if loop is enabled
+    */
+    const bool isLoopEnabled();
+
+    /*! Called from ToolbarIF.h when user clicks mouse icon
+    \   Toggles mouse state between cursor for wave selection
+    \   and normal mouse state for clicking and moving selection
+    */
+    void setMouseState(bool);
+
+    /*! Returns true if mouse state is normal (not selection cursor)
+    */
+    const bool isMouseNormal();
 
     /*! Called by ToolbarIF.h to get current transport state info
     */
@@ -137,6 +162,18 @@ public:
     */
     void fadeOutMarkedRegion();
 
+/*! Undo the last operation
+    */
+    void undo();
+
+    /*! Redo the last operation
+    */
+    void redo();
+
+    bool isUndoEnabled();
+
+    bool isRedoEnabled();
+
     ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
     ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
@@ -147,10 +184,18 @@ private:
     */
     void setState(TransportState state);
 
+    static UndoStackAudioBuffer getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
+            int startSample, int endSample, int startChannel, int numChannels);
+
+    UndoStackAudioBuffer getUndoBufferFromMarkedRegion();
+
+    void pushMarkedRegionToUndoStack();
+
     AudioFormatManager formatManager;
     TransportState state;
     bool fileLoaded;  // indicates if a file is loaded
     CatmullRomInterpolator** interpolators;
+    UndoStack undoStack;
 
     //// AudioBuffer
     // buffer definitions
@@ -163,6 +208,9 @@ private:
     int currentPos;
     int markerStartPos;
     int markerEndPos;
+
+    bool loopEnabled;
+    bool mouseNormal;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
