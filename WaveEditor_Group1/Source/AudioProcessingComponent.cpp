@@ -164,16 +164,22 @@ const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 
 void AudioProcessingComponent::muteMarkedRegion ()
 {
-    int numSamples = 0;
-    float *writePointer = nullptr;
-    for (int channel=0; channel<getNumChannels(); channel++)
+    if (markerStartPos == 0 && markerEndPos == getNumSamples())
+        return;
+    else
     {
-        writePointer = getAudioWritePointer(channel, numSamples);
+        int numSamples = 0;
+        float* writePointer = nullptr;
+        for (int c = 0; c < getNumChannels(); c++)
+        {
+            writePointer = getAudioWritePointer(c, numSamples);
 
-        for (int i=markerStartPos; i<=markerEndPos; i++)
-            writePointer[i] = 0;
+            for (int i = markerStartPos; i <= markerEndPos; i++)
+                writePointer[i] = 0;
+        }
+        audioBufferChanged.sendChangeMessage();
     }
-    audioBufferChanged.sendChangeMessage();
+    return;
 }
 
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
@@ -264,28 +270,9 @@ double AudioProcessingComponent::getPositionInS(AudioProcessingComponent::Positi
 
 double AudioProcessingComponent::getLengthInS()
 {
-    return numAudioSamples / sampleRate;
+    return getNumSamples() / sampleRate;
 }
 
-void AudioProcessingComponent::muteMarkedRegion ()
-{
-    if (markerStartPos == 0 && markerEndPos == numAudioSamples)
-        return;
-    else
-    {
-        int numSamples = 0;
-        float* writePointer = nullptr;
-        for (int c = 0; c < numChannels; c++)
-        {
-            writePointer = getAudioWritePointer(c, numSamples);
-
-            for (int i = markerStartPos; i <= markerEndPos; i++)
-                writePointer[i] = 0;
-        }
-        audioBufferChanged.sendChangeMessage();
-    }
-    return;
-}
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
