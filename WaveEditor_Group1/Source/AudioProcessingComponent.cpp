@@ -20,7 +20,9 @@ sampleRate(0.f),
 deviceSampleRate(0.f),
 currentPos(0),
 markerStartPos(0),
-markerEndPos(0)
+markerEndPos(0),
+loopEnabled(false),
+mouseNormal(false)
 {
     formatManager.registerBasicFormats();
 }
@@ -262,7 +264,27 @@ double AudioProcessingComponent::getPositionInS(AudioProcessingComponent::Positi
 
 double AudioProcessingComponent::getLengthInS()
 {
-    return getNumSamples() / sampleRate;
+    return numAudioSamples / sampleRate;
+}
+
+void AudioProcessingComponent::muteMarkedRegion ()
+{
+    if (markerStartPos == 0 && markerEndPos == numAudioSamples)
+        return;
+    else
+    {
+        int numSamples = 0;
+        float* writePointer = nullptr;
+        for (int c = 0; c < numChannels; c++)
+        {
+            writePointer = getAudioWritePointer(c, numSamples);
+
+            for (int i = markerStartPos; i <= markerEndPos; i++)
+                writePointer[i] = 0;
+        }
+        audioBufferChanged.sendChangeMessage();
+    }
+    return;
 }
 
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
@@ -346,4 +368,29 @@ void AudioProcessingComponent::pauseRequested()
 {
     if (state == Playing)
         setState(Pausing); //stop transport, save current position
+}
+
+void AudioProcessingComponent::loopOnRequested()
+{
+    loopEnabled = true;
+}
+
+void AudioProcessingComponent::loopOffRequested()
+{
+    loopEnabled = false;
+}
+
+const bool AudioProcessingComponent::isLoopEnabled()
+{
+    return loopEnabled;
+}
+
+void AudioProcessingComponent::setMouseState(bool mouseState)
+{
+    mouseNormal = mouseState;
+}
+
+const bool AudioProcessingComponent::isMouseNormal()
+{
+    return mouseNormal;
 }
