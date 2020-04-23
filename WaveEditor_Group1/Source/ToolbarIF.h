@@ -211,7 +211,7 @@ public:
         undoButton.setState(Button::ButtonState::buttonNormal);
         undoButton.onClick = [this] {undoButtonClicked(); };
         undoButton.setEnabled(false);
-        undoButton.setTooltip("undo (or right click->undo)");
+        undoButton.setTooltip("undo");
 
         //Redo
         addAndMakeVisible(&redoButton);
@@ -219,7 +219,7 @@ public:
         redoButton.setState(Button::ButtonState::buttonNormal);
         redoButton.onClick = [this] {redoButtonClicked(); };
         redoButton.setEnabled(false);
-        redoButton.setTooltip("redo (or right click->redo");
+        redoButton.setTooltip("redo");
     }
 
     ~ToolbarIF()
@@ -251,6 +251,8 @@ public:
                 cutButton.setEnabled(false);
                 copyButton.setEnabled(false);
                 pasteButton.setEnabled(false);
+                undoButton.setEnabled(false);
+                redoButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -268,6 +270,15 @@ public:
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
                 pasteButton.setEnabled(true);
+
+                if (apc.isUndoEnabled())
+                    undoButton.setEnabled(true);
+                else
+                    undoButton.setEnabled(false);
+                if (apc.isRedoEnabled())
+                    redoButton.setEnabled(true);
+                else
+                    redoButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Pausing)
             {
@@ -285,6 +296,15 @@ public:
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
                 pasteButton.setEnabled(true);
+
+                if (apc.isUndoEnabled())
+                    undoButton.setEnabled(true);
+                else
+                    undoButton.setEnabled(false);
+                if (apc.isRedoEnabled())
+                    redoButton.setEnabled(true);
+                else
+                    redoButton.setEnabled(false);
             }
         }
     }
@@ -298,9 +318,31 @@ public:
         if (state == AudioProcessingComponent::Playing)
             playButton.setState(Button::ButtonState::buttonDown);
         else if (state == AudioProcessingComponent::Stopped)
+        {
             stopButton.setState(Button::ButtonState::buttonDown);
+
+            if (apc.isUndoEnabled())
+                undoButton.setEnabled(true);
+            else
+                undoButton.setEnabled(false);
+            if (apc.isRedoEnabled())
+                redoButton.setEnabled(true);
+            else
+                redoButton.setEnabled(false);
+        }
         else if (state == AudioProcessingComponent::Paused)
+        {
             pauseButton.setState(Button::ButtonState::buttonDown);
+
+            if (apc.isUndoEnabled())
+                undoButton.setEnabled(true);
+            else
+                undoButton.setEnabled(false);
+            if (apc.isRedoEnabled())
+                redoButton.setEnabled(true);
+            else
+                redoButton.setEnabled(false);
+        }
     }
 
     void resized() override
@@ -381,6 +423,8 @@ private:
         cutButton.setEnabled(false);
         copyButton.setEnabled(false);
         pasteButton.setEnabled(false);
+        undoButton.setEnabled(false);
+        redoButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -399,6 +443,15 @@ private:
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
         pasteButton.setEnabled(true);
+
+        if (apc.isUndoEnabled())
+            undoButton.setEnabled(true);
+        else
+            undoButton.setEnabled(false);
+        if (apc.isRedoEnabled())
+            redoButton.setEnabled(true);
+        else
+            redoButton.setEnabled(false);
     }
 
     void stopButtonClicked()
@@ -417,6 +470,15 @@ private:
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
         pasteButton.setEnabled(true);
+
+        if(apc.isUndoEnabled())
+            undoButton.setEnabled(true);
+        else
+            undoButton.setEnabled(false);
+        if (apc.isRedoEnabled())
+            redoButton.setEnabled(true);
+        else
+            redoButton.setEnabled(false);
     }
 
     void ffwdButtonClicked()
@@ -483,12 +545,12 @@ private:
 
     void undoButtonClicked()
     {
-
+        apc.undo();
     }
 
     void redoButtonClicked()
     {
-
+        apc.redo();
     }
     
     //==========================================================================
