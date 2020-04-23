@@ -185,26 +185,21 @@ void AudioProcessingComponent::muteMarkedRegion ()
     return;
 }
 
-void AudioProcessingComponent::undo()
-{
-    if(!isUndoEnabled())
-        return;
-    undoStack.undo(audioBuffer);
-    audioBufferChanged.sendChangeMessage();
-}
-
 void AudioProcessingComponent::fadeInMarkedRegion()
 {
     int markedLength = markerEndPos - markerStartPos + 1;
     int numAudioSamples;
     float* channelPointer = nullptr;
 
+    auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         channelPointer = getAudioWritePointer(channel, numAudioSamples);
         for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
             channelPointer[i+markerStartPos] *= static_cast<float>(i) / static_cast<float>(markedLength-1);
     }
+    auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
+    undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -214,12 +209,23 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
     int numAudioSamples;
     float* channelPointer = nullptr;
 
+    auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         channelPointer = getAudioWritePointer(channel, numAudioSamples);
         for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
             channelPointer[i+markerStartPos] *= (1 - static_cast<float>(i) / static_cast<float>(markedLength-1));
     }
+    auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
+    undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
+    audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::undo()
+{
+    if(!isUndoEnabled())
+        return;
+    undoStack.undo(audioBuffer);
     audioBufferChanged.sendChangeMessage();
 }
 
