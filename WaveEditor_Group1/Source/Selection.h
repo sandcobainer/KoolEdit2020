@@ -99,8 +99,8 @@ public:
         auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
         auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
 
-        if (audioStart == 0 && audioEnd == apc.getLengthInS())
-        {
+        if (audioStart == 0 && (abs(audioEnd - apc.getLengthInS()) < 0.001))
+        { 
             resetBounds();
         }
         else
