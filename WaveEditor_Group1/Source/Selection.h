@@ -264,6 +264,8 @@ private:
             {
                 popupMenu.clear();
                 popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
+                popupMenu.addItem("Fade In", [this]() {apc.fadeInMarkedRegion(); });
+                popupMenu.addItem("Fade Out", [this]() {apc.fadeOutMarkedRegion(); });
                 popupMenu.show();
             }
 
