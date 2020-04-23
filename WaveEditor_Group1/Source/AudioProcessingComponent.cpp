@@ -20,7 +20,9 @@ sampleRate(0.f),
 deviceSampleRate(0.f),
 currentPos(0),
 markerStartPos(0),
-markerEndPos(0)
+markerEndPos(0),
+loopEnabled(false),
+mouseNormal(false)
 {
     formatManager.registerBasicFormats();
 }
@@ -162,32 +164,22 @@ const AudioBuffer<float>* AudioProcessingComponent::getAudioBuffer()
 
 void AudioProcessingComponent::muteMarkedRegion ()
 {
-    int numSamples = 0;
-    float *writePointer = nullptr;
-
-    auto beforeEditBuffer = getUndoBufferFromMarkedRegion();
-
-    for (int channel=0; channel<getNumChannels(); channel++)
-    {
-        writePointer = getAudioWritePointer(channel, numSamples);
-
-        for (int i=markerStartPos; i<=markerEndPos; i++)
-            writePointer[i] = 0;
-    }
-
-    auto afterEditBuffer = getUndoBufferFromMarkedRegion();
-
-    undoStack.pushUndoStackAudioBuffers(beforeEditBuffer, afterEditBuffer);
-
-    audioBufferChanged.sendChangeMessage();
-}
-
-void AudioProcessingComponent::undo()
-{
-    if (!isUndoEnabled())
+    if (markerStartPos == 0 && markerEndPos == getNumSamples())
         return;
-    undoStack.undo(audioBuffer);
-    audioBufferChanged.sendChangeMessage();
+    else
+    {
+        int numSamples = 0;
+        float* writePointer = nullptr;
+        for (int c = 0; c < getNumChannels(); c++)
+        {
+            writePointer = getAudioWritePointer(c, numSamples);
+
+            for (int i = markerStartPos; i <= markerEndPos; i++)
+                writePointer[i] = 0;
+        }
+        audioBufferChanged.sendChangeMessage();
+    }
+    return;
 }
 
 void AudioProcessingComponent::redo()
@@ -316,6 +308,7 @@ double AudioProcessingComponent::getLengthInS()
     return getNumSamples() / sampleRate;
 }
 
+
 //-----------------------------BUTTON PRESS HANDLING-------------------------------------------
 void AudioProcessingComponent::loadFile(File file)
 {
@@ -401,4 +394,29 @@ void AudioProcessingComponent::pauseRequested()
 {
     if (state == Playing)
         setState(Pausing); //stop transport, save current position
+}
+
+void AudioProcessingComponent::loopOnRequested()
+{
+    loopEnabled = true;
+}
+
+void AudioProcessingComponent::loopOffRequested()
+{
+    loopEnabled = false;
+}
+
+const bool AudioProcessingComponent::isLoopEnabled()
+{
+    return loopEnabled;
+}
+
+void AudioProcessingComponent::setMouseState(bool mouseState)
+{
+    mouseNormal = mouseState;
+}
+
+const bool AudioProcessingComponent::isMouseNormal()
+{
+    return mouseNormal;
 }

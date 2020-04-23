@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
+#include "Selection.h"
 
 //==============================================================================
 /*
@@ -25,12 +26,15 @@ public:
     apc(c),
     thumbnailCache (5),
     thumbnail (512, formatManager, thumbnailCache),
-    selectionBounds(0,0,0,0)
+    thumbnailBounds(0, 0, 0, 0)
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
         apc.audioBufferChanged.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
+
+        waveSelection = new Selection(apc, thumbnail);
+        addAndMakeVisible(waveSelection);
     }
 
     ~WaveVisualizer()
@@ -40,16 +44,18 @@ public:
     void paint (Graphics& g) override
     {
         // TODO: Change this size later
-        Rectangle<int> thumbnailBounds (0,0, getWidth(), getHeight());
+       thumbnailBounds.setBounds(0,0, getWidth(), getHeight());
+       waveSelection->parentDimensions(getWidth(), getHeight());
         
         if (apc.getNumChannels() == 0)
-            paintIfNoFileLoaded (g, thumbnailBounds);
+            paintIfNoFileLoaded (g);
         else
-            paintIfFileLoaded (g, thumbnailBounds);
+            paintIfFileLoaded (g);
     }
 
     void resized() override
     {
+        waveSelection->parentDimensions(getWidth(), getHeight());
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
@@ -63,9 +69,10 @@ public:
     void timerCallback() override
     {
         repaint();
+        waveSelection->setSelectionSize();
     }
 
-    void paintIfNoFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
+    void paintIfNoFileLoaded (Graphics& g)
     {
         g.setColour (Colours::darkgrey);
         g.fillRect (thumbnailBounds);
@@ -73,7 +80,7 @@ public:
         g.drawFittedText ("No File Loaded", thumbnailBounds, Justification::centred, 1.0f);
     }
     
-    void paintIfFileLoaded (Graphics& g, const Rectangle<int>& thumbnailBounds)
+    void paintIfFileLoaded (Graphics& g)
     {
         //-----------------------------track background--------------------------------------
         g.setColour (Colours::dimgrey);
@@ -95,23 +102,6 @@ public:
                            + thumbnailBounds.getX());                                        // [13]
         g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
-
-        //--------------------------------selection----------------------------------------
-        auto audioStart(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
-        auto audioEnd(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-        
-        auto selectStart = (audioStart / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
-        auto selectEnd = (audioEnd / audioLength) * thumbnailBounds.getWidth() + thumbnailBounds.getX();
-
-        selectionBounds.setBounds(selectStart, 0, selectEnd - selectStart, getHeight());
-
-        g.setColour(Colours::palevioletred);
-        //if there is no actual selection (start = beginning, end = track end) AND loop is off, don't paint
-        if (audioStart == 0 && audioEnd == apc.getLengthInS())
-            g.setOpacity(0);
-        else
-            g.setOpacity(0.4);
-        g.fillRect(selectionBounds);
     }
 
     void mouseDown (const MouseEvent &event) override
@@ -123,54 +113,19 @@ public:
             apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
             apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
 
-            selectionBounds.setBounds(0, 0, 0, 0);
+            waveSelection->resetBounds();
             repaint();
         }
-        else if (event.mods.isRightButtonDown())
-        {
-            popupMenu.clear();
-
-            popupMenu.addItem("Mute", [this](){apc.muteMarkedRegion();});
-            if (apc.isUndoEnabled())
-                popupMenu.addItem("Undo", [this](){apc.undo();});
-            if (apc.isRedoEnabled())
-                popupMenu.addItem("Redo", [this](){apc.redo();});
-
-            popupMenu.show();
-        }
-    }
-
-    void mouseDrag(const MouseEvent& event) override
-    {
-        //coordinates from mouse event
-        float start = float(event.getMouseDownX());
-        float dragDist = float(event.getDistanceFromDragStartX());
-
-        //start and end positions in seconds
-        float startPos = 0;
-        float endPos = 0;
-
-        if (dragDist > 0)
-        {
-            startPos = (start / getWidth()) * apc.getLengthInS();
-            endPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
-        }
-        else if (dragDist < 0)
-        {
-            startPos = ((start + dragDist) / getWidth()) * apc.getLengthInS();
-            endPos = (start / getWidth()) * apc.getLengthInS();
-        }
-
-        apc.setPositionInS(AudioProcessingComponent::MarkerStart, startPos);
-        apc.setPositionInS(AudioProcessingComponent::MarkerEnd, endPos);
-        apc.setPositionInS(AudioProcessingComponent::Cursor, startPos);
-        repaint();
     }
 
     void mouseEnter(const MouseEvent& event) override
     {
         //automatically change the cursor to IBeam style when over the waveform
-        setMouseCursor(juce::MouseCursor::IBeamCursor);
+        //and if mouse icon is not clicked
+        if (apc.isMouseNormal())
+            setMouseCursor(juce::MouseCursor::NormalCursor);
+        else
+            setMouseCursor(juce::MouseCursor::IBeamCursor);
     }
 
     void mouseExit(const MouseEvent& event) override
@@ -185,10 +140,11 @@ private:
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
+    Rectangle<int> thumbnailBounds;
     AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
-    PopupMenu popupMenu;
 
-    Rectangle<float> selectionBounds;              //rectangle drawn when user clicks and drags
+    Selection *waveSelection;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
 

@@ -73,6 +73,30 @@ public:
     */
     void pauseRequested();
 
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to TRUE
+    */
+    void loopOnRequested();
+
+    /*! Called from ToolbarIF.h when user clicks loop button
+    \   sets loopEnabled to FALSE
+    */
+    void loopOffRequested();
+
+    /*! Returns true if loop is enabled
+    */
+    const bool isLoopEnabled();
+
+    /*! Called from ToolbarIF.h when user clicks mouse icon
+    \   Toggles mouse state between cursor for wave selection
+    \   and normal mouse state for clicking and moving selection
+    */
+    void setMouseState(bool);
+
+    /*! Returns true if mouse state is normal (not selection cursor)
+    */
+    const bool isMouseNormal();
+
     /*! Called by ToolbarIF.h to get current transport state info
     */
     TransportState getState();
@@ -176,6 +200,9 @@ private:
     int currentPos;
     int markerStartPos;
     int markerEndPos;
+
+    bool loopEnabled;
+    bool mouseNormal;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessingComponent)
 };
