@@ -170,6 +170,7 @@ void AudioProcessingComponent::muteMarkedRegion ()
     {
         int numSamples = 0;
         float* writePointer = nullptr;
+        auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
         for (int c = 0; c < getNumChannels(); c++)
         {
             writePointer = getAudioWritePointer(c, numSamples);
@@ -177,9 +178,19 @@ void AudioProcessingComponent::muteMarkedRegion ()
             for (int i = markerStartPos; i <= markerEndPos; i++)
                 writePointer[i] = 0;
         }
+        auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
+        undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
         audioBufferChanged.sendChangeMessage();
     }
     return;
+}
+
+void AudioProcessingComponent::undo()
+{
+    if(!isUndoEnabled())
+        return;
+    undoStack.undo(audioBuffer);
+    audioBufferChanged.sendChangeMessage();
 }
 
 void AudioProcessingComponent::redo()
