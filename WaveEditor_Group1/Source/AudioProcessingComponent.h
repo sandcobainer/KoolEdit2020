@@ -126,6 +126,10 @@ public:
     */
     int getNumChannels();
 
+    /*! Returns the number of samples of audio data
+    */
+    int getNumSamples();
+
     /*! Returns the current sample rate
     */
     double getSampleRate();
@@ -154,33 +158,23 @@ public:
     ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
 
 private:
-    
-
-    /*! Fill the audioSampleBuffer with new coming data.
-        @param channelData one channel of data.
-        @param numChannel the number of channel that will be filled.
-    */
-    void fillAudioBlockBuffer(const float* channelData, int numChannel);
 
     /*! Internal function to change the transport state
     */
     void setState(TransportState state);
 
     AudioFormatManager formatManager;
-
-    TransportState state;       //!< enum
-
+    TransportState state;
     bool fileLoaded;  // indicates if a file is loaded
+    CatmullRomInterpolator** interpolators;
 
     //// AudioBuffer
     // buffer definitions
     AudioBuffer<float> audioBlockBuffer;
     AudioBuffer<float> audioBuffer;
     // meta info
-    unsigned int numChannels;
-    int numBlockSamples;
     double sampleRate;
-    juce::int64 numAudioSamples;
+    double deviceSampleRate;
     // position info (the unit is always in sample)
     int currentPos;
     int markerStartPos;
