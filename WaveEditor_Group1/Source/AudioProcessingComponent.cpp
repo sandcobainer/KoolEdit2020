@@ -185,11 +185,10 @@ void AudioProcessingComponent::muteMarkedRegion ()
             for (int i = markerStartPos; i <= markerEndPos; i++)
                 writePointer[i] = 0;
         }
-        //auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
+
         for (int channel=0; channel<getNumChannels(); channel++)
             bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
 
-        std::cout << "markerStartPos: " << markerStartPos <<std::endl;
         UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
         undoStack.addRecord(record);
         audioBufferChanged.sendChangeMessage();
