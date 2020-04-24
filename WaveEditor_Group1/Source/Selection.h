@@ -263,6 +263,10 @@ private:
             if ((mousePos >= selectionBounds.getX()) && (mousePos <= selectionBounds.getRight()))
             {
                 popupMenu.clear();
+                popupMenu.addItem("Copy", [this]() {apc.copyMarkedRegion(); });
+                popupMenu.addItem("Cut", [this]() {apc.cutMarkedRegion(); });
+                if (apc.isPasteEnabled())
+                    popupMenu.addItem("Paste", [this]() {apc.pasteFromCursor(); });
                 popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
                 popupMenu.addItem("Fade In", [this]() {apc.fadeInMarkedRegion(); });
                 popupMenu.addItem("Fade Out", [this]() {apc.fadeOutMarkedRegion(); });

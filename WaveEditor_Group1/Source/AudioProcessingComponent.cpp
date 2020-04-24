@@ -25,6 +25,7 @@ loopEnabled(false),
 mouseNormal(false)
 {
     formatManager.registerBasicFormats();
+    audioCopyBuffer.clear();
 }
 
 AudioProcessingComponent::~AudioProcessingComponent()  {
@@ -219,6 +220,53 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
     auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
     undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
     audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::copyMarkedRegion()
+{
+    audioCopyBuffer.clear();
+    // TODO: the channel number is hard-coded here, which equals to the audio channel number
+    audioCopyBuffer.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    for (int channel=0; channel<getNumChannels(); channel++)
+        audioCopyBuffer.copyFrom(channel, 0, audioBuffer, channel, markerStartPos, markerEndPos-markerStartPos+1);
+    audioCopied.sendChangeMessage();
+}
+
+void AudioProcessingComponent::cutMarkedRegion()
+{
+    copyMarkedRegion();
+    muteMarkedRegion();
+}
+
+void AudioProcessingComponent::pasteFromCursor()
+{
+    // TODO: the channel number is hard-coded here, which equals to the audio channel number
+    // FIXME: due to the current UndoStack implementation, undo and redo functionality is not stable for paste operation
+    int newLength = 0;
+    //auto bufferBeforeEdit = getUndoBufferFromSamplesInRange(
+    //        audioBuffer,
+    //        currentPos,
+    //        jmin(currentPos+audioCopyBuffer.getNumSamples()-1, getNumSamples()-1),
+    //        0, getNumChannels());
+    for (int channel=0; channel<getNumChannels(); channel++)
+    {
+        newLength = currentPos + audioCopyBuffer.getNumSamples();
+        if (newLength > getNumSamples()) // resize audio buffer if it should get larger
+            audioBuffer.setSize(getNumChannels(), newLength, true);
+        audioBuffer.copyFrom(channel, currentPos, audioCopyBuffer, channel, 0, audioCopyBuffer.getNumSamples());
+    }
+    //auto bufferAfterEdit = getUndoBufferFromSamplesInRange(
+    //        audioBuffer,
+    //        currentPos,
+    //        currentPos+audioCopyBuffer.getNumSamples()-1,
+    //        0, getNumChannels());
+    //undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
+    audioBufferChanged.sendChangeMessage();
+}
+
+bool AudioProcessingComponent::isPasteEnabled()
+{
+    return !audioCopyBuffer.hasBeenCleared();
 }
 
 void AudioProcessingComponent::undo()

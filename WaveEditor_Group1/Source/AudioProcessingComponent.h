@@ -162,7 +162,21 @@ public:
     */
     void fadeOutMarkedRegion();
 
-/*! Undo the last operation
+    /*! Copies the audio in the marked region
+    */
+    void copyMarkedRegion();
+
+    /*! Cuts the audio in the marked region
+    */
+    void cutMarkedRegion();
+
+    /*! Pastes the audio from the current cursor position
+    */
+    void pasteFromCursor();
+
+    bool isPasteEnabled();
+
+    /*! Undo the last operation
     */
     void undo();
 
@@ -174,9 +188,10 @@ public:
 
     bool isRedoEnabled();
 
-    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
-    ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
-    ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
+    ChangeBroadcaster transportState;
+    ChangeBroadcaster audioBufferChanged;
+    ChangeBroadcaster blockReady;
+    ChangeBroadcaster audioCopied;
 
 private:
 
@@ -201,6 +216,7 @@ private:
     // buffer definitions
     AudioBuffer<float> audioBlockBuffer;
     AudioBuffer<float> audioBuffer;
+    AudioBuffer<float> audioCopyBuffer;
     // meta info
     double sampleRate;
     double deviceSampleRate;
