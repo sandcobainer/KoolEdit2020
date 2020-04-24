@@ -176,11 +176,6 @@ private:
     */
     void setState(TransportState state);
 
-    static UndoStackAudioBuffer getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
-            int startSample, int endSample, int startChannel, int numChannels);
-
-    UndoStackAudioBuffer getUndoBufferFromMarkedRegion();
-
     void pushMarkedRegionToUndoStack();
 
     AudioFormatManager formatManager;
