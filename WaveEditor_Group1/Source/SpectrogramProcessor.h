@@ -69,9 +69,13 @@ public:
         int cols = fftSize * 2;
         // TODO: it only takes channel 0
         auto readPointer = apc.getAudioReadPointer(0, numSamples);
-        releaseMemForMatrix();
-        // the size of each row must be fftSize*2
-        allocMemForMatrix(static_cast<int>(numSamples/fftSize), cols);
+        if (this->numSamples != numSamples)
+        {
+            if (isMatrixInitialized)
+                releaseMemForMatrix();
+            // the size of each row must be fftSize*2
+            allocMemForMatrix(static_cast<int>(numSamples/fftSize), cols);
+        }
         zeromem(matrixRawPointer, sizeof(float)*getNumRows()*getNumColumns());
         for (int row=0; row<getNumRows(); row++)
         {
@@ -80,6 +84,7 @@ public:
             memcpy(matrixRawPointer+row*cols, readPointer+row*fftSize, sizeof(float)*fftSize);
             forwardFFT.performFrequencyOnlyForwardTransform(matrixRawPointer+row*cols);
         }
+        this->numSamples = numSamples;
         spectrogramReady.sendChangeMessage();
     }
 
@@ -110,4 +115,5 @@ private:
     int numRows;
     int numColumns;
     bool isMatrixInitialized;
+    int numSamples;
 };
