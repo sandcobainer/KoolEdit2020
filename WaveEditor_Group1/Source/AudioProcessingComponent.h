@@ -210,7 +210,7 @@ private:
     /*! Makes sure the markers are not out of range. It should be used in
      * any operation that might change the audio buffer size
     */
-    void boundMarkers();
+    void boundPositions();
 
     AudioFormatManager formatManager;
     TransportState state;

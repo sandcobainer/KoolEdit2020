@@ -303,7 +303,7 @@ void AudioProcessingComponent::deleteMarkedRegion()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
-    boundMarkers();
+    boundPositions();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -338,7 +338,7 @@ void AudioProcessingComponent::pasteFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, currentPos};
     undoStack.addRecord(record);
 
-    boundMarkers();
+    boundPositions();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -358,7 +358,7 @@ void AudioProcessingComponent::insertFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
-    boundMarkers();
+    boundPositions();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -372,7 +372,7 @@ void AudioProcessingComponent::undo()
     if(!isUndoEnabled())
         return;
     undoStack.undo(audioBuffer);
-    boundMarkers();
+    boundPositions();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -381,7 +381,7 @@ void AudioProcessingComponent::redo()
     if(!isRedoEnabled())
         return;
     undoStack.redo(audioBuffer);
-    boundMarkers();
+    boundPositions();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -395,7 +395,7 @@ bool AudioProcessingComponent::isRedoEnabled()
     return undoStack.isRedoEnabled();
 }
 
-void AudioProcessingComponent::boundMarkers()
+void AudioProcessingComponent::boundPositions()
 {
     if (markerStartPos < 0)
         markerStartPos = 0;
@@ -406,6 +406,11 @@ void AudioProcessingComponent::boundMarkers()
         markerEndPos = 0;
     else if (markerEndPos > getNumSamples()-1)
         markerEndPos = getNumSamples() - 1;
+
+    if (currentPos < 0)
+        currentPos = 0;
+    else if (currentPos > getNumSamples()-1)
+        currentPos = getNumSamples() - 1;
 }
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
