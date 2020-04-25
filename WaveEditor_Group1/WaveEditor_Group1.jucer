@@ -4,6 +4,8 @@
   <MAINGROUP id="tyDDqv" name="WaveEditor_Group1">
     <GROUP id="{3E47EF1E-4CB9-544D-1C23-A552A31D159C}" name="Source">
       <GROUP id="{BB5CC47A-0D16-07D6-1FBF-C9722E750B60}" name="AudioProcessing">
+        <FILE id="YD6ucg" name="Utils.h" compile="0" resource="0" file="Source/Utils.h"/>
+        <FILE id="XtzHWw" name="UndoStack.h" compile="0" resource="0" file="Source/UndoStack.h"/>
         <FILE id="Tgs0Vv" name="MeterAudio.h" compile="0" resource="0" file="Source/MeterAudio.h"/>
         <FILE id="hvTkn4" name="SpectrogramProcessor.h" compile="0" resource="0"
               file="Source/SpectrogramProcessor.h"/>
@@ -26,8 +28,6 @@
             file="Source/AudioProcessingComponent.cpp"/>
       <FILE id="Q3HFvT" name="AudioProcessingComponent.h" compile="0" resource="0"
             file="Source/AudioProcessingComponent.h"/>
-      <FILE id="XtzHWw" name="AudioProcessingUtils.h" compile="0" resource="0"
-            file="Source/AudioProcessingUtils.h"/>
       <FILE id="kSxnZY" name="GUIComponent.cpp" compile="1" resource="0"
             file="Source/GUIComponent.cpp"/>
       <FILE id="RPJWRE" name="GUIComponent.h" compile="0" resource="0" file="Source/GUIComponent.h"/>
