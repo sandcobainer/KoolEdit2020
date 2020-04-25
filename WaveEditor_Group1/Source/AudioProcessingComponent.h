@@ -178,6 +178,10 @@ public:
     */
     void pasteFromCursor();
 
+    /*! Insert the audio from the current cursor position
+    */
+    void insertFromCursor();
+
     bool isPasteEnabled();
 
     /*! Undo the last operation

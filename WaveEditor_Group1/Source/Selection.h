@@ -266,7 +266,10 @@ private:
                 popupMenu.addItem("Copy", [this]() {apc.copyMarkedRegion(); });
                 popupMenu.addItem("Cut", [this]() {apc.cutMarkedRegion(); });
                 if (apc.isPasteEnabled())
+                {
                     popupMenu.addItem("Paste", [this]() {apc.pasteFromCursor(); });
+                    popupMenu.addItem("Insert", [this]() {apc.insertFromCursor(); });
+                }
                 popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
                 popupMenu.addItem("Delete", [this]() {apc.deleteMarkedRegion(); });
                 popupMenu.addItem("Fade In", [this]() {apc.fadeInMarkedRegion(); });
