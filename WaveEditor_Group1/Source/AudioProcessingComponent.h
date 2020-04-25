@@ -207,7 +207,10 @@ private:
     */
     void setState(TransportState state);
 
-    void pushMarkedRegionToUndoStack();
+    /*! Makes sure the markers are not out of range. It should be used in
+     * any operation that might change the audio buffer size
+    */
+    void boundMarkers();
 
     AudioFormatManager formatManager;
     TransportState state;

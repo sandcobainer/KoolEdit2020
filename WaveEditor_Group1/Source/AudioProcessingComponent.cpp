@@ -300,6 +300,7 @@ void AudioProcessingComponent::deleteMarkedRegion()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
+    boundMarkers();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -334,6 +335,7 @@ void AudioProcessingComponent::pasteFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, currentPos};
     undoStack.addRecord(record);
 
+    boundMarkers();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -342,7 +344,7 @@ void AudioProcessingComponent::insertFromCursor()
     AudioBuffer<float> bufferBeforeOperation;
     bufferBeforeOperation.setSize(getNumChannels(), 0);
     AudioBuffer<float> bufferAfterOperation;
-    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    bufferAfterOperation.setSize(getNumChannels(), audioCopyBuffer.getNumSamples());
 
     AudioBufferUtils<float>::insertRegion(audioBuffer, audioCopyBuffer, markerStartPos);
 
@@ -353,6 +355,7 @@ void AudioProcessingComponent::insertFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
+    boundMarkers();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -366,6 +369,7 @@ void AudioProcessingComponent::undo()
     if(!isUndoEnabled())
         return;
     undoStack.undo(audioBuffer);
+    boundMarkers();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -374,6 +378,7 @@ void AudioProcessingComponent::redo()
     if(!isRedoEnabled())
         return;
     undoStack.redo(audioBuffer);
+    boundMarkers();
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -387,6 +392,18 @@ bool AudioProcessingComponent::isRedoEnabled()
     return undoStack.isRedoEnabled();
 }
 
+void AudioProcessingComponent::boundMarkers()
+{
+    if (markerStartPos < 0)
+        markerStartPos = 0;
+    else if (markerStartPos > getNumSamples()-1)
+        markerStartPos = getNumSamples() - 1;
+
+    if (markerEndPos < 0)
+        markerEndPos = 0;
+    else if (markerEndPos > getNumSamples()-1)
+        markerEndPos = getNumSamples() - 1;
+}
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
 {
