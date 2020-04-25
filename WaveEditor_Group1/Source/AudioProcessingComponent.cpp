@@ -118,7 +118,10 @@ void AudioProcessingComponent::getNextAudioBlock (const AudioSourceChannelInfo& 
             if (currentPos >= markerEndPos)
             {
                 bufferToFill.clearActiveBufferRegion();
-                stopRequested();
+                if (isLoopEnabled())
+                    currentPos = markerStartPos;
+                else
+                    stopRequested();
                 break;
             }
         }
