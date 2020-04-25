@@ -10,25 +10,22 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
-//#include "SpectrogramAudio.h"
+#include "SpectrogramProcessor.h"
 
 class SpectrogramVisualizer : public Component,
-                              public ChangeListener,
-                              private Timer
+                              public ChangeListener
 {
 public:
     SpectrogramVisualizer(AudioProcessingComponent& c) :
-    apc(c),
-    forwardFFT (fftOrder),
-    spectrogramImage (Image::RGB, 512, 512, true)
+    spectrogramImage (Image::RGB, 512, 512, true),
+    spectrogramProcessor(c)
     {
         setOpaque (true);
-        startTimerHz (60);
         setSize (700, 500);
         setBounds(0, 100, 700, 500);
-        apc.blockReady.addChangeListener(this);
+        spectrogramProcessor.spectrogramReady.addChangeListener(this);
     }
 
     ~SpectrogramVisualizer() override
@@ -38,90 +35,53 @@ public:
     //==============================================================================
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        int numSamples;
-        const auto* channelData = apc.getAudioBlockReadPointer(0, numSamples);
-        for (auto i = 0; i < numSamples; ++i)
-            pushNextSampleIntoFifo (channelData[i]);
+        repaint();
     }
     
     //==============================================================================
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
-
+        drawNextLineOfSpectrogram();
         g.setOpacity (1.0f);
         g.drawImage (spectrogramImage, getLocalBounds().toFloat());
     }
 
-    void timerCallback() override
-    {
-        if (nextFFTBlockReady)
-        {
-            drawNextLineOfSpectrogram();
-            nextFFTBlockReady = false;
-            repaint();
-        }
-    }
-
-    void pushNextSampleIntoFifo (float sample) noexcept
-    {
-        // if the fifo contains enough data, set a flag to say
-        // that the next line should now be rendered..
-        if (fifoIndex == fftSize)
-        {
-            if (! nextFFTBlockReady)
-            {
-                zeromem (fftData, sizeof (fftData));
-                memcpy (fftData, fifo, sizeof (fifo));
-                nextFFTBlockReady = true;
-            }
-
-            fifoIndex = 0;
-        }
-
-        fifo[fifoIndex++] = sample;
-    }
-
     void drawNextLineOfSpectrogram()
     {
+        if (!spectrogramProcessor.isSpectrogramReady())
+            return;
+
         auto rightHandEdge = spectrogramImage.getWidth() - 1;
         auto imageHeight   = spectrogramImage.getHeight();
 
-        // first, shuffle our image leftwards by 1 pixel..
-        spectrogramImage.moveImageSection (0, 0, 1, 0, rightHandEdge, imageHeight);
+        auto matrixRawPointer = spectrogramProcessor.getReadPointer();
+        auto fftSize = spectrogramProcessor.getFftSize();
+        auto matrixRows = spectrogramProcessor.getNumRows();
+        auto matrixCols = spectrogramProcessor.getNumColumns();
+        auto maxLevel = FloatVectorOperations::findMinAndMax (matrixRawPointer, matrixCols*matrixRows);
 
-        // then render our FFT data..
-        forwardFFT.performFrequencyOnlyForwardTransform (fftData);
+        float ratio = static_cast<float>(matrixRows) / static_cast<float>(rightHandEdge);
 
-        // find the range of values produced, so we can scale our rendering to
-        // show up the detail clearly
-        auto maxLevel = FloatVectorOperations::findMinAndMax (fftData, fftSize / 2);
-
-        for (auto y = 1; y < imageHeight; ++y)
+        for (auto x = 0; x < rightHandEdge; ++x)
         {
-            auto skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
-            auto fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * (int) fftSize / 2));
-            auto level = jmap (fftData[fftDataIndex], 0.0f, jmax (maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
-
-            spectrogramImage.setPixelAt (rightHandEdge, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
+            for (auto y = 1; y < imageHeight; ++y)
+            {
+                auto skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
+                auto fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * (int) fftSize / 2));
+                auto level = jmap (
+                        matrixRawPointer[static_cast<int>(x*ratio)*matrixCols+fftDataIndex],
+                        0.0f,
+                        jmax (maxLevel.getEnd(), 1e-5f),
+                        0.0f,
+                        1.0f);
+                spectrogramImage.setPixelAt (x, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
+            }
         }
     }
 
-    enum
-    {
-        fftOrder = 10,
-        fftSize  = 1 << fftOrder
-    };
-
 private:
-    AudioProcessingComponent &apc;
-    dsp::FFT forwardFFT;
     Image spectrogramImage;
-
-    float fifo [fftSize];
-    float fftData [2 * fftSize];
-    int fifoIndex = 0;
-    bool nextFFTBlockReady = false;
-
+    SpectrogramProcessor spectrogramProcessor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrogramVisualizer)
 };
