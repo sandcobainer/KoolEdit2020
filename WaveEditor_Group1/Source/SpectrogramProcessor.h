@@ -13,7 +13,7 @@
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
 
-class SpectrogramProcessor : public ChangeListener,
+class SpectrogramProcessor : public ChangeListener
 {
 public:
     SpectrogramProcessor(AudioProcessingComponent& c):
@@ -38,6 +38,11 @@ public:
         fftSize  = 1 << fftOrder
     };
 
+    int getFftSize()
+    {
+        return static_cast<int>(fftSize);
+    }
+
     const float* getReadPointer()
     {
         return const_cast<float*> (matrixRawPointer);
@@ -51,6 +56,11 @@ public:
     int getNumColumns()
     {
         return numColumns;
+    }
+
+    bool isSpectrogramReady()
+    {
+        return isMatrixInitialized;
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
