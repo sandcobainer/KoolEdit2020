@@ -12,7 +12,7 @@
 
 #include <JuceHeader.h>
 #include "WaveAudio.h"
-#include "AudioProcessingUtils.h"
+#include "UndoStack.h"
 
 //==============================================================================
 /*
@@ -198,11 +198,6 @@ private:
     /*! Internal function to change the transport state
     */
     void setState(TransportState state);
-
-    static UndoStackAudioBuffer getUndoBufferFromSamplesInRange(AudioBuffer<float> &audioBuffer,
-            int startSample, int endSample, int startChannel, int numChannels);
-
-    UndoStackAudioBuffer getUndoBufferFromMarkedRegion();
 
     void pushMarkedRegionToUndoStack();
 
