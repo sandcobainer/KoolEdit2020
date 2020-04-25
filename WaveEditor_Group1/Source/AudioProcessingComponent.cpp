@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
+#include "Utils.h"
 
 //==============================================================================
 AudioProcessingComponent::AudioProcessingComponent():
@@ -281,6 +282,25 @@ void AudioProcessingComponent::cutMarkedRegion()
 {
     copyMarkedRegion();
     muteMarkedRegion();
+}
+
+void AudioProcessingComponent::deleteMarkedRegion()
+{
+    AudioBuffer<float> bufferBeforeOperation;
+    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    AudioBuffer<float> bufferAfterOperation;
+    bufferAfterOperation.setSize(getNumChannels(), 0);
+
+    // fill the bufferBeforeOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    AudioBufferUtils<float>::deleteRegion(audioBuffer, markerStartPos, markerEndPos-markerStartPos+1);
+
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    undoStack.addRecord(record);
+
+    audioBufferChanged.sendChangeMessage();
 }
 
 void AudioProcessingComponent::pasteFromCursor()

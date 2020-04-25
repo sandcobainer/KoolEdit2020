@@ -170,6 +170,10 @@ public:
     */
     void cutMarkedRegion();
 
+    /*! Delete the audio in the marked region
+    */
+    void deleteMarkedRegion();
+
     /*! Pastes the audio from the current cursor position
     */
     void pasteFromCursor();
