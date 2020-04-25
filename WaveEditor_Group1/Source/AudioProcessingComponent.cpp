@@ -286,26 +286,34 @@ void AudioProcessingComponent::cutMarkedRegion()
 void AudioProcessingComponent::pasteFromCursor()
 {
     // TODO: the channel number is hard-coded here, which equals to the audio channel number
-    // FIXME: due to the current UndoStack implementation, undo and redo functionality is not stable for paste operation
-    int newLength = 0;
-    //auto bufferBeforeEdit = getUndoBufferFromSamplesInRange(
-    //        audioBuffer,
-    //        currentPos,
-    //        jmin(currentPos+audioCopyBuffer.getNumSamples()-1, getNumSamples()-1),
-    //        0, getNumChannels());
+    int newLength = currentPos + audioCopyBuffer.getNumSamples();
+    int replacedNumSamples = jmin(getNumSamples()-currentPos, audioCopyBuffer.getNumSamples());
+    int copiedNumSamples = audioCopyBuffer.getNumSamples();
+
+    AudioBuffer<float> bufferBeforeOperation;
+    bufferBeforeOperation.setSize(getNumChannels(), replacedNumSamples);
+    AudioBuffer<float> bufferAfterOperation;
+    bufferAfterOperation.setSize(getNumChannels(), copiedNumSamples);
+
+    // fill the bufferBeforeOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, currentPos, replacedNumSamples);
+
+    // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
-        newLength = currentPos + audioCopyBuffer.getNumSamples();
         if (newLength > getNumSamples()) // resize audio buffer if it should get larger
             audioBuffer.setSize(getNumChannels(), newLength, true);
-        audioBuffer.copyFrom(channel, currentPos, audioCopyBuffer, channel, 0, audioCopyBuffer.getNumSamples());
+        audioBuffer.copyFrom(channel, currentPos, audioCopyBuffer, channel, 0, copiedNumSamples);
     }
-    //auto bufferAfterEdit = getUndoBufferFromSamplesInRange(
-    //        audioBuffer,
-    //        currentPos,
-    //        currentPos+audioCopyBuffer.getNumSamples()-1,
-    //        0, getNumChannels());
-    //undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
+
+    // fill the bufferAfterOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, currentPos, copiedNumSamples);
+
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    undoStack.addRecord(record);
+
     audioBufferChanged.sendChangeMessage();
 }
 
