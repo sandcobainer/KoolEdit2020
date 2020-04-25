@@ -5,8 +5,8 @@
     <GROUP id="{3E47EF1E-4CB9-544D-1C23-A552A31D159C}" name="Source">
       <GROUP id="{BB5CC47A-0D16-07D6-1FBF-C9722E750B60}" name="AudioProcessing">
         <FILE id="Tgs0Vv" name="MeterAudio.h" compile="0" resource="0" file="Source/MeterAudio.h"/>
-        <FILE id="hvTkn4" name="SpectrogramAudio.h" compile="0" resource="0"
-              file="Source/SpectrogramAudio.h"/>
+        <FILE id="hvTkn4" name="SpectrogramProcessor.h" compile="0" resource="0"
+              file="Source/SpectrogramProcessor.h"/>
         <FILE id="TerYr7" name="WaveAudio.h" compile="0" resource="0" file="Source/WaveAudio.h"/>
       </GROUP>
       <GROUP id="{A7B9535E-4657-AC2C-601D-3D7D2805E8CD}" name="GUI">
