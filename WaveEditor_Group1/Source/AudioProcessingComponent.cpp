@@ -177,8 +177,11 @@ void AudioProcessingComponent::muteMarkedRegion ()
         AudioBuffer<float> bufferAfterOperation;
         bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
 
+        // fill the bufferBeforeOperation
         for (int channel=0; channel<getNumChannels(); channel++)
             bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+        // operation
         for (int c = 0; c < getNumChannels(); c++)
         {
             writePointer = getAudioWritePointer(c, numSamples);
@@ -187,6 +190,7 @@ void AudioProcessingComponent::muteMarkedRegion ()
                 writePointer[i] = 0;
         }
 
+        // fill the bufferAfterOperation
         for (int channel=0; channel<getNumChannels(); channel++)
             bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
 
@@ -203,15 +207,30 @@ void AudioProcessingComponent::fadeInMarkedRegion()
     int numAudioSamples;
     float* channelPointer = nullptr;
 
-    auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
+    AudioBuffer<float> bufferBeforeOperation;
+    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    AudioBuffer<float> bufferAfterOperation;
+    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+
+    // fill the bufferBeforeOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         channelPointer = getAudioWritePointer(channel, numAudioSamples);
         for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
             channelPointer[i+markerStartPos] *= static_cast<float>(i) / static_cast<float>(markedLength-1);
     }
-    auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
-    undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
+
+    // fill the bufferAfter
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    undoStack.addRecord(record);
+
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -221,15 +240,30 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
     int numAudioSamples;
     float* channelPointer = nullptr;
 
-    auto bufferBeforeEdit = getUndoBufferFromMarkedRegion();
+    AudioBuffer<float> bufferBeforeOperation;
+    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    AudioBuffer<float> bufferAfterOperation;
+    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+
+    // fill the bufferBeforeOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         channelPointer = getAudioWritePointer(channel, numAudioSamples);
         for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
             channelPointer[i+markerStartPos] *= (1 - static_cast<float>(i) / static_cast<float>(markedLength-1));
     }
-    auto bufferAfterEdit = getUndoBufferFromMarkedRegion();
-    undoStack.pushUndoStackAudioBuffers(bufferBeforeEdit, bufferAfterEdit);
+
+    // fill the bufferAfter
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    undoStack.addRecord(record);
+
     audioBufferChanged.sendChangeMessage();
 }
 
