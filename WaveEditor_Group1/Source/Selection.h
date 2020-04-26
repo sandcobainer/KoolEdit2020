@@ -259,24 +259,24 @@ private:
         else if (event.mods.isRightButtonDown())
         {
             //if click is inside original selection bounds
+            popupMenu.clear();
             int mousePos = event.getMouseDownX() + event.getDistanceFromDragStartX();
             if ((mousePos >= selectionBounds.getX()) && (mousePos <= selectionBounds.getRight()))
             {
-                popupMenu.clear();
                 popupMenu.addItem("Copy", [this]() {apc.copyMarkedRegion(); });
                 popupMenu.addItem("Cut", [this]() {apc.cutMarkedRegion(); });
-                if (apc.isPasteEnabled())
-                {
-                    popupMenu.addItem("Paste", [this]() {apc.pasteFromCursor(); });
-                    popupMenu.addItem("Insert", [this]() {apc.insertFromCursor(); });
-                }
                 popupMenu.addItem("Mute", [this]() {apc.muteMarkedRegion(); });
                 popupMenu.addItem("Delete", [this]() {apc.deleteMarkedRegion(); });
                 popupMenu.addItem("Fade In", [this]() {apc.fadeInMarkedRegion(); });
                 popupMenu.addItem("Fade Out", [this]() {apc.fadeOutMarkedRegion(); });
-                popupMenu.show();
             }
-
+            // these funtionalities are not limited inside the selected bounds
+            if (apc.isPasteEnabled())
+            {
+                popupMenu.addItem("Paste", [this]() {apc.pasteFromCursor(); });
+                popupMenu.addItem("Insert", [this]() {apc.insertFromCursor(); });
+            }
+            popupMenu.show();
         }
     }
 
