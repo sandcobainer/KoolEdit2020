@@ -20,8 +20,8 @@ public:
     ToolbarIF(AudioProcessingComponent& c) : apc(c)
     {
         state = apc.getState(); //initialize transport source state
-        //apc.transportSource.addChangeListener(this); //listen to changes in the transport source
         apc.transportState.addChangeListener(this);
+        apc.audioBufferChanged.addChangeListener(this);
         buttonHelp = new TooltipWindow(this);
 
         //-----------------------GUI Images------------------------------------
@@ -187,7 +187,7 @@ public:
         cutButton.setState(Button::ButtonState::buttonNormal);
         cutButton.onClick = [this] {cutButtonClicked(); };
         cutButton.setEnabled(false);
-        cutButton.setTooltip("cut");
+        cutButton.setTooltip("cut (or right click->Cut)");
 
         //Copy
         addAndMakeVisible(&copyButton);
@@ -195,7 +195,7 @@ public:
         copyButton.setState(Button::ButtonState::buttonNormal);
         copyButton.onClick = [this] {copyButtonClicked(); };
         copyButton.setEnabled(false);
-        copyButton.setTooltip("copy");
+        copyButton.setTooltip("copy (or right click->Copy)");
 
         //Paste
         addAndMakeVisible(&pasteButton);
@@ -203,7 +203,7 @@ public:
         pasteButton.setState(Button::ButtonState::buttonNormal);
         pasteButton.onClick = [this] {pasteButtonClicked(); };
         pasteButton.setEnabled(false);
-        pasteButton.setTooltip("paste");
+        pasteButton.setTooltip("paste (or right click->Paste)");
 
         //Undo
         addAndMakeVisible(&undoButton);
@@ -315,20 +315,8 @@ public:
                     redoButton.setEnabled(false);
             }
         }
-    }
-
-    void paint(Graphics& g) override
-    {
-        g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-        
-        //paint buttons based on current audio state
-        state = apc.getState();
-        if (state == AudioProcessingComponent::Playing)
-            playButton.setState(Button::ButtonState::buttonDown);
-        else if (state == AudioProcessingComponent::Stopped)
+        else if (source == &apc.audioBufferChanged)
         {
-            stopButton.setState(Button::ButtonState::buttonDown);
-
             if (apc.isPasteEnabled())
                 pasteButton.setEnabled(true);
             else
@@ -343,23 +331,23 @@ public:
             else
                 redoButton.setEnabled(false);
         }
+    }
+
+    void paint(Graphics& g) override
+    {
+        g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+        
+        //paint buttons based on current audio state
+        state = apc.getState();
+        if (state == AudioProcessingComponent::Playing)
+            playButton.setState(Button::ButtonState::buttonDown);
+        else if (state == AudioProcessingComponent::Stopped)
+        {
+            stopButton.setState(Button::ButtonState::buttonDown);
+        }
         else if (state == AudioProcessingComponent::Paused)
         {
             pauseButton.setState(Button::ButtonState::buttonDown);
-
-            if (apc.isPasteEnabled())
-                pasteButton.setEnabled(true);
-            else
-                pasteButton.setEnabled(false);
-
-            if (apc.isUndoEnabled())
-                undoButton.setEnabled(true);
-            else
-                undoButton.setEnabled(false);
-            if (apc.isRedoEnabled())
-                redoButton.setEnabled(true);
-            else
-                redoButton.setEnabled(false);
         }
     }
 
