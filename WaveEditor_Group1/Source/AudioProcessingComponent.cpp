@@ -358,13 +358,13 @@ void AudioProcessingComponent::insertFromCursor()
     AudioBuffer<float> bufferAfterOperation;
     bufferAfterOperation.setSize(getNumChannels(), audioCopyBuffer.getNumSamples());
 
-    AudioBufferUtils<float>::insertRegion(audioBuffer, audioCopyBuffer, markerStartPos);
+    AudioBufferUtils<float>::insertRegion(audioBuffer, audioCopyBuffer, currentPos);
 
     // fill the bufferAfterOperation
     for (int channel=0; channel<getNumChannels(); channel++)
-        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, audioCopyBuffer.getNumSamples());
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, currentPos, audioCopyBuffer.getNumSamples());
 
-    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, currentPos};
     undoStack.addRecord(record);
 
     // set the markers
