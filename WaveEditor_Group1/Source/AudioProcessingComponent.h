@@ -154,6 +154,36 @@ public:
     */
     void muteMarkedRegion();
 
+    /*! Fades in the audio in the marked region
+    */
+    void fadeInMarkedRegion();
+
+    /*! Fades out the audio in the marked region
+    */
+    void fadeOutMarkedRegion();
+
+    /*! Copies the audio in the marked region
+    */
+    void copyMarkedRegion();
+
+    /*! Cuts the audio in the marked region
+    */
+    void cutMarkedRegion();
+
+    /*! Delete the audio in the marked region
+    */
+    void deleteMarkedRegion();
+
+    /*! Pastes the audio from the current cursor position
+    */
+    void pasteFromCursor();
+
+    /*! Insert the audio from the current cursor position
+    */
+    void insertFromCursor();
+
+    bool isPasteEnabled();
+
     /*! Undo the last operation
     */
     void undo();
@@ -166,9 +196,10 @@ public:
 
     bool isRedoEnabled();
 
-    ChangeBroadcaster transportState;           //!< public broadcaster for the transport state
-    ChangeBroadcaster audioBufferChanged;               //!< public broadcaster for the transport state
-    ChangeBroadcaster blockReady;               //!< public broadcaster for the transport state
+    ChangeBroadcaster transportState;
+    ChangeBroadcaster audioBufferChanged;
+    ChangeBroadcaster blockReady;
+    ChangeBroadcaster audioCopied;
 
 private:
 
@@ -176,7 +207,10 @@ private:
     */
     void setState(TransportState state);
 
-    void pushMarkedRegionToUndoStack();
+    /*! Makes sure the markers are not out of range. It should be used in
+     * any operation that might change the audio buffer size
+    */
+    void boundPositions();
 
     AudioFormatManager formatManager;
     TransportState state;
@@ -188,6 +222,7 @@ private:
     // buffer definitions
     AudioBuffer<float> audioBlockBuffer;
     AudioBuffer<float> audioBuffer;
+    AudioBuffer<float> audioCopyBuffer;
     // meta info
     double sampleRate;
     double deviceSampleRate;
