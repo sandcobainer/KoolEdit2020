@@ -186,7 +186,7 @@ public:
         stackPos++;
     }
 
-    void undo(AudioBuffer<float>& audioBuffer)
+    void undo(AudioBuffer<float>& audioBuffer, int& startSample, int& numSamples)
     {
         if(!isUndoEnabled())
             return;
@@ -196,14 +196,15 @@ public:
 
         auto record = getRecord(stackPos);
         auto undoBuffer = record->getAudioBuffer(UndoRecord::UndoBuffer);
-        auto startSample = record->getStartSample();
+        startSample = record->getStartSample();
         auto replaceNumSamples = record->getNumSamples(UndoRecord::RedoBuffer);
+        numSamples = record->getNumSamples(UndoRecord::UndoBuffer);
         AudioBufferUtils<float>::replaceRegion(audioBuffer, *undoBuffer, startSample, replaceNumSamples);
 
         mode = UndoMode;
     }
 
-    void redo(AudioBuffer<float>& audioBuffer)
+    void redo(AudioBuffer<float>& audioBuffer, int& startSample, int& numSamples)
     {
         if(!isRedoEnabled())
             return;
@@ -213,8 +214,9 @@ public:
 
         auto record = getRecord(stackPos);
         auto redoBuffer = record->getAudioBuffer(UndoRecord::RedoBuffer);
-        auto startSample = record->getStartSample();
+        startSample = record->getStartSample();
         auto replaceNumSamples = record->getNumSamples(UndoRecord::UndoBuffer);
+        numSamples = record->getNumSamples(UndoRecord::RedoBuffer);
         AudioBufferUtils<float>::replaceRegion(audioBuffer, *redoBuffer, startSample, replaceNumSamples);
 
         mode = RedoMode;
