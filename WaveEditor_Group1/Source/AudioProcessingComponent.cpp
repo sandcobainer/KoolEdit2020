@@ -303,7 +303,12 @@ void AudioProcessingComponent::deleteMarkedRegion()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
+    // set the positions
+    currentPos = markerStartPos;
+    markerStartPos = 0;
+    markerEndPos = getNumSamples();
     boundPositions();
+
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -338,7 +343,11 @@ void AudioProcessingComponent::pasteFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, currentPos};
     undoStack.addRecord(record);
 
+    // set the markers
+    markerStartPos = currentPos;
+    markerEndPos = currentPos + copiedNumSamples;
     boundPositions();
+
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -358,7 +367,11 @@ void AudioProcessingComponent::insertFromCursor()
     UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
     undoStack.addRecord(record);
 
+    // set the markers
+    markerStartPos = currentPos;
+    markerEndPos = currentPos + audioCopyBuffer.getNumSamples();
     boundPositions();
+
     audioBufferChanged.sendChangeMessage();
 }
 
