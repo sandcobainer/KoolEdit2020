@@ -269,7 +269,11 @@ public:
                 muteButton.setEnabled(true);
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
-                pasteButton.setEnabled(true);
+
+                if (apc.isPasteEnabled())
+                    pasteButton.setEnabled(true);
+                else
+                    pasteButton.setEnabled(false);
 
                 if (apc.isUndoEnabled())
                     undoButton.setEnabled(true);
@@ -295,7 +299,11 @@ public:
                 muteButton.setEnabled(true);
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
-                pasteButton.setEnabled(true);
+
+                if (apc.isPasteEnabled())
+                    pasteButton.setEnabled(true);
+                else
+                    pasteButton.setEnabled(false);
 
                 if (apc.isUndoEnabled())
                     undoButton.setEnabled(true);
@@ -321,6 +329,11 @@ public:
         {
             stopButton.setState(Button::ButtonState::buttonDown);
 
+            if (apc.isPasteEnabled())
+                pasteButton.setEnabled(true);
+            else
+                pasteButton.setEnabled(false);
+
             if (apc.isUndoEnabled())
                 undoButton.setEnabled(true);
             else
@@ -333,6 +346,11 @@ public:
         else if (state == AudioProcessingComponent::Paused)
         {
             pauseButton.setState(Button::ButtonState::buttonDown);
+
+            if (apc.isPasteEnabled())
+                pasteButton.setEnabled(true);
+            else
+                pasteButton.setEnabled(false);
 
             if (apc.isUndoEnabled())
                 undoButton.setEnabled(true);
@@ -391,7 +409,7 @@ private:
         mouseButton.setEnabled(true);
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
-        pasteButton.setEnabled(true);
+        pasteButton.setEnabled(false);
     }
 
     void saveButtonClicked()
@@ -442,7 +460,11 @@ private:
         muteButton.setEnabled(true);
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
-        pasteButton.setEnabled(true);
+
+        if (apc.isPasteEnabled())
+            pasteButton.setEnabled(true);
+        else
+            pasteButton.setEnabled(false);
 
         if (apc.isUndoEnabled())
             undoButton.setEnabled(true);
@@ -469,7 +491,11 @@ private:
         muteButton.setEnabled(true);
         cutButton.setEnabled(true);
         copyButton.setEnabled(true);
-        pasteButton.setEnabled(true);
+
+        if (apc.isPasteEnabled())
+            pasteButton.setEnabled(true);
+        else
+            pasteButton.setEnabled(false);
 
         if(apc.isUndoEnabled())
             undoButton.setEnabled(true);
@@ -530,17 +556,17 @@ private:
 
     void cutButtonClicked()
     {
-
+        apc.cutMarkedRegion();
     }
 
     void copyButtonClicked()
     {
-
+        apc.copyMarkedRegion();
     }
 
     void pasteButtonClicked()
     {
-
+        apc.pasteFromCursor();
     }
 
     void undoButtonClicked()
