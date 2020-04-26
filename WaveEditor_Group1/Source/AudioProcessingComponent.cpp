@@ -384,8 +384,13 @@ void AudioProcessingComponent::undo()
 {
     if(!isUndoEnabled())
         return;
+
     undoStack.undo(audioBuffer);
+
+    markerStartPos = 0;
+    markerEndPos = getNumSamples();
     boundPositions();
+
     audioBufferChanged.sendChangeMessage();
 }
 
@@ -393,8 +398,13 @@ void AudioProcessingComponent::redo()
 {
     if(!isRedoEnabled())
         return;
+
     undoStack.redo(audioBuffer);
+
+    markerStartPos = 0;
+    markerEndPos = getNumSamples();
     boundPositions();
+
     audioBufferChanged.sendChangeMessage();
 }
 
