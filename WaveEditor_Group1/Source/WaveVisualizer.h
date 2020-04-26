@@ -104,36 +104,6 @@ public:
                     thumbnailBounds.getBottom(), 2.0f);
     }
 
-    void mouseDown (const MouseEvent &event) override
-    {
-        if (event.mods.isLeftButtonDown())
-        {
-            float ratio = float(event.getMouseDownX()) / float(getWidth());
-            apc.setPositionInS(AudioProcessingComponent::Cursor, ratio*apc.getLengthInS());
-            apc.setPositionInS(AudioProcessingComponent::MarkerStart, 0);
-            apc.setPositionInS(AudioProcessingComponent::MarkerEnd, apc.getLengthInS());
-
-            waveSelection->resetBounds();
-            repaint();
-        }
-    }
-
-    void mouseEnter(const MouseEvent& event) override
-    {
-        //automatically change the cursor to IBeam style when over the waveform
-        //and if mouse icon is not clicked
-        if (apc.isMouseNormal())
-            setMouseCursor(juce::MouseCursor::NormalCursor);
-        else
-            setMouseCursor(juce::MouseCursor::IBeamCursor);
-    }
-
-    void mouseExit(const MouseEvent& event) override
-    {
-        //automatically change the cursor to back to normal when not over the waveform
-        setMouseCursor(juce::MouseCursor::NormalCursor);
-    }
-
 private:
     //connection to AudioProcessingComponent (passed from parent)
     AudioProcessingComponent& apc;
