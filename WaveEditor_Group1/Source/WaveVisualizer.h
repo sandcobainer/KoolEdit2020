@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
 #include "Selection.h"
+#include "Timeline.h"
 #include "OtherLookAndFeel.h"
 
 //==============================================================================
@@ -27,8 +28,8 @@ public:
     apc(c),
     thumbnailCache (5),
     thumbnail (512, formatManager, thumbnailCache),
-    thumbnailBounds(0, 0, 0, 0),
-    timelineBounds(0, 0, 0, 0)
+    thumbnailBounds(0, 0, 0, 0)
+//    timelineBounds(0, 0, 0, 0)
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
@@ -36,43 +37,45 @@ public:
         startTimerHz (60); // refresh the visualizer 30 times per second
         
         
-        timelineSlider.setTextBoxStyle (Slider::TextBoxAbove, true, 50,15 );
-        timelineSlider.setSliderStyle (Slider::LinearHorizontal);
-        timelineSlider.setRange (0, 10, 0.1);
-        timelineSlider.setLookAndFeel (&otherLookAndFeel);
+//        timelineSlider.setTextBoxStyle (Slider::TextBoxAbove, true, 50,15 );
+//        timelineSlider.setSliderStyle (Slider::LinearHorizontal);
+//        timelineSlider.setRange (0, 10, 0.1);
+//        timelineSlider.setLookAndFeel (&otherLookAndFeel);
+//
+//        timelineLabel.setFont (10.0f);
+//        timelineLabel.setText ("Playback Time", NotificationType::dontSendNotification);
+//        timelineLabel.setJustificationType (Justification::centredTop);
+//        timelineLabel.attachToComponent (&timelineSlider, false);
         
-        timelineLabel.setFont (10.0f);
-        timelineLabel.setText ("Playback Time", NotificationType::dontSendNotification);
-        timelineLabel.setJustificationType (Justification::centredTop);
-        timelineLabel.attachToComponent (&timelineSlider, false);
-        
+        timeline = new Timeline(apc, thumbnail);
         waveSelection = new Selection(apc, thumbnail);
         
         addAndMakeVisible (waveSelection);
-        addAndMakeVisible (timelineSlider);
+        addAndMakeVisible (timeline);
+//        addAndMakeVisible (timelineSlider);
     }
 
     ~WaveVisualizer()
     {
-        setLookAndFeel (nullptr);
     }
 
     void paint (Graphics& g) override
     {
         // TODO: Change this size later
-        timelineSlider.setBounds(0, 0, getWidth(), getHeight()-195);
-        thumbnailBounds.setBounds(8, 40, getWidth()-16, getHeight() - 40);
-        waveSelection->parentDimensions(getWidth()-16, getHeight());
-
+//        timelineSlider.setBounds(0, 0, getWidth(), getHeight()-195);
+        thumbnailBounds.setBounds(0, 100, getWidth(), getHeight()-100);
+        waveSelection->parentDimensions(getWidth(), getHeight());
+        timeline->parentDimensions(getWidth(), getHeight()-250);
+        
         if (apc.getNumChannels() == 0)
-        paintIfNoFileLoaded (g);
+            paintIfNoFileLoaded (g);
         else
         {
             paintIfFileLoaded (g);
-            timelineSlider.setRange (0, apc.getLengthInS(), 0.01);
+//            timelineSlider.setRange (0, apc.getLengthInS(), 0.01);
 //        timelineSlider.setMinValue(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
 //        timelineSlider.setMaxValue(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-        timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
+//        timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
         }
         
     }
@@ -80,6 +83,7 @@ public:
     void resized() override
     {
         waveSelection->parentDimensions(getWidth(), getHeight());
+        timeline->parentDimensions(getWidth(), getHeight()-250);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
@@ -135,13 +139,12 @@ private:
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
     Rectangle<int> thumbnailBounds;
-    Rectangle<int> timelineBounds;
+//    Rectangle<int> timelineBounds;
     AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
 
     OtherLookAndFeel otherLookAndFeel;
-    Slider timelineSlider;
-    Label timelineLabel;
     Selection *waveSelection;
+    Timeline *timeline;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
@@ -152,8 +155,10 @@ class TrackVisualizer: public Component,
                        public Slider::Listener
 {
 public:
-    TrackVisualizer (AudioProcessingComponent &c):
-    waveVis(c),
+    TrackVisualizer (AudioProcessingComponent &apc):
+    waveVis(apc),
+    thumbnailCache (5),
+    thumbnail (512, formatManager, thumbnailCache),
     waveVisualizerWidthRatio(1.f),
     waveVisualizerWidth(0),
     isInitialized(false)
@@ -161,8 +166,14 @@ public:
         incDecSlider.addListener(this);
         incDecSlider.setRange(0.1, 10.0, 0.1);
         incDecSlider.setValue(1.0);
+        
+//        timeline = new Timeline(apc, thumbnail);
+        
         addAndMakeVisible(incDecSlider);
         addAndMakeVisible(trackViewport);
+//        addAndMakeVisible(timeline);
+        
+        
     }
     ~TrackVisualizer()
     {
@@ -170,6 +181,7 @@ public:
 
     void paint (Graphics& g) override
     {
+//        timeline->parentDimensions(getWidth(), getHeight()-250);
     }
 
     void resized() override
@@ -180,11 +192,16 @@ public:
             isInitialized = true;
         }
         waveVisualizerWidthRatio = incDecSlider.getValue();
-        waveVis.setBounds(0, 0, waveVisualizerWidthRatio*waveVisualizerWidth, getHeight()-50);
-        trackViewport.setViewedComponent(&waveVis);
-        trackViewport.setBounds(0, 50, getWidth(), getHeight()-50);
+//        timeline->setWidthRatio(waveVisualizerWidthRatio);
         incDecSlider.setBounds(getWidth()-100, 0, 100, 50);
-
+        trackViewport.setViewedComponent(&waveVis);
+        trackViewport.setBounds(0, 0, getWidth(), getHeight());
+        
+//        timeline->parentDimensions(getWidth(), getHeight()-250);
+        
+        waveVis.setBounds(0, 0, waveVisualizerWidthRatio*waveVisualizerWidth, getHeight());
+        
+//      timeline->repaint();
         waveVis.repaint();
     }
 
@@ -201,6 +218,11 @@ public:
 private:
     Viewport trackViewport;
     WaveVisualizer waveVis;
+//    Timeline *timeline;
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;
+    AudioThumbnail thumbnail;
+    
     Slider incDecSlider { Slider::IncDecButtons, Slider::TextBoxBelow };
 
     float waveVisualizerWidthRatio;

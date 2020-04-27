@@ -104,10 +104,10 @@ public:
         }
         else
         {
-            auto selectStart = (audioStart / audioLength) * waveVisWidth + 8;
-            auto selectEnd = (audioEnd / audioLength) * waveVisWidth - 8;
+            auto selectStart = (audioStart / audioLength) * waveVisWidth;
+            auto selectEnd = (audioEnd / audioLength) * waveVisWidth;
 
-            selectionBounds.setBounds(selectStart , 40, selectEnd - selectStart, waveVisHeight);
+            selectionBounds.setBounds(selectStart , 100, selectEnd - selectStart, waveVisHeight);
             repaint();
         }
     }

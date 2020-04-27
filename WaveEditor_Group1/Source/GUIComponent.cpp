@@ -62,7 +62,7 @@ void GUIComponent::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    tlbar->setBounds(0, 0, getWidth(), 100);
-    trackVis->setBounds(0,100,getWidth(),(getHeight()-100)/2);
-    specvis->setBounds(0, 100+(getHeight()-100)/2, getWidth(), (getHeight()-100)/2);
+    tlbar->setBounds(0, 0, getWidth(), 70);
+    trackVis->setBounds(0,70,getWidth(), getHeight()/2);
+    specvis->setBounds(0, 70+ getHeight()/2, getWidth(), (getHeight()-140)/2);
 }
