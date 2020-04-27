@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "AudioProcessingComponent.h"
 #include "Selection.h"
+#include "OtherLookAndFeel.h"
 
 //==============================================================================
 /*
@@ -26,15 +27,29 @@ public:
     apc(c),
     thumbnailCache (5),
     thumbnail (512, formatManager, thumbnailCache),
-    thumbnailBounds(0, 0, 0, 0)
+    thumbnailBounds(0, 0, 0, 0),
+    timelineBounds(0, 0, 0, 0)
     {
         state = apc.getState(); //initialize transport source state
         //apc.addActionListener(this);
         apc.audioBufferChanged.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
-
+        
+        
+        timelineSlider.setTextBoxStyle (Slider::TextBoxAbove, true, 50,15 );
+        timelineSlider.setSliderStyle (Slider::ThreeValueHorizontal);
+        timelineSlider.setRange (0, 10, 0.1);
+        timelineSlider.setLookAndFeel (&otherLookAndFeel);
+        
+        timelineLabel.setFont (10.0f);
+        timelineLabel.setText ("Playback Time", NotificationType::dontSendNotification);
+        timelineLabel.setJustificationType (Justification::centredTop);
+        timelineLabel.attachToComponent (&timelineSlider, false);
+        
         waveSelection = new Selection(apc, thumbnail);
-        addAndMakeVisible(waveSelection);
+        
+        addAndMakeVisible (waveSelection);
+        addAndMakeVisible (timelineSlider);
     }
 
     ~WaveVisualizer()
@@ -44,13 +59,21 @@ public:
     void paint (Graphics& g) override
     {
         // TODO: Change this size later
-       thumbnailBounds.setBounds(0,0, getWidth(), getHeight());
-       waveSelection->parentDimensions(getWidth(), getHeight());
-        
+        timelineSlider.setBounds(0, 0, getWidth(), getHeight() - 190);
+        thumbnailBounds.setBounds(0,40, getWidth(), getHeight() - 40);
+        waveSelection->parentDimensions(getWidth(), getHeight());
+
         if (apc.getNumChannels() == 0)
-            paintIfNoFileLoaded (g);
+        paintIfNoFileLoaded (g);
         else
+        {
             paintIfFileLoaded (g);
+            timelineSlider.setRange (0, apc.getLengthInS(), 0.01);
+            timelineSlider.setMinValue(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
+            timelineSlider.setMaxValue(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
+            timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
+        }
+        
     }
 
     void resized() override
@@ -100,7 +123,7 @@ public:
         auto audioPosition (apc.getPositionInS(AudioProcessingComponent::Cursor));
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
                            + thumbnailBounds.getX());                                        // [13]
-        g.drawLine (drawPosition, thumbnailBounds.getY(), drawPosition,
+        g.drawLine (drawPosition, thumbnailBounds.getY()-5, drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
     }
 
@@ -111,8 +134,12 @@ private:
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
     Rectangle<int> thumbnailBounds;
+    Rectangle<int> timelineBounds;
     AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
 
+    OtherLookAndFeel otherLookAndFeel;
+    Slider timelineSlider;
+    Label timelineLabel;
     Selection *waveSelection;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
