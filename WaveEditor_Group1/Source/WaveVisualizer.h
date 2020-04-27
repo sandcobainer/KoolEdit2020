@@ -37,7 +37,7 @@ public:
         
         
         timelineSlider.setTextBoxStyle (Slider::TextBoxAbove, true, 50,15 );
-        timelineSlider.setSliderStyle (Slider::ThreeValueHorizontal);
+        timelineSlider.setSliderStyle (Slider::LinearHorizontal);
         timelineSlider.setRange (0, 10, 0.1);
         timelineSlider.setLookAndFeel (&otherLookAndFeel);
         
@@ -54,14 +54,15 @@ public:
 
     ~WaveVisualizer()
     {
+        setLookAndFeel (nullptr);
     }
 
     void paint (Graphics& g) override
     {
         // TODO: Change this size later
-        timelineSlider.setBounds(0, 0, getWidth(), getHeight() - 190);
-        thumbnailBounds.setBounds(0,40, getWidth(), getHeight() - 40);
-        waveSelection->parentDimensions(getWidth(), getHeight());
+        timelineSlider.setBounds(0, 0, getWidth(), getHeight()-195);
+        thumbnailBounds.setBounds(8, 40, getWidth()-16, getHeight() - 40);
+        waveSelection->parentDimensions(getWidth()-16, getHeight());
 
         if (apc.getNumChannels() == 0)
         paintIfNoFileLoaded (g);
@@ -69,9 +70,9 @@ public:
         {
             paintIfFileLoaded (g);
             timelineSlider.setRange (0, apc.getLengthInS(), 0.01);
-            timelineSlider.setMinValue(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
-            timelineSlider.setMaxValue(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-            timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
+//        timelineSlider.setMinValue(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
+//        timelineSlider.setMaxValue(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
+        timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
         }
         
     }
