@@ -31,6 +31,33 @@ namespace buttonAssets
     extern const char*  cut_over_png;
     const int           cut_over_pngSize = 1912;
 
+    extern const char*  delete_down_png;
+    const int           delete_down_pngSize = 1163;
+
+    extern const char*  delete_normal_png;
+    const int           delete_normal_pngSize = 1162;
+
+    extern const char*  delete_over_png;
+    const int           delete_over_pngSize = 1172;
+
+    extern const char*  fadein_down_png;
+    const int           fadein_down_pngSize = 1179;
+
+    extern const char*  fadein_normal_png;
+    const int           fadein_normal_pngSize = 1213;
+
+    extern const char*  fadein_over_png;
+    const int           fadein_over_pngSize = 1178;
+
+    extern const char*  fadeout_down_png;
+    const int           fadeout_down_pngSize = 1230;
+
+    extern const char*  fadeout_normal_png;
+    const int           fadeout_normal_pngSize = 1212;
+
+    extern const char*  fadeout_over_png;
+    const int           fadeout_over_pngSize = 1173;
+
     extern const char*  ffwd_down_png;
     const int           ffwd_down_pngSize = 1666;
 
@@ -39,6 +66,15 @@ namespace buttonAssets
 
     extern const char*  ffwd_over_png;
     const int           ffwd_over_pngSize = 1246;
+
+    extern const char*  insert_down_png;
+    const int           insert_down_pngSize = 1600;
+
+    extern const char*  insert_normal_png;
+    const int           insert_normal_pngSize = 1508;
+
+    extern const char*  insert_over_png;
+    const int           insert_over_pngSize = 1515;
 
     extern const char*  koolEdit2020_logo_png;
     const int           koolEdit2020_logo_pngSize = 133624;
