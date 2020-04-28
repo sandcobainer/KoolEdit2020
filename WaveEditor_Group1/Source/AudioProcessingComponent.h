@@ -217,7 +217,8 @@ private:
     */
     void boundPositions();
 
-    void inplaceOperateMarkedRegion(std::function<void(float*, int, int)>);
+    void inplaceOperate(const std::function<void(float*, int, int)>&, int startSample, int numSamples);
+    void inplaceOperateMarkedRegion(const std::function<void(float*, int, int)>&);
 
     AudioFormatManager formatManager;
     TransportState state;

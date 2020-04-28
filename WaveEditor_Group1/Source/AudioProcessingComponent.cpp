@@ -9,6 +9,8 @@
 */
 
 #include <JuceHeader.h>
+
+#include <utility>
 #include "AudioProcessingComponent.h"
 #include "Utils.h"
 
@@ -362,35 +364,39 @@ void AudioProcessingComponent::boundPositions()
         currentPos = getNumSamples() - 1;
 }
 
-void AudioProcessingComponent::inplaceOperateMarkedRegion(std::function<void(float*, int, int)> processFunc)
+void AudioProcessingComponent::inplaceOperate(const std::function<void(float*, int, int)>& processFunc, int startSample, int numSamples)
 {
-    int markedLength = markerEndPos - markerStartPos + 1;
     int numAudioSamples;
 
     AudioBuffer<float> bufferBeforeOperation;
-    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    bufferBeforeOperation.setSize(getNumChannels(), numSamples);
     AudioBuffer<float> bufferAfterOperation;
-    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    bufferAfterOperation.setSize(getNumChannels(), numSamples);
 
     // fill the bufferBeforeOperation
     for (int channel=0; channel<getNumChannels(); channel++)
-        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, startSample, numSamples);
 
     // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
         auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
-        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
-        processFunc(channelPointer, markerStartPos, numSamples);
+        auto actualNumSamples = jmin(numSamples, numAudioSamples - startSample);
+        processFunc(channelPointer, startSample, actualNumSamples);
     }
 
     // fill the bufferAfterOperation
     for (int channel=0; channel<getNumChannels(); channel++)
-        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, startSample, numSamples);
 
-    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, startSample};
     undoStack.addRecord(record);
     audioBufferChanged.sendChangeMessage();
+}
+
+void AudioProcessingComponent::inplaceOperateMarkedRegion(const std::function<void(float*, int, int)>& processFunc)
+{
+    inplaceOperate(processFunc, markerStartPos, markerEndPos-markerStartPos+1);
 }
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
