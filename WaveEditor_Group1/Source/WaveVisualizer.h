@@ -3,7 +3,7 @@
 
     WaveVisualizer.h
     Created: 7 Feb 2020 3:15:20pm
-    Author:  user
+    Author:  sandcobainer
 
   ==============================================================================
 */
@@ -31,20 +31,13 @@ public:
     timelineBounds(0, 0, 0, 0)
     {
         state = apc.getState(); //initialize transport source state
-        //apc.addActionListener(this);
         apc.audioBufferChanged.addChangeListener(this);
         startTimerHz (60); // refresh the visualizer 30 times per second
-        
-        
-        timelineSlider.setTextBoxStyle (Slider::TextBoxAbove, true, 50,15 );
+                
+        timelineSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
         timelineSlider.setSliderStyle (Slider::LinearHorizontal);
         timelineSlider.setRange (0, 10, 0.1);
         timelineSlider.setLookAndFeel (&otherLookAndFeel);
-        
-        timelineLabel.setFont (10.0f);
-        timelineLabel.setText ("Playback Time", NotificationType::dontSendNotification);
-        timelineLabel.setJustificationType (Justification::centredTop);
-        timelineLabel.attachToComponent (&timelineSlider, false);
         
         waveSelection = new Selection(apc, thumbnail);
         
@@ -60,19 +53,22 @@ public:
     void paint (Graphics& g) override
     {
         // TODO: Change this size later
-        timelineSlider.setBounds(0, 0, getWidth(), getHeight()-195);
+        timelineSlider.setBounds(0, 0, getWidth(), getHeight()-210);
         thumbnailBounds.setBounds(8, 40, getWidth()-16, getHeight() - 40);
+        
+        waveSelection->setThumbnailBounds(thumbnailBounds);
         waveSelection->parentDimensions(getWidth()-16, getHeight());
 
         if (apc.getNumChannels() == 0)
-        paintIfNoFileLoaded (g);
+            paintIfNoFileLoaded (g);
         else
         {
             paintIfFileLoaded (g);
             timelineSlider.setRange (0, apc.getLengthInS(), 0.01);
-//        timelineSlider.setMinValue(apc.getPositionInS(AudioProcessingComponent::MarkerStart));
-//        timelineSlider.setMaxValue(apc.getPositionInS(AudioProcessingComponent::MarkerEnd));
-        timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
+            timelineSlider.setValue(apc.getPositionInS(AudioProcessingComponent::Cursor));
+            
+            auto audioLength (thumbnail.getTotalLength());
+            otherLookAndFeel.setDivSize(audioLength *50 / waveWidth, waveWidth, audioLength);
         }
         
     }
@@ -111,7 +107,7 @@ public:
         g.fillRect (thumbnailBounds);
         
         //---------------------------------waveform------------------------------------------
-        g.setColour (Colours::white);                                     // [8]
+        g.setColour (Colour(153,255,255));                                     // [8]
         thumbnail.drawChannels (g,                                 // [9]
                                 thumbnailBounds,
                                 0.0,                                    // start time
@@ -119,7 +115,7 @@ public:
                                 1.0f);                                  // vertical zoom
         
         //-------------------------------play marker----------------------------------------
-        g.setColour (Colours::red);
+        g.setColour (Colour(128,255,0));
         auto audioLength (thumbnail.getTotalLength());
         auto audioPosition (apc.getPositionInS(AudioProcessingComponent::Cursor));
         auto drawPosition ((audioPosition / audioLength) * thumbnailBounds.getWidth()
@@ -127,6 +123,14 @@ public:
         g.drawLine (drawPosition, thumbnailBounds.getY()-5, drawPosition,
                     thumbnailBounds.getBottom(), 2.0f);
     }
+    
+    void setWidth(float waveVisualizerWidth)
+    {
+        auto audioLength (thumbnail.getTotalLength());
+        waveWidth = waveVisualizerWidth;
+        otherLookAndFeel.setDivSize(audioLength * 50 / waveWidth, waveWidth, audioLength);
+    }
+    
 
 private:
     //connection to AudioProcessingComponent (passed from parent)
@@ -138,10 +142,11 @@ private:
     Rectangle<int> timelineBounds;
     AudioProcessingComponent::TransportState state;                                //transport state (from apc.getState() function)
 
+    
     OtherLookAndFeel otherLookAndFeel;
     Slider timelineSlider;
-    Label timelineLabel;
     Selection *waveSelection;
+    float waveWidth;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveVisualizer)
 };
@@ -161,6 +166,7 @@ public:
         incDecSlider.addListener(this);
         incDecSlider.setRange(0.1, 10.0, 0.1);
         incDecSlider.setValue(1.0);
+        
         addAndMakeVisible(incDecSlider);
         addAndMakeVisible(trackViewport);
     }
@@ -177,6 +183,7 @@ public:
         if (!isInitialized)
         {
             waveVisualizerWidth = getWidth();
+            waveVis.setWidth(waveVisualizerWidth);
             isInitialized = true;
         }
         waveVisualizerWidthRatio = incDecSlider.getValue();
@@ -190,6 +197,7 @@ public:
 
     void sliderValueChanged(Slider* slider) override
     {
+        waveVis.setWidth(incDecSlider.getValue() * waveVisualizerWidth);
         resized();
     }
 
@@ -198,6 +206,8 @@ public:
         waveVisualizerWidthRatio = ratio;
         resized();
     }
+
+    
 private:
     Viewport trackViewport;
     WaveVisualizer waveVis;
