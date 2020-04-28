@@ -209,7 +209,6 @@ void AudioProcessingComponent::fadeInMarkedRegion()
 {
     int markedLength = markerEndPos - markerStartPos + 1;
     int numAudioSamples;
-    float* channelPointer = nullptr;
 
     AudioBuffer<float> bufferBeforeOperation;
     bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
@@ -223,9 +222,9 @@ void AudioProcessingComponent::fadeInMarkedRegion()
     // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
-        channelPointer = getAudioWritePointer(channel, numAudioSamples);
-        for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
-            channelPointer[i+markerStartPos] *= static_cast<float>(i) / static_cast<float>(markedLength-1);
+        auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
+        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
+        AudioProcessingUtils::fadeIn(channelPointer, markerStartPos, numSamples);
     }
 
     // fill the bufferAfter
@@ -242,7 +241,6 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
 {
     int markedLength = markerEndPos - markerStartPos + 1;
     int numAudioSamples;
-    float* channelPointer = nullptr;
 
     AudioBuffer<float> bufferBeforeOperation;
     bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
@@ -256,9 +254,9 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
     // operation
     for (int channel=0; channel<getNumChannels(); channel++)
     {
-        channelPointer = getAudioWritePointer(channel, numAudioSamples);
-        for (int i=0; i<markedLength && (i+markerStartPos)<numAudioSamples; i++)
-            channelPointer[i+markerStartPos] *= (1 - static_cast<float>(i) / static_cast<float>(markedLength-1));
+        auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
+        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
+        AudioProcessingUtils::fadeOut(channelPointer, markerStartPos, numSamples);
     }
 
     // fill the bufferAfter

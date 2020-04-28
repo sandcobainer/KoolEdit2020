@@ -61,4 +61,16 @@ private:
 
 class AudioProcessingUtils
 {
+public:
+    static void fadeIn (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= static_cast<float>(i) / static_cast<float>(numSamples-1);
+    }
+
+    static void fadeOut (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= (1- static_cast<float>(i) / static_cast<float>(numSamples-1));
+    }
 };
