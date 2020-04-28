@@ -62,6 +62,12 @@ private:
 class AudioProcessingUtils
 {
 public:
+    static void mute (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= 0;
+    }
+
     static void fadeIn (float* bufferWritePointer, int startSample, int numSamples)
     {
         for (int i=0; i<numSamples; i++)

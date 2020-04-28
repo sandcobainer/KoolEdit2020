@@ -173,9 +173,9 @@ void AudioProcessingComponent::muteMarkedRegion ()
         return;
     else
     {
-        int numSamples = 0;
-        float* writePointer = nullptr;
-        
+        int markedLength = markerEndPos - markerStartPos + 1;
+        int numAudioSamples;
+
         AudioBuffer<float> bufferBeforeOperation;
         bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
         AudioBuffer<float> bufferAfterOperation;
@@ -186,12 +186,11 @@ void AudioProcessingComponent::muteMarkedRegion ()
             bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
 
         // operation
-        for (int c = 0; c < getNumChannels(); c++)
+        for (int channel=0; channel<getNumChannels(); channel++)
         {
-            writePointer = getAudioWritePointer(c, numSamples);
-
-            for (int i = markerStartPos; i <= markerEndPos; i++)
-                writePointer[i] = 0;
+            auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
+            auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
+            AudioProcessingUtils::mute(channelPointer, markerStartPos, numSamples);
         }
 
         // fill the bufferAfterOperation
@@ -202,7 +201,6 @@ void AudioProcessingComponent::muteMarkedRegion ()
         undoStack.addRecord(record);
         audioBufferChanged.sendChangeMessage();
     }
-    return;
 }
 
 void AudioProcessingComponent::fadeInMarkedRegion()
