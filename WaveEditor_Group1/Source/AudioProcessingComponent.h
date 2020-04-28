@@ -212,6 +212,8 @@ private:
     */
     void boundPositions();
 
+    void inplaceOperateMarkedRegion(void(*processFunc)(float*, int, int));
+
     AudioFormatManager formatManager;
     TransportState state;
     bool fileLoaded;  // indicates if a file is loaded

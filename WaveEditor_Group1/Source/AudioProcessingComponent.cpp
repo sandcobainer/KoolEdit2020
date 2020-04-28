@@ -172,99 +172,17 @@ void AudioProcessingComponent::muteMarkedRegion ()
     if (markerStartPos == 0 && markerEndPos == getNumSamples())
         return;
     else
-    {
-        int markedLength = markerEndPos - markerStartPos + 1;
-        int numAudioSamples;
-
-        AudioBuffer<float> bufferBeforeOperation;
-        bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-        AudioBuffer<float> bufferAfterOperation;
-        bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-
-        // fill the bufferBeforeOperation
-        for (int channel=0; channel<getNumChannels(); channel++)
-            bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-        // operation
-        for (int channel=0; channel<getNumChannels(); channel++)
-        {
-            auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
-            auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
-            AudioProcessingUtils::mute(channelPointer, markerStartPos, numSamples);
-        }
-
-        // fill the bufferAfterOperation
-        for (int channel=0; channel<getNumChannels(); channel++)
-            bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-        UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
-        undoStack.addRecord(record);
-        audioBufferChanged.sendChangeMessage();
-    }
+        inplaceOperateMarkedRegion(&AudioProcessingUtils::mute);
 }
 
 void AudioProcessingComponent::fadeInMarkedRegion()
 {
-    int markedLength = markerEndPos - markerStartPos + 1;
-    int numAudioSamples;
-
-    AudioBuffer<float> bufferBeforeOperation;
-    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-    AudioBuffer<float> bufferAfterOperation;
-    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-
-    // fill the bufferBeforeOperation
-    for (int channel=0; channel<getNumChannels(); channel++)
-        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-    // operation
-    for (int channel=0; channel<getNumChannels(); channel++)
-    {
-        auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
-        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
-        AudioProcessingUtils::fadeIn(channelPointer, markerStartPos, numSamples);
-    }
-
-    // fill the bufferAfter
-    for (int channel=0; channel<getNumChannels(); channel++)
-        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
-    undoStack.addRecord(record);
-
-    audioBufferChanged.sendChangeMessage();
+    inplaceOperateMarkedRegion(&AudioProcessingUtils::fadeIn);
 }
 
 void AudioProcessingComponent::fadeOutMarkedRegion()
 {
-    int markedLength = markerEndPos - markerStartPos + 1;
-    int numAudioSamples;
-
-    AudioBuffer<float> bufferBeforeOperation;
-    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-    AudioBuffer<float> bufferAfterOperation;
-    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
-
-    // fill the bufferBeforeOperation
-    for (int channel=0; channel<getNumChannels(); channel++)
-        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-    // operation
-    for (int channel=0; channel<getNumChannels(); channel++)
-    {
-        auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
-        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
-        AudioProcessingUtils::fadeOut(channelPointer, markerStartPos, numSamples);
-    }
-
-    // fill the bufferAfter
-    for (int channel=0; channel<getNumChannels(); channel++)
-        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
-
-    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
-    undoStack.addRecord(record);
-
-    audioBufferChanged.sendChangeMessage();
+    inplaceOperateMarkedRegion(&AudioProcessingUtils::fadeOut);
 }
 
 void AudioProcessingComponent::copyMarkedRegion()
@@ -436,6 +354,37 @@ void AudioProcessingComponent::boundPositions()
         currentPos = 0;
     else if (currentPos > getNumSamples()-1)
         currentPos = getNumSamples() - 1;
+}
+
+void AudioProcessingComponent::inplaceOperateMarkedRegion(void (*processFunc)(float*, int, int))
+{
+    int markedLength = markerEndPos - markerStartPos + 1;
+    int numAudioSamples;
+
+    AudioBuffer<float> bufferBeforeOperation;
+    bufferBeforeOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+    AudioBuffer<float> bufferAfterOperation;
+    bufferAfterOperation.setSize(getNumChannels(), markerEndPos-markerStartPos+1);
+
+    // fill the bufferBeforeOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferBeforeOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    // operation
+    for (int channel=0; channel<getNumChannels(); channel++)
+    {
+        auto channelPointer = getAudioWritePointer(channel, numAudioSamples);
+        auto numSamples = jmin(markedLength, numAudioSamples - markerStartPos);
+        processFunc(channelPointer, markerStartPos, numSamples);
+    }
+
+    // fill the bufferAfterOperation
+    for (int channel=0; channel<getNumChannels(); channel++)
+        bufferAfterOperation.copyFrom(channel, 0, audioBuffer, 0, markerStartPos, markerEndPos-markerStartPos+1);
+
+    UndoRecord record{bufferBeforeOperation, bufferAfterOperation, 0, markerStartPos};
+    undoStack.addRecord(record);
+    audioBufferChanged.sendChangeMessage();
 }
 //-------------------------------TRANSPORT STATE HANDLING-------------------------------------
 AudioProcessingComponent::TransportState AudioProcessingComponent::getState ()
