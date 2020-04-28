@@ -107,4 +107,7 @@ public:
         for (int i=0; i<numSamples; i++)
             bufferWritePointer[startSample+i] /= maxValue;
     }
+private:
+    AudioProcessingUtils(){};
+    ~AudioProcessingUtils(){};
 };
