@@ -177,12 +177,18 @@ void AudioProcessingComponent::muteMarkedRegion ()
 
 void AudioProcessingComponent::fadeInMarkedRegion()
 {
-    inplaceOperateMarkedRegion(&AudioProcessingUtils::fadeIn);
+    inplaceOperateMarkedRegion(AudioProcessingUtils::fadeIn);
 }
 
 void AudioProcessingComponent::fadeOutMarkedRegion()
 {
-    inplaceOperateMarkedRegion(&AudioProcessingUtils::fadeOut);
+    inplaceOperateMarkedRegion(AudioProcessingUtils::fadeOut);
+}
+
+void AudioProcessingComponent::gainMarkedRegion(float gainValue)
+{
+    auto gainFunc = AudioProcessingUtils::getGainFunc(gainValue);
+    inplaceOperateMarkedRegion(gainFunc);
 }
 
 void AudioProcessingComponent::copyMarkedRegion()
@@ -356,7 +362,7 @@ void AudioProcessingComponent::boundPositions()
         currentPos = getNumSamples() - 1;
 }
 
-void AudioProcessingComponent::inplaceOperateMarkedRegion(void (*processFunc)(float*, int, int))
+void AudioProcessingComponent::inplaceOperateMarkedRegion(std::function<void(float*, int, int)> processFunc)
 {
     int markedLength = markerEndPos - markerStartPos + 1;
     int numAudioSamples;

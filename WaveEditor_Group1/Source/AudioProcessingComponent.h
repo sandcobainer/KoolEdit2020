@@ -162,6 +162,11 @@ public:
     */
     void fadeOutMarkedRegion();
 
+    /*! Adds gain to the audio in the marked region
+        @param float the gain value
+    */
+    void gainMarkedRegion(float gainValue);
+
     /*! Copies the audio in the marked region
     */
     void copyMarkedRegion();
@@ -212,7 +217,7 @@ private:
     */
     void boundPositions();
 
-    void inplaceOperateMarkedRegion(void(*processFunc)(float*, int, int));
+    void inplaceOperateMarkedRegion(std::function<void(float*, int, int)>);
 
     AudioFormatManager formatManager;
     TransportState state;

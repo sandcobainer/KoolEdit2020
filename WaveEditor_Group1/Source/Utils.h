@@ -79,4 +79,17 @@ public:
         for (int i=0; i<numSamples; i++)
             bufferWritePointer[startSample+i] *= (1- static_cast<float>(i) / static_cast<float>(numSamples-1));
     }
+
+    static void gain (float* bufferWritePointer, int startSample, int numSamples, float gainValue)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= gainValue;
+    }
+
+    static std::function<void(float*, int, int)> getGainFunc (float gainValue)
+    {
+        return [gainValue](float* bufferWritePointer, int startSample, int numSamples) {
+            gain(bufferWritePointer, startSample, numSamples, gainValue);
+        };
+    }
 };
