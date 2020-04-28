@@ -187,6 +187,11 @@ void AudioProcessingComponent::fadeOutMarkedRegion()
     inplaceOperateMarkedRegion(AudioProcessingUtils::fadeOut);
 }
 
+void AudioProcessingComponent::normalizeMarkedRegion()
+{
+    inplaceOperateMarkedRegion(AudioProcessingUtils::normalize);
+}
+
 void AudioProcessingComponent::gainMarkedRegion(float gainValue)
 {
     auto gainFunc = AudioProcessingUtils::getGainFunc(gainValue);

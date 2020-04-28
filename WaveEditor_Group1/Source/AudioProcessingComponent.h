@@ -162,6 +162,10 @@ public:
     */
     void fadeOutMarkedRegion();
 
+    /*! Normalizes out the audio in the marked region
+    */
+    void normalizeMarkedRegion();
+
     /*! Adds gain to the audio in the marked region
         @param float the gain value
     */

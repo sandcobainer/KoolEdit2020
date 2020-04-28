@@ -92,4 +92,19 @@ public:
             gain(bufferWritePointer, startSample, numSamples, gainValue);
         };
     }
+
+    static void normalize (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        float maxValue = 0;
+        float currentAbsValue = 0;
+        for (int i=0; i<numSamples; i++)
+        {
+            currentAbsValue = abs(bufferWritePointer[startSample+i]);
+            if (currentAbsValue > maxValue)
+                maxValue = currentAbsValue;
+        }
+
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] /= maxValue;
+    }
 };
