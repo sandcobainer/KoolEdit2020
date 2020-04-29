@@ -37,6 +37,7 @@
       <FILE id="vbGSMz" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
       <FILE id="eF6Rc5" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="inziOB" name="UnitTest.h" compile="0" resource="0" file="Source/UnitTest.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

@@ -61,4 +61,53 @@ private:
 
 class AudioProcessingUtils
 {
+public:
+    static void mute (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= 0;
+    }
+
+    static void fadeIn (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= static_cast<float>(i) / static_cast<float>(numSamples-1);
+    }
+
+    static void fadeOut (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= (1- static_cast<float>(i) / static_cast<float>(numSamples-1));
+    }
+
+    static void gain (float* bufferWritePointer, int startSample, int numSamples, float gainValue)
+    {
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] *= gainValue;
+    }
+
+    static std::function<void(float*, int, int)> getGainFunc (float gainValue)
+    {
+        return [gainValue](float* bufferWritePointer, int startSample, int numSamples) {
+            gain(bufferWritePointer, startSample, numSamples, gainValue);
+        };
+    }
+
+    static void normalize (float* bufferWritePointer, int startSample, int numSamples)
+    {
+        float maxValue = 0;
+        float currentAbsValue = 0;
+        for (int i=0; i<numSamples; i++)
+        {
+            currentAbsValue = abs(bufferWritePointer[startSample+i]);
+            if (currentAbsValue > maxValue)
+                maxValue = currentAbsValue;
+        }
+
+        for (int i=0; i<numSamples; i++)
+            bufferWritePointer[startSample+i] /= maxValue;
+    }
+private:
+    AudioProcessingUtils(){};
+    ~AudioProcessingUtils(){};
 };

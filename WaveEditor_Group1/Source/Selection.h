@@ -270,6 +270,7 @@ private:
                 popupMenu.addItem("Delete", [this]() {apc.deleteMarkedRegion(); });
                 popupMenu.addItem("Fade In", [this]() {apc.fadeInMarkedRegion(); });
                 popupMenu.addItem("Fade Out", [this]() {apc.fadeOutMarkedRegion(); });
+                popupMenu.addItem("Normalize", [this]() {apc.normalizeMarkedRegion(); });
             }
             // these funtionalities are not limited inside the selected bounds
             if (apc.isPasteEnabled())
