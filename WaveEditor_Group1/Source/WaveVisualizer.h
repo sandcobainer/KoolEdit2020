@@ -100,7 +100,7 @@ public:
         paintTimeline (g);
         //-----------------------------track background--------------------------------------
         g.setColour (Colours::black);
-        g.setOpacity (0.2f);
+        g.setOpacity (0.4f);
         g.fillRect (thumbnailBounds);
         
         //---------------------------------waveform------------------------------------------

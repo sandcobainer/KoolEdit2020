@@ -47,7 +47,7 @@ void GUIComponent::paint (Graphics& g)
        drawing code..
     */
 
-    g.fillAll (Colour(32,32,32));   // clear the background
+    g.fillAll (getLookAndFeel().findColour(ResizableWindow::backgroundColourId));   // clear the background
 
     g.setColour (Colour(32,32,32));
     g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
