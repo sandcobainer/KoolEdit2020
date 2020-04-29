@@ -48,5 +48,5 @@ Kool Edit 2020 is a simple, open source audio wave editor inspired from [Cool Ed
 
 ## License
 
-[MIT](https://github.com/sandcobainer/KoolEdit2020/master/LICENSE.md)
+[MIT](https://github.com/sandcobainer/KoolEdit2020/blob/master/LICENSE.md)
 
