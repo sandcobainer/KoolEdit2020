@@ -32,13 +32,10 @@ public:
 
     ~Selection()
     {
-
     }
 
     void paint(Graphics& g) override
     {
-        //std::cout << selectionBounds.getWidth() << " " << selectionBounds.getHeight() << std::endl;
-
         if (apc.getNumChannels() == 0)
             paintIfNoFileLoaded(g);
         else
@@ -104,12 +101,16 @@ public:
         }
         else
         {
-            auto selectStart = (audioStart / audioLength) * waveVisWidth;
-            auto selectEnd = (audioEnd / audioLength) * waveVisWidth;
-
-            selectionBounds.setBounds(selectStart, 0, selectEnd - selectStart, waveVisHeight);
+            auto selectStart = (audioStart / audioLength) * waveVisWidth ;
+            auto selectEnd = (audioEnd / audioLength) * waveVisWidth ;
+            selectionBounds.setBounds(selectStart , 20, selectEnd - selectStart, waveVisHeight);
             repaint();
         }
+    }
+    
+    void setThumbnailBounds(Rectangle<int> tBounds)
+    {
+        thumbnailBounds = tBounds;
     }
 
 private:
@@ -324,6 +325,7 @@ private:
     int waveVisHeight;
     int thresholdInPixels;     //threshold to fix tiny selection bug
     Rectangle<int> selectionBounds; //member that gets painted
+    Rectangle<int> thumbnailBounds;
     
     bool isMouseDown; //used in slideBounds
     float selectionStart; //used in slideBounds
