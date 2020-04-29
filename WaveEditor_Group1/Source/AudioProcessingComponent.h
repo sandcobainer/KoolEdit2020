@@ -162,6 +162,15 @@ public:
     */
     void fadeOutMarkedRegion();
 
+    /*! Normalizes out the audio in the marked region
+    */
+    void normalizeMarkedRegion();
+
+    /*! Adds gain to the audio in the marked region
+        @param float the gain value
+    */
+    void gainMarkedRegion(float gainValue);
+
     /*! Copies the audio in the marked region
     */
     void copyMarkedRegion();
@@ -211,6 +220,9 @@ private:
      * any operation that might change the audio buffer size
     */
     void boundPositions();
+
+    void inplaceOperate(const std::function<void(float*, int, int)>&, int startSample, int numSamples);
+    void inplaceOperateMarkedRegion(const std::function<void(float*, int, int)>&);
 
     AudioFormatManager formatManager;
     TransportState state;
