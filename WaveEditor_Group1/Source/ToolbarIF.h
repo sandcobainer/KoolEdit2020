@@ -120,6 +120,11 @@ public:
         iFadeOutNormal = ImageFileFormat::loadFrom(buttonAssets::fadeout_normal_png, (size_t)buttonAssets::fadeout_normal_pngSize);
         iFadeOutOver = ImageFileFormat::loadFrom(buttonAssets::fadeout_over_png, (size_t)buttonAssets::fadeout_over_pngSize);
         iFadeOutDown = ImageFileFormat::loadFrom(buttonAssets::fadeout_down_png, (size_t)buttonAssets::fadeout_down_pngSize);
+
+        //Normalize
+        iNormNormal = ImageFileFormat::loadFrom(buttonAssets::norm_normal_png, (size_t)buttonAssets::norm_normal_pngSize);
+        iNormOver = ImageFileFormat::loadFrom(buttonAssets::norm_over_png, (size_t)buttonAssets::norm_over_pngSize);
+        iNormDown = ImageFileFormat::loadFrom(buttonAssets::norm_down_png, (size_t)buttonAssets::norm_down_pngSize);
         
         //-----------------------GUI Buttons-----------------------------------
         //Open
@@ -254,7 +259,7 @@ public:
         addAndMakeVisible(&deleteButton);
         deleteButton.setImages(false, true, true, iDeleteNormal, 1.0, Colours::transparentBlack, iDeleteOver, 1.0, Colours::transparentBlack, iDeleteDown, 1.0, Colours::transparentBlack);
         deleteButton.setState(Button::ButtonState::buttonNormal);
-        deleteButton.onClick = [this] {deleteButtonClicked(); };
+        deleteButton.onClick = [this] {apc.deleteMarkedRegion(); };
         deleteButton.setEnabled(false);
         deleteButton.setTooltip("delete (or right click->Delete)");
 
@@ -262,7 +267,7 @@ public:
         addAndMakeVisible(&fadeInButton);
         fadeInButton.setImages(false, true, true, iFadeInNormal, 1.0, Colours::transparentBlack, iFadeInOver, 1.0, Colours::transparentBlack, iFadeInDown, 1.0, Colours::transparentBlack);
         fadeInButton.setState(Button::ButtonState::buttonNormal);
-        fadeInButton.onClick = [this] {fadeInButtonClicked(); };
+        fadeInButton.onClick = [this] {apc.fadeInMarkedRegion(); };
         fadeInButton.setEnabled(false);
         fadeInButton.setTooltip("fade in");
 
@@ -270,9 +275,17 @@ public:
         addAndMakeVisible(&fadeOutButton);
         fadeOutButton.setImages(false, true, true, iFadeOutNormal, 1.0, Colours::transparentBlack, iFadeOutOver, 1.0, Colours::transparentBlack, iFadeOutDown, 1.0, Colours::transparentBlack);
         fadeOutButton.setState(Button::ButtonState::buttonNormal);
-        fadeOutButton.onClick = [this] {fadeOutButtonClicked(); };
+        fadeOutButton.onClick = [this] {apc.fadeOutMarkedRegion(); };
         fadeOutButton.setEnabled(false);
         fadeOutButton.setTooltip("fade out");
+
+        //Normalize
+        addAndMakeVisible(&normalizeButton);
+        normalizeButton.setImages(false, true, true, iNormNormal, 1.0, Colours::transparentBlack, iNormOver, 1.0, Colours::transparentBlack, iNormDown, 1.0, Colours::transparentBlack);
+        normalizeButton.setState(Button::ButtonState::buttonNormal);
+        normalizeButton.onClick = [this] {apc.normalizeMarkedRegion(); };
+        normalizeButton.setEnabled(false);
+        normalizeButton.setTooltip("normalize (or right click->Normalize)");
     }
 
     ~ToolbarIF()
@@ -307,6 +320,10 @@ public:
                 undoButton.setEnabled(false);
                 redoButton.setEnabled(false);
                 insertButton.setEnabled(false);
+                deleteButton.setEnabled(false);
+                fadeInButton.setEnabled(false);
+                fadeOutButton.setEnabled(false);
+                normalizeButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -323,6 +340,10 @@ public:
                 muteButton.setEnabled(true);
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
+                deleteButton.setEnabled(true);
+                fadeInButton.setEnabled(true);
+                fadeOutButton.setEnabled(true);
+                normalizeButton.setEnabled(true);
 
                 if (apc.isPasteEnabled())
                 {
@@ -359,6 +380,10 @@ public:
                 muteButton.setEnabled(true);
                 cutButton.setEnabled(true);
                 copyButton.setEnabled(true);
+                deleteButton.setEnabled(true);
+                fadeInButton.setEnabled(true);
+                fadeOutButton.setEnabled(true);
+                normalizeButton.setEnabled(true);
 
                 if (apc.isPasteEnabled())
                 {
@@ -467,6 +492,7 @@ public:
         deleteButton.setBounds(265, 43, 30, 30);
         fadeInButton.setBounds(298, 43, 30, 30);
         fadeOutButton.setBounds(331, 43, 30, 30);
+        normalizeButton.setBounds(364, 43, 30, 30);
     }
 
     //==========================================================================
@@ -500,6 +526,7 @@ private:
         deleteButton.setEnabled(true);
         fadeInButton.setEnabled(true);
         fadeOutButton.setEnabled(true);
+        normalizeButton.setEnabled(true);
     }
 
     void saveButtonClicked()
@@ -537,6 +564,7 @@ private:
         deleteButton.setEnabled(false);
         fadeInButton.setEnabled(false);
         fadeOutButton.setEnabled(false);
+        normalizeButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -557,6 +585,7 @@ private:
         deleteButton.setEnabled(true);
         fadeInButton.setEnabled(true);
         fadeOutButton.setEnabled(true);
+        normalizeButton.setEnabled(true);
 
         if (apc.isPasteEnabled())
         {
@@ -597,6 +626,7 @@ private:
         deleteButton.setEnabled(true);
         fadeInButton.setEnabled(true);
         fadeOutButton.setEnabled(true);
+        normalizeButton.setEnabled(true);
 
         if (apc.isPasteEnabled())
         {
@@ -659,21 +689,6 @@ private:
         //toggle apc state
         apc.setMouseState(mouseState);
     }
-
-    void deleteButtonClicked()
-    {
-        apc.deleteMarkedRegion();
-    }
-
-    void fadeInButtonClicked()
-    {
-        apc.fadeInMarkedRegion();
-    }
-
-    void fadeOutButtonClicked()
-    {
-        apc.fadeOutMarkedRegion();
-    }
     
     //==========================================================================
     //Additional variables
@@ -697,6 +712,7 @@ private:
     ImageButton deleteButton;
     ImageButton fadeInButton;
     ImageButton fadeOutButton;
+    ImageButton normalizeButton;
 
     //Image objects
     Image iPlayNormal;
@@ -774,6 +790,10 @@ private:
     Image iFadeOutNormal;
     Image iFadeOutOver;
     Image iFadeOutDown;
+
+    Image iNormNormal;
+    Image iNormOver;
+    Image iNormDown;
 
     TooltipWindow* buttonHelp;
 
