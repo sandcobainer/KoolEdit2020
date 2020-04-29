@@ -324,6 +324,8 @@ public:
                 fadeInButton.setEnabled(false);
                 fadeOutButton.setEnabled(false);
                 normalizeButton.setEnabled(false);
+                openButton.setEnabled(false);
+                saveButton.setEnabled(false);
             }
             else if (apc.getState() == AudioProcessingComponent::Stopped)
             {
@@ -344,6 +346,8 @@ public:
                 fadeInButton.setEnabled(true);
                 fadeOutButton.setEnabled(true);
                 normalizeButton.setEnabled(true);
+                openButton.setEnabled(true);
+                saveButton.setEnabled(true);
 
                 if (apc.isPasteEnabled())
                 {
@@ -384,6 +388,8 @@ public:
                 fadeInButton.setEnabled(true);
                 fadeOutButton.setEnabled(true);
                 normalizeButton.setEnabled(true);
+                openButton.setEnabled(true);
+                saveButton.setEnabled(true);
 
                 if (apc.isPasteEnabled())
                 {
@@ -565,6 +571,8 @@ private:
         fadeInButton.setEnabled(false);
         fadeOutButton.setEnabled(false);
         normalizeButton.setEnabled(false);
+        openButton.setEnabled(false);
+        saveButton.setEnabled(false);
     }
 
     void pauseButtonClicked()
@@ -586,6 +594,8 @@ private:
         fadeInButton.setEnabled(true);
         fadeOutButton.setEnabled(true);
         normalizeButton.setEnabled(true);
+        openButton.setEnabled(true);
+        saveButton.setEnabled(true);
 
         if (apc.isPasteEnabled())
         {
@@ -627,6 +637,8 @@ private:
         fadeInButton.setEnabled(true);
         fadeOutButton.setEnabled(true);
         normalizeButton.setEnabled(true);
+        openButton.setEnabled(true);
+        saveButton.setEnabled(true);
 
         if (apc.isPasteEnabled())
         {
