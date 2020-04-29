@@ -13,6 +13,12 @@
 #include "buttonAssets.h"
 #include <iostream>
 
+//#define RUN_TEST
+
+#ifdef RUN_TEST
+#include "UnitTest.h"
+#endif
+
 //==============================================================================
 class WaveEditor_Group1Application  : public JUCEApplication
 {
@@ -28,7 +34,10 @@ public:
     void initialise (const String&) override
     {
         // This method is where you should put your application's initialisation code..
-        
+#ifdef RUN_TEST
+    UnitTestRunner runner;
+    runner.runAllTests();
+#endif
         splash = new SplashScreen("koolEdit", 
             ImageFileFormat::loadFrom(buttonAssets::koolEdit2020_logo_png, (size_t)buttonAssets::koolEdit2020_logo_pngSize), 
             true);
