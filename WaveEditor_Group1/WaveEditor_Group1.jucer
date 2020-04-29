@@ -12,8 +12,6 @@
         <FILE id="TerYr7" name="WaveAudio.h" compile="0" resource="0" file="Source/WaveAudio.h"/>
       </GROUP>
       <GROUP id="{A7B9535E-4657-AC2C-601D-3D7D2805E8CD}" name="GUI">
-        <FILE id="TxVd6Y" name="OtherLookAndFeel.h" compile="0" resource="0"
-              file="Source/OtherLookAndFeel.h"/>
         <FILE id="iCb3eg" name="Selection.h" compile="0" resource="0" file="Source/Selection.h"/>
         <FILE id="d9LiAJ" name="MeterVisualizer.h" compile="0" resource="0"
               file="Source/MeterVisualizer.h"/>
